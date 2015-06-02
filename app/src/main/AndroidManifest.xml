@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="net.opencurlybraces.android.projects.wifihandler"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest
+    package="net.opencurlybraces.android.projects.wifihandler"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"></uses-permission>
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"></uses-permission>
@@ -25,6 +26,15 @@
                 <action android:name="android.net.wifi.SCAN_RESULTS"/>
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".service.WifiEventService"
+            android:label="Wifi Handler Service">
+            <intent-filter>
+                <action
+                    android:name="net.opencurlybraces.android.projects.wifihandler.service.ACTION_HANDLE_WIFI_SCAN_RESULTS"/>
+            </intent-filter>
+        </service>
 
     </application>
 
