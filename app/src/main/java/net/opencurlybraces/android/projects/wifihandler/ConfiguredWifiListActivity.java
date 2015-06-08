@@ -1,9 +1,12 @@
 package net.opencurlybraces.android.projects.wifihandler;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import net.opencurlybraces.android.projects.wifihandler.service.WifiEventService;
 
 
 public class ConfiguredWifiListActivity extends AppCompatActivity {
@@ -12,6 +15,14 @@ public class ConfiguredWifiListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_configured_wifi_list);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Intent handleWifiInsert = new Intent(this, WifiEventService.class);
+        handleWifiInsert.setAction(WifiEventService.ACTION_HANDLE_USER_WIFI_INSERT);
+        this.startService(handleWifiInsert);
     }
 
     @Override

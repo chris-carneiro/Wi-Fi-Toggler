@@ -1,16 +1,22 @@
 package net.opencurlybraces.android.projects.wifihandler.data.table;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.net.wifi.WifiConfiguration;
 import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifihandler.data.provider.WifiHandlerContract;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * ConfiguredWIfi Table, holds the table of the user's configured wifi along with their state.
@@ -29,7 +35,7 @@ public class ConfiguredWifi implements BaseColumns {
     public static final String PATH_CONFIGURED_WIFIS = "configured_wifis";
 
     public static final Uri CONTENT_URI =
-            WifiHandlerContract.BASE_CONTENT_URI.buildUpon().appendPath(PATH_CONFIGURED_WIFIS)
+            WifiHandlerContract.BASE_CONTENT_URI.buildUpon().appendEncodedPath(PATH_CONFIGURED_WIFIS)
                     .build();
 
     public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
@@ -42,21 +48,21 @@ public class ConfiguredWifi implements BaseColumns {
     public static final String AUTO_TOGGLE = "is_auto_toggle";
     public static final String OPEN_WIFI = "is_open_wifi";
     public static final String PREFERRED = "is_preferred";
-    public static final String STATUS = "status";
-    public static final String IN_RANGE = "is_in_range";
     public static final String BOOSTED = "is_boosted";
+    public static final String IN_RANGE = "is_in_range";
     public static final String LOCKED = "is_locked";
+    public static final String STATUS = "status";
 
     private static final String[] PROJECTION = new String[]{
             _ID,
             SSID,
-            STATUS,
+            AUTO_TOGGLE,
             OPEN_WIFI,
             PREFERRED,
-            STATUS,
-            IN_RANGE,
             BOOSTED,
-            LOCKED
+            IN_RANGE,
+            LOCKED,
+            STATUS
     };
 
 
@@ -70,7 +76,7 @@ public class ConfiguredWifi implements BaseColumns {
             + BOOSTED + " INTEGER NOT NULL DEFAULT 0,"
             + IN_RANGE + " INTEGER NOT NULL DEFAULT 0,"
             + LOCKED + " INTEGER NOT NULL DEFAULT 0,"
-            + STATUS + " TEXT NOT NULL DEFAULT DISCONNECTED,"
+            + STATUS + " INTEGER NOT NULL DEFAULT 1"
             + ");";
 
 
@@ -127,4 +133,32 @@ public class ConfiguredWifi implements BaseColumns {
         return CONTENT_URI.buildUpon().appendPath(configuredWifiId).build();
     }
 
+    /**
+     * Given the list of {@link WifiConfiguration}, prepares the data to be inserted
+     *
+     * @param configuredWifis
+     * @return List of ContentValues data ready for insertion
+     */
+    @NonNull
+    public static List<ContentValues> buildValuesUsingConfigurations(List<WifiConfiguration>
+                                                                             configuredWifis) {
+        if (configuredWifis == null || configuredWifis.isEmpty())
+            throw new IllegalArgumentException("Nothing to build");
+
+        List<ContentValues> contents = new ArrayList<>(configuredWifis.size());
+        ContentValues values = new ContentValues();
+
+        for (WifiConfiguration wifi : configuredWifis) {
+            values.put(ConfiguredWifi.SSID, wifi.SSID);
+            values.put(ConfiguredWifi.AUTO_TOGGLE, 0);
+            values.put(ConfiguredWifi.OPEN_WIFI, 0);
+            values.put(ConfiguredWifi.PREFERRED, 0);
+            values.put(ConfiguredWifi.BOOSTED, 0);
+            values.put(ConfiguredWifi.IN_RANGE, 0);
+            values.put(ConfiguredWifi.LOCKED, 0);
+            values.put(ConfiguredWifi.STATUS, wifi.status);
+            contents.add(values);
+        }
+        return contents;
+    }
 }

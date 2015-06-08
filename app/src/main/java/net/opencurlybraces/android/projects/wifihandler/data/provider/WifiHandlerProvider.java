@@ -1,13 +1,16 @@
 package net.opencurlybraces.android.projects.wifihandler.data.provider;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifihandler.data.table.ConfiguredWifi;
 
@@ -28,9 +31,11 @@ public class WifiHandlerProvider extends ContentProvider {
     static {
         sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-        sURIMatcher.addURI(WifiHandlerContract.AUTHORITY, ConfiguredWifi.PATH_CONFIGURED_WIFIS,
+        sURIMatcher.addURI(WifiHandlerContract.AUTHORITY, ConfiguredWifi
+                        .PATH_CONFIGURED_WIFIS,
                 CONFIGURED_WIFIS);
-        sURIMatcher.addURI(WifiHandlerContract.AUTHORITY, ConfiguredWifi.PATH_CONFIGURED_WIFIS +
+        sURIMatcher.addURI(WifiHandlerContract.AUTHORITY, ConfiguredWifi
+                        .PATH_CONFIGURED_WIFIS +
                         "/#",
                 CONFIGURED_WIFI_ID);
     }
@@ -108,16 +113,26 @@ public class WifiHandlerProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         SQLiteDatabase database = mWifiHandlerDatabase.getWritableDatabase();
-        long id;
-        switch (sURIMatcher.match(uri)) {
+        long rowId;
+        int result = sURIMatcher.match(uri);
+        Log.d(TAG, "Match result=" + result);
+        switch (result) {
             case CONFIGURED_WIFIS:
-                id = database.insert(ConfiguredWifi.TABLE, null, values);
+                rowId = database.insert(ConfiguredWifi.TABLE, null, values);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
-        getContext().getContentResolver().notifyChange(uri, null);
-        return ConfiguredWifi.buildConfiguredWifiUri(String.valueOf(id));
+
+        // If the insert succeeded, the row ID > 0.
+        if (rowId > 0) {
+            Uri noteUri = ConfiguredWifi.buildConfiguredWifiUri(String.valueOf(rowId));
+
+            getContext().getContentResolver().notifyChange(uri, null);
+            return noteUri;
+        }
+
+        throw new SQLException("Failed to insert row into " + uri);
 
     }
 
@@ -156,6 +171,7 @@ public class WifiHandlerProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
+
         getContext().getContentResolver().notifyChange(uri, null);
         return updatedRows;
     }

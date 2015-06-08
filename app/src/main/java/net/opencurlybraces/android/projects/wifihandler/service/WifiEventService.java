@@ -1,10 +1,17 @@
 package net.opencurlybraces.android.projects.wifihandler.service;
 
 import android.app.IntentService;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.util.Log;
+
+import net.opencurlybraces.android.projects.wifihandler.data.provider.WifiHandlerContract;
+import net.opencurlybraces.android.projects.wifihandler.data.table.ConfiguredWifi;
+import net.opencurlybraces.android.projects.wifihandler.util.WifiUtils;
 
 import java.util.List;
 
@@ -15,8 +22,13 @@ import java.util.List;
 public class WifiEventService extends IntentService {
 
     private static final String TAG = WifiEventService.class.getSimpleName();
-    public static final String ACTION_HANDLE_WIFI_SCAN_RESULTS = "net.opencurlybraces.android" +
-            ".projects.wifihandler.service.ACTION_HANDLE_WIFI_SCAN_RESULTS";
+    private static final String SERVICE_ACTION_PREFIX = "net.opencurlybraces.android" +
+            ".projects.wifihandler.service.";
+    public static final String ACTION_HANDLE_WIFI_SCAN_RESULTS = SERVICE_ACTION_PREFIX +
+            "ACTION_HANDLE_WIFI_SCAN_RESULTS";
+    public static final String ACTION_HANDLE_USER_WIFI_INSERT = SERVICE_ACTION_PREFIX +
+            "ACTION_HANDLE_USER_WIFI_INSERT";
+
     private WifiManager mWifiManager;
 
     //default constructor
@@ -50,11 +62,22 @@ public class WifiEventService extends IntentService {
             case ACTION_HANDLE_WIFI_SCAN_RESULTS:
                 handleScanResults();
                 break;
+            case ACTION_HANDLE_USER_WIFI_INSERT:
+                handleUserWifiInsert();
+                break;
+
         }
     }
 
     private void handleScanResults() {
         boolean activateWifiAdapter = matchConfiguredWifiWithScanResults();
+    }
+
+    private void handleUserWifiInsert() {
+        Log.d(TAG, "handleUserWifiInsert");
+        List<WifiConfiguration> configuredWifis = WifiUtils.getConfiguredWifis(mWifiManager);
+        List<ContentValues> values = ConfiguredWifi.buildValuesUsingConfigurations(configuredWifis);
+        insertValues(values);
     }
 
     /**
@@ -72,4 +95,12 @@ public class WifiEventService extends IntentService {
     private List<android.net.wifi.ScanResult> getWifiScanResults() {
         return mWifiManager.getScanResults();
     }
+
+    private void insertValues(List<ContentValues> contents) {
+        Log.d(TAG, "Content URI=" + ConfiguredWifi.CONTENT_URI);
+        for (ContentValues values : contents) {
+            getContentResolver().insert(ConfiguredWifi.CONTENT_URI, values);
+        }
+    }
+
 }
