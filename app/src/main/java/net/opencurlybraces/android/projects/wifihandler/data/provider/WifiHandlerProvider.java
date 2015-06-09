@@ -1,8 +1,11 @@
 package net.opencurlybraces.android.projects.wifihandler.data.provider;
 
 import android.content.ContentProvider;
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.OperationApplicationException;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -13,6 +16,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifihandler.data.table.ConfiguredWifi;
+
+import java.util.ArrayList;
 
 
 /**
@@ -176,4 +181,22 @@ public class WifiHandlerProvider extends ContentProvider {
         return updatedRows;
     }
 
+    @Override
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
+            throws OperationApplicationException {
+
+        final SQLiteDatabase database = mWifiHandlerDatabase.getWritableDatabase();
+        database.beginTransaction();
+        try {
+            final int numOperations = operations.size();
+            final ContentProviderResult[] results = new ContentProviderResult[numOperations];
+            for (int i = 0; i < numOperations; i++) {
+                results[i] = operations.get(i).apply(this, results, i);
+            }
+            database.setTransactionSuccessful();
+            return results;
+        } finally {
+            database.endTransaction();
+        }
+    }
 }

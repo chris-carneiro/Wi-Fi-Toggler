@@ -33,10 +33,12 @@ public class WifiUtils {
     @Nullable
     public static List<WifiConfiguration> getConfiguredWifis(final WifiManager
                                                                      wifiManager) {
-        wifiManager.setWifiEnabled(true);
-        List<WifiConfiguration> configuredWifis = wifiManager.getConfiguredNetworks();
-        wifiManager.setWifiEnabled(false);
+        List<WifiConfiguration> configuredWifis = null;
 
+        if (wifiManager.setWifiEnabled(true)) {
+            configuredWifis = wifiManager.getConfiguredNetworks();
+            wifiManager.setWifiEnabled(false);
+        }
         return configuredWifis;
     }
 

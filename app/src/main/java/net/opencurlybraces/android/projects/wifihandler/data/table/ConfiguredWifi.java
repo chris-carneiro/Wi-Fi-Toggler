@@ -1,8 +1,8 @@
 package net.opencurlybraces.android.projects.wifihandler.data.table;
 
+import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
@@ -35,7 +35,8 @@ public class ConfiguredWifi implements BaseColumns {
     public static final String PATH_CONFIGURED_WIFIS = "configured_wifis";
 
     public static final Uri CONTENT_URI =
-            WifiHandlerContract.BASE_CONTENT_URI.buildUpon().appendEncodedPath(PATH_CONFIGURED_WIFIS)
+            WifiHandlerContract.BASE_CONTENT_URI.buildUpon().appendEncodedPath
+                    (PATH_CONFIGURED_WIFIS)
                     .build();
 
     public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
@@ -134,31 +135,42 @@ public class ConfiguredWifi implements BaseColumns {
     }
 
     /**
-     * Given the list of {@link WifiConfiguration}, prepares the data to be inserted
+     * Given the list of {@link WifiConfiguration}, prepares the data to be inserted as a batch
      *
-     * @param configuredWifis
-     * @return List of ContentValues data ready for insertion
+     * @param {@code List} of {@link WifiConfiguration}
+     * @return List of {@link ContentProviderOperation} data ready for batch insertion
+     * @throws IllegalArgumentException
      */
     @NonNull
-    public static List<ContentValues> buildValuesUsingConfigurations(List<WifiConfiguration>
-                                                                             configuredWifis) {
+    public static List<ContentProviderOperation> buildBatch(List<WifiConfiguration>
+                                                                    configuredWifis)
+            throws IllegalArgumentException {
         if (configuredWifis == null || configuredWifis.isEmpty())
             throw new IllegalArgumentException("Nothing to build");
 
-        List<ContentValues> contents = new ArrayList<>(configuredWifis.size());
-        ContentValues values = new ContentValues();
-
+        List<ContentProviderOperation> batch = new
+                ArrayList<>();
         for (WifiConfiguration wifi : configuredWifis) {
-            values.put(ConfiguredWifi.SSID, wifi.SSID);
-            values.put(ConfiguredWifi.AUTO_TOGGLE, 0);
-            values.put(ConfiguredWifi.OPEN_WIFI, 0);
-            values.put(ConfiguredWifi.PREFERRED, 0);
-            values.put(ConfiguredWifi.BOOSTED, 0);
-            values.put(ConfiguredWifi.IN_RANGE, 0);
-            values.put(ConfiguredWifi.LOCKED, 0);
-            values.put(ConfiguredWifi.STATUS, wifi.status);
-            contents.add(values);
+            ContentValues values = buildDefaultWifiContentValues(wifi);
+            ContentProviderOperation.Builder builder = ContentProviderOperation.
+                    newInsert(CONTENT_URI);
+            builder.withValues(values);
+            batch.add(builder.build());
         }
-        return contents;
+        return batch;
     }
+
+    private static ContentValues buildDefaultWifiContentValues(WifiConfiguration wifi) {
+        ContentValues values = new ContentValues();
+        values.put(ConfiguredWifi.SSID, wifi.SSID);
+        values.put(ConfiguredWifi.AUTO_TOGGLE, 0);
+        values.put(ConfiguredWifi.OPEN_WIFI, 0);
+        values.put(ConfiguredWifi.PREFERRED, 0);
+        values.put(ConfiguredWifi.BOOSTED, 0);
+        values.put(ConfiguredWifi.IN_RANGE, 0);
+        values.put(ConfiguredWifi.LOCKED, 0);
+        values.put(ConfiguredWifi.STATUS, wifi.status);
+        return values;
+    }
+
 }
