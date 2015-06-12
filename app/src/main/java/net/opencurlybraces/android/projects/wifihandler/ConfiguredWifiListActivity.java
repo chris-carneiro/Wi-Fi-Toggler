@@ -1,28 +1,33 @@
 package net.opencurlybraces.android.projects.wifihandler;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.CompoundButton;
+import android.widget.Switch;
+import android.widget.TextView;
 
-import net.opencurlybraces.android.projects.wifihandler.service.WifiEventService;
 
+public class ConfiguredWifiListActivity extends AppCompatActivity implements
+        CompoundButton.OnCheckedChangeListener {
 
-public class ConfiguredWifiListActivity extends AppCompatActivity {
+    private TextView mWifiHandlerSwitchLabel = null;
+    private Switch mWifiHandlerActivationSwitch = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_configured_wifi_list);
+
+        mWifiHandlerSwitchLabel = (TextView) findViewById(R.id.wifi_handler_switch_label);
+        mWifiHandlerActivationSwitch = (Switch) findViewById(R.id.wifi_handler_activation_switch);
+        mWifiHandlerActivationSwitch.setOnCheckedChangeListener(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Intent handleWifiInsert = new Intent(this, WifiEventService.class);
-        handleWifiInsert.setAction(WifiEventService.ACTION_HANDLE_USER_WIFI_INSERT);
-        this.startService(handleWifiInsert);
     }
 
     @Override
@@ -45,5 +50,26 @@ public class ConfiguredWifiListActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        switch (buttonView.getId()) {
+            case R.id.wifi_handler_activation_switch:
+                handleSwitchLabelValue(isChecked);
+                break;
+        }
+
+    }
+
+
+    private void handleSwitchLabelValue(boolean isChecked) {
+        if (isChecked) {
+            String on = getString(R.string.on_wifi_handler_switch_label_value);
+            mWifiHandlerSwitchLabel.setText(on);
+        } else {
+            String off = getString(R.string.off_wifi_handler_switch_label_value);
+            mWifiHandlerSwitchLabel.setText(off);
+        }
     }
 }

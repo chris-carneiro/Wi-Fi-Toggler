@@ -28,19 +28,15 @@
         </receiver>
 
         <service
-            android:name=".service.WifiEventService"
-            android:label="Wifi Handler Service">
-            <intent-filter>
-                <action
-                    android:name="net.opencurlybraces.android.projects.wifihandler.service.ACTION_HANDLE_WIFI_SCAN_RESULTS"/>
-            </intent-filter>
+            android:name=".service.WifiHandlerService"
+            android:label="Wifi Handler">
         </service>
 
-        <provider
-            android:name=".data.provider.WifiHandlerProvider"
-            android:authorities="net.opencurlybraces.android.projects.wifihandler.data.provider"
-            android:exported="false">
-        </provider>
+        <!--<provider-->
+            <!--android:name=".data.provider.WifiHandlerProvider"-->
+            <!--android:authorities="net.opencurlybraces.android.projects.wifihandler.data.provider"-->
+            <!--android:exported="false">-->
+        <!--</provider>-->
     </application>
 
 </manifest>

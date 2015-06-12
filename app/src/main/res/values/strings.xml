@@ -3,4 +3,6 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="off_wifi_handler_switch_label_value">Off</string>
+    <string name="on_wifi_handler_switch_label_value">On</string>
 </resources>
