@@ -5,4 +5,6 @@
     <string name="action_settings">Settings</string>
     <string name="off_wifi_handler_switch_label_value">Off</string>
     <string name="on_wifi_handler_switch_label_value">On</string>
+    <string name="wifi_list_info_when_wifi_handler_off">"Lorem ipsum dolor sit amet, sumo audire sea an. Saperet iudicabit et mei. His vidit theophrastus ne, has movet simul eu. Ne ius nemore feugait imperdiet. Et aeque tempor mei, sit dicta laudem detracto ea, te tibique nostrum recusabo his.
+"</string>
 </resources>

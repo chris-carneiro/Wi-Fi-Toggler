@@ -3,40 +3,57 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 tools:context=".ConfiguredWifiListActivity">
+
     <RelativeLayout
         android:id="@+id/wifi_handler_switch_banner"
         android:layout_width="match_parent"
         android:layout_height="@dimen/switch_banner_height"
         android:background="@color/background_floating_material_dark"
-        android:padding="@dimen/padding_normal">
+        android:padding="@dimen/normal_padding">
 
         <TextView
             android:id="@+id/wifi_handler_switch_label"
-            android:text="@string/off_wifi_handler_switch_label_value"
-            android:textSize="@dimen/switch_banner_label_value_text_size"
-            android:layout_marginStart="@dimen/action_bar_title_left_margin"
-            android:textColor="@color/primary_material_light"
-            android:layout_centerVertical="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-          />
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/action_bar_title_left_margin"
+            android:text="@string/off_wifi_handler_switch_label_value"
+            android:textColor="@color/primary_material_light"
+            android:textSize="@dimen/switch_banner_label_value_text_size"
+            />
 
         <Switch
             android:id="@+id/wifi_handler_activation_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_toEndOf="@id/wifi_handler_switch_label"
-            android:layout_alignParentEnd="true"
             android:checked="false"/>
 
     </RelativeLayout>
 
-    <ListView
-        android:id="@+id/wifi_handler_configured_wifi_list"
+    <RelativeLayout
+        android:id="@+id/list_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/wifi_handler_switch_banner"
-        />
+        android:layout_below="@id/wifi_handler_switch_banner">
+
+        <ListView
+            android:id="@android:id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+
+        <TextView
+            android:id="@android:id/empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/normal_padding"
+            android:layout_margin="@dimen/normal_padding"
+            android:layout_centerInParent="true"
+            android:textAlignment="center"
+            android:text="@string/wifi_list_info_when_wifi_handler_off"/>
+    </RelativeLayout>
 
 </RelativeLayout>
