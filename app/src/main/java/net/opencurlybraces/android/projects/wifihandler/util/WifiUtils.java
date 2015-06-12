@@ -17,6 +17,8 @@ public class WifiUtils {
     private WifiUtils() {
     }
 
+    private static final String TAG = "WifiUtils";
+
     public static boolean isWiFiEnabled(final Context context) {
         final WifiManager wifiManager =
                 (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
@@ -37,17 +39,19 @@ public class WifiUtils {
     public static List<WifiConfiguration> getConfiguredWifis(final WifiManager
                                                                      wifiManager) throws
             InterruptedException {
-        WifiManager.WifiLock wifiLock = wifiManager.createWifiLock(WifiManager
-                .WIFI_MODE_SCAN_ONLY, null);
+        Log.d(TAG, "getConfiguredWifis");
         List<WifiConfiguration> configuredWifis = null;
 
         if (wifiManager.isWifiEnabled()) {
+            configuredWifis = wifiManager.getConfiguredNetworks();
             return configuredWifis;
         } else {
             if (isHotspotOn(wifiManager)) {
                 disableHotspot(wifiManager);
             }
             if (wifiManager.setWifiEnabled(true)) {
+                WifiManager.WifiLock wifiLock = wifiManager.createWifiLock(WifiManager
+                        .WIFI_MODE_SCAN_ONLY, null);
                 wifiLock.acquire();
                 int attempts = 0;
 
@@ -67,9 +71,9 @@ public class WifiUtils {
 
 
     /**
-     * Check whether wifi hotspot on or off
-     * This is a workaround and should be used with caution as it uses reflection to access
-     * private methods. There's no guarantee this will work.
+     * Check whether wifi hotspot on or off This is a workaround and should be used with caution as
+     * it uses reflection to access private methods. There's no guarantee this will work.
+     *
      * @param wifiManager
      * @return true hotspot active, false otherwise
      */
@@ -84,9 +88,9 @@ public class WifiUtils {
     }
 
     /**
-     * Disable portable Wifi Hotspot
-     * This is a workaround and should be used with caution as it uses reflection to access
-     * private methods. There's no guarantee this will work.
+     * Disable portable Wifi Hotspot This is a workaround and should be used with caution as it uses
+     * reflection to access private methods. There's no guarantee this will work.
+     *
      * @param wifiManager
      * @return
      */

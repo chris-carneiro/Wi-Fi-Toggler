@@ -1,10 +1,14 @@
 package net.opencurlybraces.android.projects.wifihandler;
 
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
@@ -14,6 +18,9 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import net.opencurlybraces.android.projects.wifihandler.receiver.WifiScanResultsReceiver;
+import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
+import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.WifiUtils;
 
 import java.util.List;
@@ -21,6 +28,8 @@ import java.util.List;
 
 public class ConfiguredWifiListActivity extends AppCompatActivity implements
         CompoundButton.OnCheckedChangeListener, WifiUtils.UserWifiConfigurationLoadedListener {
+
+    private static final String TAG = "ConfiguredWifiList";
 
     private TextView mWifiHandlerSwitchLabel = null;
     private Switch mWifiHandlerActivationSwitch = null;
@@ -45,7 +54,12 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+        if (PrefUtils.isWifiHandlerActive(this)) {
+            mWifiHandlerActivationSwitch.setChecked(true);
+        }
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -75,11 +89,46 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
             case R.id.wifi_handler_activation_switch:
                 handleSwitchLabelValue(isChecked);
                 handleUserWifiListLoading(isChecked);
+
+                PrefUtils.setWifiHandlerActive(this, isChecked);
+                handleWifiScanReceiver(isChecked);
+
+                if (!isChecked) {
+                    makeNotificationDismissable();
+                }
+
                 break;
         }
 
     }
 
+
+    private void makeNotificationDismissable() {
+        Intent dismissNotificationIntent = new Intent(this, WifiHandlerService.class);
+        dismissNotificationIntent.setAction(WifiHandlerService
+                .ACTION_STOP_FOREGROUND_NOTIFICATION);
+        startService(dismissNotificationIntent);
+
+    }
+
+    private void handleWifiScanReceiver(boolean isChecked) {
+
+        ComponentName component = new ComponentName(this, WifiScanResultsReceiver.class);
+
+        if (isChecked) {
+            getPackageManager().setComponentEnabledSetting(component, PackageManager
+                    .COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+        } else {
+            getPackageManager().setComponentEnabledSetting(component, PackageManager
+                    .COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        }
+        int status = getPackageManager().getComponentEnabledSetting(component);
+        if (status == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+            Log.d(TAG, "receiver is enabled");
+        } else if (status == PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
+            Log.d(TAG, "receiver is disabled");
+        }
+    }
 
     private void handleSwitchLabelValue(boolean isChecked) {
         if (isChecked) {
@@ -94,8 +143,7 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
 
     private void handleUserWifiListLoading(boolean isChecked) {
         if (isChecked) {
-            WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
-            new WifiConfigurationLoader(wifiManager, this).execute();
+            loadWifiConfigurations();
         } else {
             mWifiHandlerWifiList.setAdapter(null);
         }
@@ -109,6 +157,19 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
             askUserCheckHotspot();
             return;
         }
+        setListViewData(userWifiConfigurations);
+
+        Intent notifIntent = new Intent(this, WifiHandlerService.class);
+        notifIntent.setAction(WifiHandlerService.ACTION_HANDLE_FOREGROUND_NOTIFICATION);
+        startService(notifIntent);
+    }
+
+    private void loadWifiConfigurations() {
+        WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
+        new WifiConfigurationLoader(wifiManager, this).execute();
+    }
+
+    private void setListViewData(List<WifiConfiguration> userWifiConfigurations) {
         mConfiguredWifiAdapter = new ArrayAdapter<>(this, R.layout
                 .configured_wifi_list_row, R.id.configured_wifi_ssid,
                 userWifiConfigurations);
@@ -117,7 +178,7 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
     }
 
     private void askUserCheckHotspot() {
-        Toast.makeText(this,"WifiConfigurations could not be retrieved, please disable any " +
+        Toast.makeText(this, "WifiConfigurations could not be retrieved, please disable any " +
                 "hotspot or tethering mode and retry", Toast
                 .LENGTH_LONG).show();
     }
