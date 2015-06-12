@@ -3,10 +3,10 @@ package net.opencurlybraces.android.projects.wifihandler.util;
 import android.content.Context;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 /**
@@ -35,28 +35,82 @@ public class WifiUtils {
      */
     @Nullable
     public static List<WifiConfiguration> getConfiguredWifis(final WifiManager
-                                                                     wifiManager) {
+                                                                     wifiManager) throws
+            InterruptedException {
         WifiManager.WifiLock wifiLock = wifiManager.createWifiLock(WifiManager
                 .WIFI_MODE_SCAN_ONLY, null);
         List<WifiConfiguration> configuredWifis = null;
 
-        if (wifiManager.setWifiEnabled(true)) {
-            wifiLock.acquire();
-            do {
-                configuredWifis = wifiManager.getConfiguredNetworks();
-            } while (configuredWifis == null);
-
-            wifiManager.setWifiEnabled(false);
-            wifiLock.release();
+        if (wifiManager.isWifiEnabled()) {
+            return configuredWifis;
         } else {
-            Log.d("WifiConfigurationLoader", "could not enable wifi");
+            if (isHotspotOn(wifiManager)) {
+                disableHotspot(wifiManager);
+            }
+            if (wifiManager.setWifiEnabled(true)) {
+                wifiLock.acquire();
+                int attempts = 0;
+
+                do {
+                    Log.d("WifiUtils", "getNetworks");
+                    configuredWifis = wifiManager.getConfiguredNetworks();
+                    attempts++;
+                } while (configuredWifis == null && attempts < 100);
+
+                wifiManager.setWifiEnabled(false);
+                wifiLock.release();
+            }
+
         }
         return configuredWifis;
     }
 
+
+    /**
+     * Check whether wifi hotspot on or off
+     * This is a workaround and should be used with caution as it uses reflection to access
+     * private methods. There's no guarantee this will work.
+     * @param wifiManager
+     * @return true hotspot active, false otherwise
+     */
+    private static boolean isHotspotOn(final WifiManager
+                                               wifiManager) {
+        try {
+            Method method = wifiManager.getClass().getDeclaredMethod("isWifiApEnabled");
+            method.setAccessible(true);
+            return (Boolean) method.invoke(wifiManager);
+        } catch (Throwable ignored) {}
+        return false;
+    }
+
+    /**
+     * Disable portable Wifi Hotspot
+     * This is a workaround and should be used with caution as it uses reflection to access
+     * private methods. There's no guarantee this will work.
+     * @param wifiManager
+     * @return
+     */
+    private static boolean disableHotspot(final WifiManager
+                                                  wifiManager) {
+        try {
+            // if WiFi is on, turn it off
+            if (isHotspotOn(wifiManager)) {
+                wifiManager.setWifiEnabled(false);
+            }
+            Method method = wifiManager.getClass().getMethod("setWifiApEnabled",
+                    WifiConfiguration.class, boolean.class);
+            method.invoke(wifiManager, null, false);
+            Thread.sleep(200);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public interface UserWifiConfigurationLoadedListener {
 
-        void onUserWifiConfigurationLoaded (List<WifiConfiguration> userWifiConfigurations);
+        void onUserWifiConfigurationLoaded(List<WifiConfiguration> userWifiConfigurations);
     }
 
 
