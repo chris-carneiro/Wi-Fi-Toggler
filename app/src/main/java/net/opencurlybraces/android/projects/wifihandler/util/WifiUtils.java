@@ -6,6 +6,8 @@ import android.net.wifi.WifiManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import net.opencurlybraces.android.projects.wifihandler.data.model.UserWifi;
+
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -114,7 +116,7 @@ public class WifiUtils {
 
     public interface UserWifiConfigurationLoadedListener {
 
-        void onUserWifiConfigurationLoaded(List<WifiConfiguration> userWifiConfigurations);
+        void onUserWifiConfigurationLoaded(List<UserWifi> userWifiConfigurations);
     }
 
 

@@ -6,5 +6,6 @@
     <dimen name="normal_padding">10dp</dimen>
     <dimen name="switch_banner_height">60dp</dimen>
     <dimen name="switch_banner_label_value_text_size">18sp</dimen>
+    <dimen name="wifi_list_row_margin_left">15dp</dimen>
 
 </resources>

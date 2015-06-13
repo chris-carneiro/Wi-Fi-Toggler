@@ -13,17 +13,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import net.opencurlybraces.android.projects.wifihandler.data.model.UserWifi;
 import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.WifiUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -36,8 +37,9 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
     private Switch mWifiHandlerActivationSwitch = null;
     private ListView mWifiHandlerWifiList = null;
     private TextView mEmptyView = null;
-    private ArrayAdapter<WifiConfiguration> mConfiguredWifiAdapter = null;
 
+    //    private ArrayAdapter<UserWifi> mConfiguredWifiAdapter = null;
+    private ConfiguredWifiListAdapter mConfiguredWifiAdapter = null;
 
 
     @Override
@@ -167,7 +169,7 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onUserWifiConfigurationLoaded(List<WifiConfiguration> userWifiConfigurations) {
+    public void onUserWifiConfigurationLoaded(List<UserWifi> userWifiConfigurations) {
         if (userWifiConfigurations == null) {
             mWifiHandlerActivationSwitch.setChecked(false);
             askUserCheckHotspot();
@@ -181,10 +183,13 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
         new WifiConfigurationLoader(wifiManager, this).execute();
     }
 
-    private void setListViewData(List<WifiConfiguration> userWifiConfigurations) {
-        mConfiguredWifiAdapter = new ArrayAdapter<>(this, R.layout
-                .configured_wifi_list_row, R.id.configured_wifi_ssid,
-                userWifiConfigurations);
+    private void setListViewData(List<UserWifi> userWifis) {
+        //        mConfiguredWifiAdapter = new ArrayAdapter<>(this, R.layout
+        //                .configured_wifi_list_row, R.id.configured_wifi_ssid,
+        //                userWifiConfigurations);
+
+        mConfiguredWifiAdapter = new ConfiguredWifiListAdapter(userWifis);
+
         mWifiHandlerWifiList.setAdapter(mConfiguredWifiAdapter);
         mWifiHandlerWifiList.setEmptyView(mEmptyView);
     }
@@ -196,7 +201,7 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
     }
 
     private static class WifiConfigurationLoader extends AsyncTask<Void, Void,
-            List<WifiConfiguration>> {
+            List<UserWifi>> {
 
         private WifiManager mWifiManager;
         private WifiUtils.UserWifiConfigurationLoadedListener mListener;
@@ -209,17 +214,32 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
 
 
         @Override
-        protected List<WifiConfiguration> doInBackground(Void... params) {
+        protected List<UserWifi> doInBackground(Void... params) {
+
+            List<UserWifi> userWifis = null;
             try {
-                return WifiUtils.getConfiguredWifis(mWifiManager);
+                List<WifiConfiguration> wifiConfigurations = WifiUtils.getConfiguredWifis
+                        (mWifiManager);
+
+                if (wifiConfigurations == null)
+                    return null;
+                userWifis = new ArrayList<>(wifiConfigurations.size());
+
+                for (WifiConfiguration config : wifiConfigurations) {
+
+                    UserWifi userWifi = new UserWifi();
+                    userWifi.SSID = config.SSID.replace("\"", "");
+                    userWifi.mActive = config.status == WifiConfiguration.Status.CURRENT;
+                    userWifis.add(userWifi);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            return null;
+            return userWifis;
         }
 
         @Override
-        protected void onPostExecute(List<WifiConfiguration> wifiConfigurations) {
+        protected void onPostExecute(List<UserWifi> wifiConfigurations) {
             mListener.onUserWifiConfigurationLoaded(wifiConfigurations);
             mListener = null;
         }
