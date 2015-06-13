@@ -57,10 +57,11 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
         mNoticationActionsReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (WifiHandlerService.ACTION_HANDLE_ACTIVATE_WIFI_HANDLER.equals(intent
+                Log.d(TAG, "Intent=" + intent.getAction());
+                if (WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE.equals(intent
                         .getAction())) {
                     mWifiHandlerActivationSwitch.setChecked(true);
-                } else if (WifiHandlerService.ACTION_HANDLE_PAUSE_WIFI_HANDLER.equals(intent
+                } else if (WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE.equals(intent
                         .getAction())) {
                     mWifiHandlerActivationSwitch.setChecked(false);
                 }
@@ -71,13 +72,16 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume");
+        Log.d(TAG, "onResume isactive=" + PrefUtils.isWifiHandlerActive(this));
         if (PrefUtils.isWifiHandlerActive(this)) {
             mWifiHandlerActivationSwitch.setChecked(true);
+        } else {
+            mWifiHandlerActivationSwitch.setChecked(false);
         }
+
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(WifiHandlerService.ACTION_HANDLE_ACTIVATE_WIFI_HANDLER);
-        intentFilter.addAction(WifiHandlerService.ACTION_HANDLE_PAUSE_WIFI_HANDLER);
+        intentFilter.addAction(WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE);
+        intentFilter.addAction(WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE);
         LocalBroadcastManager.getInstance(this).registerReceiver(mNoticationActionsReceiver,
                 intentFilter);
     }
@@ -85,7 +89,12 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-       LocalBroadcastManager.getInstance(this).unregisterReceiver(mNoticationActionsReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mNoticationActionsReceiver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     @Override
@@ -116,25 +125,26 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
             case R.id.wifi_handler_activation_switch:
                 handleSwitchLabelValue(isChecked);
                 handleUserWifiListLoading(isChecked);
-
-                PrefUtils.setWifiHandlerActive(this, isChecked);
                 handleWifiScanReceiver(isChecked);
-
-                if (!isChecked) {
-                    makeNotificationDismissable();
-                }
-
+                handleNotification(isChecked);
                 break;
         }
 
     }
 
 
-    private void makeNotificationDismissable() {
-        Intent dismissNotificationIntent = new Intent(this, WifiHandlerService.class);
-        dismissNotificationIntent.setAction(WifiHandlerService
-                .ACTION_HANDLE_PAUSE_WIFI_HANDLER);
-        startService(dismissNotificationIntent);
+    private void handleNotification(boolean isChecked) {
+        if (isChecked) {
+            Intent startForgroundNotificationIntent = new Intent(this, WifiHandlerService.class);
+            startForgroundNotificationIntent.setAction(WifiHandlerService
+                    .ACTION_HANDLE_ACTIVATE_WIFI_HANDLER);
+            startService(startForgroundNotificationIntent);
+        } else {
+            Intent dismissableNotificationIntent = new Intent(this, WifiHandlerService.class);
+            dismissableNotificationIntent.setAction(WifiHandlerService
+                    .ACTION_HANDLE_PAUSE_WIFI_HANDLER);
+            startService(dismissableNotificationIntent);
+        }
 
     }
 
@@ -185,10 +195,6 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
             return;
         }
         setListViewData(userWifiConfigurations);
-
-        Intent notifIntent = new Intent(this, WifiHandlerService.class);
-        notifIntent.setAction(WifiHandlerService.ACTION_HANDLE_FOREGROUND_NOTIFICATION);
-        startService(notifIntent);
     }
 
     private void loadWifiConfigurations() {
