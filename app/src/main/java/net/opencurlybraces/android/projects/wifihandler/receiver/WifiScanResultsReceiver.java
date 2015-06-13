@@ -23,7 +23,7 @@ import java.util.List;
 public class WifiScanResultsReceiver extends BroadcastReceiver {
     private static final String TAG = WifiScanResultsReceiver.class.getSimpleName();
     WifiManager mWifiManager = null;
-    private static final int SIGNAL_STRENGH_THRESHOLD = -80;
+    private static final int SIGNAL_STRENGTH_THRESHOLD = -80;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -66,7 +66,7 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
                             Log.d(TAG, "Signal Strength=" + wifiNetwork.level + " SSID=" +
                                     wifiNetwork
                                             .SSID);
-                            if (wifiNetwork.level > SIGNAL_STRENGH_THRESHOLD) {
+                            if (wifiNetwork.level > SIGNAL_STRENGTH_THRESHOLD) {
                                 mWifiManager.setWifiEnabled(true);
                             } else {
                                 mWifiManager.setWifiEnabled(false);
