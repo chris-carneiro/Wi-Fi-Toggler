@@ -6,12 +6,14 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import net.opencurlybraces.android.projects.wifihandler.receiver.WifiScanResultsReceiver;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 
 /**
@@ -21,12 +23,6 @@ import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 public class WifiHandlerService extends Service {
 
     private static final String TAG = "WifiHandlerService";
-
-
-    public static final String ACTION_HANDLE_FOREGROUND_NOTIFICATION = "net.opencurlybraces" +
-            ".android" +
-            ".projects" +
-            ".wifihandler.service.action.ACTION_HANDLE_FOREGROUND_NOTIFICATION";
 
     /**
      * Intent actions reserved to switch button
@@ -57,7 +53,7 @@ public class WifiHandlerService extends Service {
             ".wifihandler.service.action.ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE";
 
     private WifiManager mWifiManager;
-
+    private WifiScanResultsReceiver mWifiScanResultsReceiver = null;
     private static final int NOTIFICATION_ID = 100;
 
     @Override
@@ -66,6 +62,16 @@ public class WifiHandlerService extends Service {
         if (mWifiManager == null) {
             mWifiManager = (WifiManager) getSystemService(Context
                     .WIFI_SERVICE);
+        }
+
+        registerScanResultReceiver();
+
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mWifiScanResultsReceiver != null) {
+            unregisterReceiver(mWifiScanResultsReceiver);
         }
     }
 
@@ -83,18 +89,19 @@ public class WifiHandlerService extends Service {
             case ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE:
                 activateWifiHandler();
                 buildForegroundNotification();
-                sendLocalBroadcastAction(ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE);
+                sendLocalBroadcastAction
+                        (ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE);
                 break;
             case ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE:
                 pauseWifiHandler();
                 buildDismissableNotification();
                 sendLocalBroadcastAction(ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE);
+                stopSelf();
                 break;
-
             case ACTION_HANDLE_PAUSE_WIFI_HANDLER:
                 pauseWifiHandler();
                 buildDismissableNotification();
-
+                stopSelf();
                 break;
             case ACTION_HANDLE_ACTIVATE_WIFI_HANDLER:
                 activateWifiHandler();
@@ -104,6 +111,13 @@ public class WifiHandlerService extends Service {
 
         return START_NOT_STICKY;
 
+    }
+
+    private void registerScanResultReceiver() {
+        IntentFilter wifiScanFilter = new IntentFilter();
+        wifiScanFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        mWifiScanResultsReceiver = new WifiScanResultsReceiver();
+        registerReceiver(mWifiScanResultsReceiver, wifiScanFilter);
     }
 
     private void sendLocalBroadcastAction(String action) {
@@ -126,8 +140,6 @@ public class WifiHandlerService extends Service {
         NotificationManager notifManager = (NotificationManager) getSystemService(Context
                 .NOTIFICATION_SERVICE);
 
-        stopForeground(false);
-
         NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(this)
                 .setContentTitle("Wifi Handler")
                 .setContentText("Test")
@@ -138,6 +150,8 @@ public class WifiHandlerService extends Service {
                 , createActivateWifiHandlerIntent());
         Notification notification = notifBuilder.build();
         notifManager.notify(NOTIFICATION_ID, notification);
+
+        stopForeground(false);
 
     }
 

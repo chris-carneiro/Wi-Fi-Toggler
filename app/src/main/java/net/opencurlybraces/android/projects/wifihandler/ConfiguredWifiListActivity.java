@@ -1,11 +1,9 @@
 package net.opencurlybraces.android.projects.wifihandler;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -22,7 +20,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import net.opencurlybraces.android.projects.wifihandler.receiver.WifiScanResultsReceiver;
 import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.WifiUtils;
@@ -40,7 +37,7 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
     private ListView mWifiHandlerWifiList = null;
     private TextView mEmptyView = null;
     private ArrayAdapter<WifiConfiguration> mConfiguredWifiAdapter = null;
-    private BroadcastReceiver mNoticationActionsReceiver = null;
+
 
 
     @Override
@@ -54,20 +51,22 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
         mEmptyView = (TextView) findViewById(android.R.id.empty);
         mWifiHandlerActivationSwitch.setOnCheckedChangeListener(this);
 
-        mNoticationActionsReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Log.d(TAG, "Intent=" + intent.getAction());
-                if (WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE.equals(intent
-                        .getAction())) {
-                    mWifiHandlerActivationSwitch.setChecked(true);
-                } else if (WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE.equals(intent
-                        .getAction())) {
-                    mWifiHandlerActivationSwitch.setChecked(false);
-                }
-            }
-        };
     }
+
+
+    private BroadcastReceiver mNotificationActionsReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Intent=" + intent.getAction());
+            if (WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE.equals(intent
+                    .getAction())) {
+                mWifiHandlerActivationSwitch.setChecked(true);
+            } else if (WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE.equals(intent
+                    .getAction())) {
+                mWifiHandlerActivationSwitch.setChecked(false);
+            }
+        }
+    };
 
     @Override
     protected void onResume() {
@@ -82,14 +81,15 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE);
         intentFilter.addAction(WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mNoticationActionsReceiver,
+        
+        LocalBroadcastManager.getInstance(this).registerReceiver(mNotificationActionsReceiver,
                 intentFilter);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mNoticationActionsReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mNotificationActionsReceiver);
     }
 
     @Override
@@ -125,7 +125,6 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
             case R.id.wifi_handler_activation_switch:
                 handleSwitchLabelValue(isChecked);
                 handleUserWifiListLoading(isChecked);
-                handleWifiScanReceiver(isChecked);
                 handleNotification(isChecked);
                 break;
         }
@@ -148,25 +147,6 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
 
     }
 
-    private void handleWifiScanReceiver(boolean isChecked) {
-
-        ComponentName component = new ComponentName(this, WifiScanResultsReceiver.class);
-
-        if (isChecked) {
-            getPackageManager().setComponentEnabledSetting(component, PackageManager
-                    .COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
-        } else {
-            getPackageManager().setComponentEnabledSetting(component, PackageManager
-                    .COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-        }
-        int status = getPackageManager().getComponentEnabledSetting(component);
-        if (status == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
-            Log.d(TAG, "receiver is enabled");
-        } else if (status == PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
-            Log.d(TAG, "receiver is disabled");
-        }
-    }
-
     private void handleSwitchLabelValue(boolean isChecked) {
         if (isChecked) {
             String on = getString(R.string.on_wifi_handler_switch_label_value);
@@ -184,7 +164,6 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
         } else {
             mWifiHandlerWifiList.setAdapter(null);
         }
-
     }
 
     @Override

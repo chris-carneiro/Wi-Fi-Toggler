@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
+import net.opencurlybraces.android.projects.wifihandler.service.ScanResultHandlerService;
 
 /**
  * {@link BroadcastReceiver} filtered on {@link android.net.wifi
@@ -19,7 +19,10 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "SCAN_RESULTS received");
 
+        Log.d(TAG, "SCAN_RESULTS received");
+        Intent handleResultsIntent = new Intent(context, ScanResultHandlerService.class);
+        handleResultsIntent.setAction(ScanResultHandlerService.ACTION_HANDLE_WIFI_SCAN_RESULTS);
+        context.startService(handleResultsIntent);
     }
 }
