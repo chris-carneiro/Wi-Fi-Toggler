@@ -4,16 +4,13 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
+import android.support.v4.content.LocalBroadcastManager;
 
-import net.opencurlybraces.android.projects.wifihandler.receiver.WifiScanResultsReceiver;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 
 /**
@@ -35,10 +32,6 @@ public class WifiHandlerService extends Service {
             ".projects" +
             ".wifihandler.service.action.ACTION_HANDLE_PAUSE_WIFI_HANDLER";
 
-    public static final String ACTION_STOP_FOREGROUND_NOTIFICATION = "net.opencurlybraces" +
-            ".android" +
-            ".projects" +
-            ".wifihandler.service.action.ACTION_STOP_FOREGROUND_NOTIFICATION";
 
     public static final String ACTION_HANDLE_ACTIVATE_WIFI_HANDLER = "net.opencurlybraces" +
             ".android" +
@@ -74,12 +67,12 @@ public class WifiHandlerService extends Service {
             case ACTION_HANDLE_PAUSE_WIFI_HANDLER:
                 pauseWifiHandler();
                 updateNotification();
-                break;
-            case ACTION_STOP_FOREGROUND_NOTIFICATION:
-                updateNotification();
+                sendLocalBroadcastAction(ACTION_HANDLE_PAUSE_WIFI_HANDLER);
                 break;
             case ACTION_HANDLE_ACTIVATE_WIFI_HANDLER:
                 activateWifiHandler();
+                buildForegroundNotification();
+                sendLocalBroadcastAction(ACTION_HANDLE_ACTIVATE_WIFI_HANDLER);
                 break;
         }
 
@@ -87,50 +80,21 @@ public class WifiHandlerService extends Service {
 
     }
 
+    private void sendLocalBroadcastAction(String action) {
+        Intent switchIntent = new Intent();
+        switchIntent.setAction(action);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(switchIntent);
+    }
+
     private void pauseWifiHandler() {
         PrefUtils.setWifiHandlerActive(this, false);
-        unRegisterScanReceiver();
     }
 
 
     private void activateWifiHandler() {
         PrefUtils.setWifiHandlerActive(this, true);
-        registerScanReceiver();
     }
 
-    private void unRegisterScanReceiver() {
-        Log.d(TAG, "unRegisterScanReceiver");
-        ComponentName component = new ComponentName(this, WifiScanResultsReceiver.class);
-
-        getPackageManager().setComponentEnabledSetting(component, PackageManager
-                .COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-
-        int status = getPackageManager().getComponentEnabledSetting(component);
-
-        if (status == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
-            Log.d(TAG, "receiver is enabled");
-        } else if (status == PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
-            Log.d(TAG, "receiver is disabled");
-        }
-
-    }
-
-    private void registerScanReceiver() {
-        Log.d(TAG, "registerScanReceiver");
-        ComponentName component = new ComponentName(this, WifiScanResultsReceiver.class);
-
-        getPackageManager().setComponentEnabledSetting(component, PackageManager
-                .COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
-
-        int status = getPackageManager().getComponentEnabledSetting(component);
-
-        if (status == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
-            Log.d(TAG, "receiver is enabled");
-        } else if (status == PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
-            Log.d(TAG, "receiver is disabled");
-        }
-
-    }
 
     private void updateNotification() {
         NotificationManager notifManager = (NotificationManager) getSystemService(Context
@@ -159,14 +123,14 @@ public class WifiHandlerService extends Service {
                 .setSmallIcon(android.R.drawable.ic_dialog_info);
 
         notifBuilder.addAction(0, "Pause Wifi Handler"
-                , createPauseIntent());
+                , createPauseWifiHandlerIntent());
 
         Notification notification = notifBuilder.build();
         startForeground(NOTIFICATION_ID, notification);
 
     }
 
-    private PendingIntent createPauseIntent() {
+    private PendingIntent createPauseWifiHandlerIntent() {
         Intent pauseIntent = new Intent(ACTION_HANDLE_PAUSE_WIFI_HANDLER,
                 null, this, WifiHandlerService.class);
 
