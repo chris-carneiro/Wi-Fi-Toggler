@@ -9,10 +9,10 @@
     an. Saperet iudicabit et mei. His vidit theophrastus ne, has movet simul eu. Ne ius nemore
     feugait imperdiet. Et aeque tempor mei, sit dicta laudem detracto ea, te tibique nostrum
     recusabo his."</string>
-    <string name="paused_wifi_handler_notification_context_title">Auto-toggle disabled</string>
-    <string name="active_wifi_handler_notification_context_title">Auto-toggle active</string>
-    <string name="enable_action_title">Enable</string>
-    <string name="disable_action_title">Disable</string>
+    <string name="paused_wifi_handler_notification_context_title">Wifi Auto-toggle disabled</string>
+    <string name="active_wifi_handler_notification_context_title">Wifi Auto-toggle active</string>
+    <string name="enable_action_title">Enable Wifi Handler</string>
+    <string name="disable_action_title">Pause Wifi Handler</string>
     <string name="disable_notification_ticker_content">Wifi Handler is disabled</string>
     <string name="enable_notification_ticker_content">Wifi Handler is enabled</string>
 
