@@ -14,6 +14,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import net.opencurlybraces.android.projects.wifihandler.ConfiguredWifiListActivity;
 import net.opencurlybraces.android.projects.wifihandler.R;
 import net.opencurlybraces.android.projects.wifihandler.receiver.WifiScanResultsReceiver;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
@@ -142,11 +143,19 @@ public class WifiHandlerService extends Service {
         NotificationManager notifManager = (NotificationManager) getSystemService(Context
                 .NOTIFICATION_SERVICE);
         Resources res = getResources();
+        Intent notificationIntent = new Intent(this, ConfiguredWifiListActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        PendingIntent intent = PendingIntent.getActivity(this, 0,
+                notificationIntent, 0);
+
         NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(this)
                 .setContentTitle(res.getString(R.string.app_name))
                 .setContentText(res.getString(R.string.paused_wifi_handler_notification_context_title))
                 .setTicker(res.getString(R.string.disable_notification_ticker_content))
-                .setSmallIcon(android.R.drawable.ic_dialog_info);
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentIntent(intent);
 
         notifBuilder.addAction(0, res.getString(R.string.enable_action_title)
                 , createActivateWifiHandlerIntent());
@@ -159,11 +168,21 @@ public class WifiHandlerService extends Service {
 
     private void buildForegroundNotification() {
         Resources res = getResources();
+
+        Intent notificationIntent = new Intent(this, ConfiguredWifiListActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        PendingIntent intent = PendingIntent.getActivity(this, 0,
+                notificationIntent, 0);
+
         NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(this)
                 .setContentTitle(res.getString(R.string.app_name))
                 .setContentText(res.getString(R.string.active_wifi_handler_notification_context_title))
                 .setTicker(res.getString(R.string.enable_notification_ticker_content))
-                .setSmallIcon(android.R.drawable.ic_dialog_info);
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentIntent(intent);
+
 
         notifBuilder.addAction(0, res.getString(R.string.disable_action_title)
                 , createPauseWifiHandlerIntent());
