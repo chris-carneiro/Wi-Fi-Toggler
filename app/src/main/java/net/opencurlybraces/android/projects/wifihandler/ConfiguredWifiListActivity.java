@@ -81,7 +81,7 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE);
         intentFilter.addAction(WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE);
-        
+
         LocalBroadcastManager.getInstance(this).registerReceiver(mNotificationActionsReceiver,
                 intentFilter);
     }

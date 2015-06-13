@@ -5,6 +5,15 @@
     <string name="action_settings">Settings</string>
     <string name="off_wifi_handler_switch_label_value">Off</string>
     <string name="on_wifi_handler_switch_label_value">On</string>
-    <string name="wifi_list_info_when_wifi_handler_off">"Lorem ipsum dolor sit amet, sumo audire sea an. Saperet iudicabit et mei. His vidit theophrastus ne, has movet simul eu. Ne ius nemore feugait imperdiet. Et aeque tempor mei, sit dicta laudem detracto ea, te tibique nostrum recusabo his.
-"</string>
+    <string name="wifi_list_info_when_wifi_handler_off">"Lorem ipsum dolor sit amet, sumo audire sea
+    an. Saperet iudicabit et mei. His vidit theophrastus ne, has movet simul eu. Ne ius nemore
+    feugait imperdiet. Et aeque tempor mei, sit dicta laudem detracto ea, te tibique nostrum
+    recusabo his."</string>
+    <string name="paused_wifi_handler_notification_context_title">Auto-toggle disabled</string>
+    <string name="active_wifi_handler_notification_context_title">Auto-toggle active</string>
+    <string name="enable_action_title">Enable</string>
+    <string name="disable_action_title">Disable</string>
+    <string name="disable_notification_ticker_content">Wifi Handler is disabled</string>
+    <string name="enable_notification_ticker_content">Wifi Handler is enabled</string>
+
 </resources>
