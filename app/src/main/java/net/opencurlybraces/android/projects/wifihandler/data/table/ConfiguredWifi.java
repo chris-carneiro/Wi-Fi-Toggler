@@ -162,7 +162,7 @@ public class ConfiguredWifi implements BaseColumns {
 
     private static ContentValues buildDefaultWifiContentValues(WifiConfiguration wifi) {
         ContentValues values = new ContentValues();
-        values.put(ConfiguredWifi.SSID, wifi.SSID);
+        values.put(ConfiguredWifi.SSID, wifi.SSID.replace("\"",""));
         values.put(ConfiguredWifi.AUTO_TOGGLE, 0);
         values.put(ConfiguredWifi.OPEN_WIFI, 0);
         values.put(ConfiguredWifi.PREFERRED, 0);

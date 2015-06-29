@@ -1,36 +1,41 @@
 package net.opencurlybraces.android.projects.wifihandler;
 
+import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
+import android.content.Loader;
+import android.content.res.Configuration;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
+import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import net.opencurlybraces.android.projects.wifihandler.data.model.UserWifi;
+import net.opencurlybraces.android.projects.wifihandler.data.table.ConfiguredWifi;
+import net.opencurlybraces.android.projects.wifihandler.service.ContentIntentService;
 import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
+import net.opencurlybraces.android.projects.wifihandler.util.StartupUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.WifiUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
 public class ConfiguredWifiListActivity extends AppCompatActivity implements
-        CompoundButton.OnCheckedChangeListener, WifiUtils.UserWifiConfigurationLoadedListener {
+        CompoundButton.OnCheckedChangeListener, WifiUtils.UserWifiConfigurationLoadedListener,
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = "ConfiguredWifiList";
 
@@ -39,9 +44,7 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
     private ListView mWifiHandlerWifiList = null;
     private TextView mEmptyView = null;
 
-
-    private ArrayAdapter<UserWifi> mConfiguredWifiAdapter = null;
-//    private ConfiguredWifiListAdapter mConfiguredWifiAdapter = null;
+    private CursorAdapter mSavedWifiCursorAdapter = null;
 
 
     @Override
@@ -54,6 +57,8 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
         mWifiHandlerWifiList = (ListView) findViewById(android.R.id.list);
         mEmptyView = (TextView) findViewById(android.R.id.empty);
         mWifiHandlerActivationSwitch.setOnCheckedChangeListener(this);
+
+        startupCheck();
 
     }
 
@@ -76,8 +81,11 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume isactive=" + PrefUtils.isWifiHandlerActive(this));
+        initLoader();
+        mSavedWifiCursorAdapter = initAdapter();
         if (PrefUtils.isWifiHandlerActive(this)) {
             mWifiHandlerActivationSwitch.setChecked(true);
+            mWifiHandlerWifiList.setAdapter(mSavedWifiCursorAdapter);
         } else {
             mWifiHandlerActivationSwitch.setChecked(false);
         }
@@ -128,11 +136,19 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
         switch (buttonView.getId()) {
             case R.id.wifi_handler_activation_switch:
                 handleSwitchLabelValue(isChecked);
-                handleUserWifiListLoading(isChecked);
+                handleSavedWifiListLoading(isChecked);
                 handleNotification(isChecked);
                 break;
         }
 
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Log.d(TAG, "onConfigurationChanged");
+        boolean isChecked = PrefUtils.isWifiHandlerActive(this);
+        handleSavedWifiListLoading(isChecked);
     }
 
 
@@ -162,9 +178,9 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
     }
 
 
-    private void handleUserWifiListLoading(boolean isChecked) {
+    private void handleSavedWifiListLoading(boolean isChecked) {
         if (isChecked) {
-            loadWifiConfigurations();
+            mWifiHandlerWifiList.setAdapter(mSavedWifiCursorAdapter);
         } else {
             mWifiHandlerWifiList.setAdapter(null);
         }
@@ -177,23 +193,12 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
             askUserCheckHotspot();
             return;
         }
-        setListViewData(userWifiConfigurations);
     }
 
-    private void loadWifiConfigurations() {
-        WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
-        new WifiConfigurationLoader(wifiManager, this).execute();
-    }
-
-    private void setListViewData(List<UserWifi> userWifis) {
-        mConfiguredWifiAdapter = new ArrayAdapter<>(this, R.layout
-                .configured_wifi_list_row, R.id.configured_wifi_ssid,
-                userWifis);
-
-//        mConfiguredWifiAdapter = new ConfiguredWifiListAdapter(userWifis);
-
-        mWifiHandlerWifiList.setAdapter(mConfiguredWifiAdapter);
-        mWifiHandlerWifiList.setEmptyView(mEmptyView);
+    private void loadSavedWifiIntoDatabase() {
+        Intent handleSavedWifiInsert = new Intent(this, ContentIntentService.class);
+        handleSavedWifiInsert.setAction(ContentIntentService.ACTION_HANDLE_SAVED_WIFI_INSERT);
+        this.startService(handleSavedWifiInsert);
     }
 
     private void askUserCheckHotspot() {
@@ -202,48 +207,57 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
                 .LENGTH_LONG).show();
     }
 
-    private static class WifiConfigurationLoader extends AsyncTask<Void, Void,
-            List<UserWifi>> {
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String[] projection = {ConfiguredWifi._ID, ConfiguredWifi.SSID, ConfiguredWifi.STATUS};
+        CursorLoader cursorLoader = new CursorLoader(this,
+                ConfiguredWifi.CONTENT_URI, projection, null, null, null);
+        return cursorLoader;
+    }
 
-        private WifiManager mWifiManager;
-        private WifiUtils.UserWifiConfigurationLoadedListener mListener;
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mSavedWifiCursorAdapter.swapCursor(data);
+        mWifiHandlerWifiList.setEmptyView(mEmptyView);
+    }
 
-        private WifiConfigurationLoader(WifiManager wifiManager, WifiUtils
-                .UserWifiConfigurationLoadedListener listener) {
-            mWifiManager = wifiManager;
-            mListener = listener;
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mSavedWifiCursorAdapter.swapCursor(null);
+    }
+
+    private void initLoader() {
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    private CursorAdapter initAdapter() {
+        Log.d(TAG, "initAdapter");
+        // Must include the _id column for the adapter to work
+        String[] from = new String[]{ConfiguredWifi.SSID, ConfiguredWifi.STATUS};
+        // Fields on the UI to which we map
+        int[] to = new int[]{R.id.configured_wifi_ssid, R.id.configured_wifi_state};
+
+        if (mSavedWifiCursorAdapter == null) {
+            mSavedWifiCursorAdapter = new SavedWifiListAdapter(this, null, 0);
         }
+        return mSavedWifiCursorAdapter;
+    }
 
 
-        @Override
-        protected List<UserWifi> doInBackground(Void... params) {
-
-            List<UserWifi> userWifis = null;
-            try {
-                List<WifiConfiguration> wifiConfigurations = WifiUtils.getConfiguredWifis
-                        (mWifiManager);
-
-                if (wifiConfigurations == null)
-                    return null;
-                userWifis = new ArrayList<>(wifiConfigurations.size());
-
-                for (WifiConfiguration config : wifiConfigurations) {
-
-                    UserWifi userWifi = new UserWifi();
-                    userWifi.mSSID = config.SSID.replace("\"", "");
-                    userWifi.mConnected = config.status == WifiConfiguration.Status.CURRENT;
-                    userWifis.add(userWifi);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            return userWifis;
-        }
-
-        @Override
-        protected void onPostExecute(List<UserWifi> wifiConfigurations) {
-            mListener.onUserWifiConfigurationLoaded(wifiConfigurations);
-            mListener = null;
+    private void startupCheck() {
+        int startupMode = StartupUtils.appStartMode(this);
+        switch (startupMode) {
+            case StartupUtils.FIRST_TIME:
+                Log.d(TAG, "Startup mode: FIRST_TIME");
+            case StartupUtils.FIRST_TIME_FOR_VERSION:
+                Log.d(TAG, "Startup mode: FIRST_TIME_FOR_VERSION");
+                loadSavedWifiIntoDatabase();
+                break;
+            case StartupUtils.NORMAL:
+                Log.d(TAG, "Startup mode: NORMAL");
+                break;
         }
     }
+
+
 }

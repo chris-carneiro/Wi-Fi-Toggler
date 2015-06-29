@@ -17,31 +17,43 @@ public class WifiStateReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "wifi state changed");
+        Log.d(TAG, "wifi state changed action=" + intent.getAction());
         if (mWifiManager == null) {
             mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         }
 
-        SupplicantState state = intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
+        //TODO asyncTask to handle datebase updates
+        switch (intent.getAction()) {
+            case WifiManager.WIFI_STATE_CHANGED_ACTION:
+                int wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
+                switch (wifiState) {
+                    case WifiManager.WIFI_STATE_DISABLED:
 
-        //        boolean isConnected = intent.getBooleanExtra(WifiManager
-        // .EXTRA_SUPPLICANT_CONNECTED, false);
-        Log.d(TAG, "state " + state.toString());
-        switch (state) {
-            case COMPLETED:
-                Log.d(TAG, "Wifi Connected");
+                        break;
+                    case WifiManager.WIFI_STATE_ENABLED:
+                        Log.d(TAG, "wifiState = " + wifiState);
+                        break;
+
+                }
                 break;
+            case WifiManager.SUPPLICANT_STATE_CHANGED_ACTION:
+                SupplicantState state = intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
 
-            case DISCONNECTED:
-                Log.d(TAG, "Wifi DisConnected");
+                Log.d(TAG, "state " + state.toString());
+                switch (state) {
+                    case COMPLETED:
+                        Log.d(TAG, "Wifi Connected");
+                        // TODO update SavedWifi state in DB
+                        break;
+
+                    case DISCONNECTED:
+                        Log.d(TAG, "Wifi DisConnected");
+                        // TODO update SavedWifi state in DB
+                        break;
+                }
                 break;
         }
 
-        //        if (isConnected) {
-        //
-        //
-        //        } else {
-        //
-        //        }
+
     }
 }

@@ -3,14 +3,17 @@ package net.opencurlybraces.android.projects.wifihandler.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
-import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import net.opencurlybraces.android.projects.wifihandler.util.WifiUtils;
+import net.opencurlybraces.android.projects.wifihandler.data.table.ConfiguredWifi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,39 +25,50 @@ import java.util.List;
  */
 public class WifiScanResultsReceiver extends BroadcastReceiver {
     private static final String TAG = WifiScanResultsReceiver.class.getSimpleName();
-    WifiManager mWifiManager = null;
+    ConnectivityManager mConnectivityManager = null;
     private static final int SIGNAL_STRENGTH_THRESHOLD = -80;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (mWifiManager == null) {
-            mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+
+        if (mConnectivityManager == null) {
+            mConnectivityManager = (ConnectivityManager) context.getSystemService(Context
+                    .CONNECTIVITY_SERVICE);
+        }
+
+        NetworkInfo wifiInfo = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+        if (!wifiInfo.isConnectedOrConnecting()) {
+            new ScanResultAsyncHandler(context).execute();
         }
         Log.d(TAG, "SCAN_RESULTS received");
-        new ScanResultAsyncHandler(mWifiManager).execute();
+
+
     }
 
 
     /**
-     * First event on First application launch: - getConfiguredNetworks - insert configured
-     * networks
+     * First event on First application launch: - getConfiguredNetworks - insert configured networks
      * <p>TODO onconnected : - Update known networks Database - unregister on scanresult receiver
+     * <p/> TODO on disconnected : - register scanresultreceiver if no known networks in range,
+     * disable wifi adapter.</p> see http://stackoverflow.com/a/6362468/2445061
      * <p/>
-     * TODO on disconnected : - register scanresultreceiver if no known networks in range, disable
-     * wifi adapter.</p> see http://stackoverflow.com/a/6362468/2445061
-     *
-     * So with this algorithm no need to check for available networks and their signal strengh
-     *, which is a huge battery drainer, since on disconnection it means that the network is not
-     * in range anymore.
-     * TODO add a receiver for WIFI_AP_STATE_CHANGED set in sharedPreferences the state of the
-     * hotspot ap(active or not), at app first launch if active: ask user to disable hotspot.
+     * So with this algorithm no need to check for available networks and their signal strengh ,
+     * which is a huge battery drainer, since on disconnection it means that the network is not in
+     * range anymore. TODO add a receiver for WIFI_AP_STATE_CHANGED set in sharedPreferences the
+     * state of the hotspot ap(active or not), at app first launch if active: ask user to disable
+     * hotspot.
      */
     private static class ScanResultAsyncHandler extends AsyncTask<Void, Void, Void> {
 
         private WifiManager mWifiManager = null;
+        private final Context mContext;
 
-        private ScanResultAsyncHandler(WifiManager wifiManager) {
-            mWifiManager = wifiManager;
+        private static final String[] PROJECTION = new String[]{ConfiguredWifi.SSID};
+
+        private ScanResultAsyncHandler(final Context context) {
+            mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            mContext = context;
         }
 
         @Override
@@ -64,34 +78,54 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
         }
 
         private void handleScanResults() {
-            try {
-                List<ScanResult> availableWifiNetworks = mWifiManager
-                        .getScanResults();
-                // TODO replace this call with a database query
-                List<WifiConfiguration> configuredWifiNetworks = WifiUtils.getConfiguredWifis
-                        (mWifiManager);
 
-                if (configuredWifiNetworks == null || availableWifiNetworks == null) {
-                    return;
-                }
-                for (ScanResult wifiNetwork : availableWifiNetworks) {
-                    for (WifiConfiguration wifiConfig : configuredWifiNetworks) {
-                        String quoteStripped = wifiConfig.SSID.replace("\"", "");
-                        if (quoteStripped.equals(wifiNetwork.SSID)) {
-                            Log.d(TAG, "Signal Strength=" + wifiNetwork.level + " mSSID=" +
-                                    wifiNetwork
-                                            .SSID);
-                            if (wifiNetwork.level > SIGNAL_STRENGTH_THRESHOLD) {
-                                mWifiManager.setWifiEnabled(true);
-                            } else {
-                                mWifiManager.setWifiEnabled(false);
-                            }
+            List<ScanResult> availableWifiNetworks = mWifiManager
+                    .getScanResults();
+
+            List<String> savedSSIDs = querySavedSSID();
+            if (savedSSIDs == null || availableWifiNetworks == null) {
+                return;
+            }
+            for (ScanResult wifiNetwork : availableWifiNetworks) {
+                for (String savedWifi : savedSSIDs) {
+                    if (savedWifi.equals(wifiNetwork.SSID)) {
+                        Log.d(TAG, "Signal Strength=" + wifiNetwork.level + " mSSID=" +
+                                wifiNetwork
+                                        .SSID);
+                        if (wifiNetwork.level > SIGNAL_STRENGTH_THRESHOLD) {
+                            mWifiManager.setWifiEnabled(true);
+                            return;
+                        } else {
+                            mWifiManager.setWifiEnabled(false);
                         }
                     }
                 }
-            } catch (InterruptedException e) {
-                Log.d(TAG, "Could not retrieve user's configured networks");
             }
+        }
+
+        private List<String> querySavedSSID() {
+            List<String> savedSSIDs = null;
+            Cursor cursor = null;
+            try {
+                cursor = mContext.getContentResolver().query(ConfiguredWifi.CONTENT_URI
+                        , PROJECTION, null, null, null);
+                if (cursor != null) {
+                    int index = cursor.getColumnIndexOrThrow(ConfiguredWifi.SSID);
+                    savedSSIDs = new ArrayList<>(cursor.getCount());
+                    String ssid = null;
+                    while (cursor.moveToNext()) {
+                        ssid = cursor.getString(index);
+                        savedSSIDs.add(ssid);
+                    }
+                    cursor.close();
+                }
+            } catch (IllegalArgumentException e) {
+                if (cursor != null)
+                    cursor.close();
+
+                e.printStackTrace();
+            }
+            return savedSSIDs;
         }
 
 

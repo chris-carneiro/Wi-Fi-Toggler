@@ -15,5 +15,6 @@
     <string name="disable_action_title">Pause Wifi Handler</string>
     <string name="disable_notification_ticker_content">Wifi Handler is disabled</string>
     <string name="enable_notification_ticker_content">Wifi Handler is enabled</string>
+    <string name="connected_saved_wifi_status">Connected</string>
 
 </resources>
