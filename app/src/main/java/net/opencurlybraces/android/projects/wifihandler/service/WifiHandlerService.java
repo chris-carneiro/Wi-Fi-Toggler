@@ -37,12 +37,10 @@ public class WifiHandlerService extends Service {
             ".projects" +
             ".wifihandler.service.action.ACTION_HANDLE_PAUSE_WIFI_HANDLER";
 
-
     public static final String ACTION_HANDLE_ACTIVATE_WIFI_HANDLER = "net.opencurlybraces" +
             ".android" +
             ".projects" +
             ".wifihandler.service.action.ACTION_HANDLE_ACTIVATE_WIFI_HANDLER";
-
 
     /**
      * Intent actions reserved to notification actions
@@ -56,6 +54,16 @@ public class WifiHandlerService extends Service {
             ".android" +
             ".projects" +
             ".wifihandler.service.action.ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE";
+
+    public static final String ACTION_UNREGISTER_SCAN_RESULT_RECEIVER = "net.opencurlybraces" +
+            ".android" +
+            ".projects" +
+            ".wifihandler.service.action.ACTION_UNREGISTER_SCAN_RESULT_RECEIVER";
+
+    public static final String ACTION_REGISTER_SCAN_RESULT_RECEIVER = "net.opencurlybraces" +
+            ".android" +
+            ".projects" +
+            ".wifihandler.service.action.ACTION_REGISTER_SCAN_RESULT_RECEIVER";
 
     private WifiManager mWifiManager;
     private WifiScanResultsReceiver mWifiScanResultsReceiver = null;
@@ -71,14 +79,14 @@ public class WifiHandlerService extends Service {
         }
 
         registerScanResultReceiver();
-//        registerWifiStateReceiver();
+        //        registerWifiStateReceiver();
 
     }
 
     @Override
     public void onDestroy() {
         unregisterReceiver(mWifiScanResultsReceiver);
-//        unregisterReceiver(mWifiStateReceiver);
+        //        unregisterReceiver(mWifiStateReceiver);
 
     }
 
@@ -114,6 +122,13 @@ public class WifiHandlerService extends Service {
                 activateWifiHandler();
                 buildForegroundNotification();
                 break;
+            case ACTION_UNREGISTER_SCAN_RESULT_RECEIVER:
+                unregisterReceiver(mWifiScanResultsReceiver);
+                break;
+            case ACTION_REGISTER_SCAN_RESULT_RECEIVER:
+                registerScanResultReceiver();
+                break;
+
         }
 
         return START_NOT_STICKY;

@@ -73,21 +73,18 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
 
         @Override
         protected Void doInBackground(Void... params) {
-            handleScanResults();
+            handleScanResults(mWifiManager.getScanResults());
             return null;
         }
 
-        private void handleScanResults() {
+        private void handleScanResults(List<ScanResult> availableWifiNetworks) {
+            List<String> savedSSIDsFromDb = getSavedSSIDsFromDB();
 
-            List<ScanResult> availableWifiNetworks = mWifiManager
-                    .getScanResults();
-
-            List<String> savedSSIDs = querySavedSSID();
-            if (savedSSIDs == null || availableWifiNetworks == null) {
+            if (savedSSIDsFromDb == null || availableWifiNetworks == null) {
                 return;
             }
             for (ScanResult wifiNetwork : availableWifiNetworks) {
-                for (String savedWifi : savedSSIDs) {
+                for (String savedWifi : savedSSIDsFromDb) {
                     if (savedWifi.equals(wifiNetwork.SSID)) {
                         Log.d(TAG, "Signal Strength=" + wifiNetwork.level + " mSSID=" +
                                 wifiNetwork
@@ -103,7 +100,7 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             }
         }
 
-        private List<String> querySavedSSID() {
+        private List<String> getSavedSSIDsFromDB() {
             List<String> savedSSIDs = null;
             Cursor cursor = null;
             try {
@@ -122,7 +119,6 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             } catch (IllegalArgumentException e) {
                 if (cursor != null)
                     cursor.close();
-
                 e.printStackTrace();
             }
             return savedSSIDs;

@@ -3,9 +3,12 @@ package net.opencurlybraces.android.projects.wifihandler.service;
 import android.app.IntentService;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.OperationApplicationException;
+import android.database.Cursor;
+import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.RemoteException;
@@ -13,6 +16,7 @@ import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifihandler.data.provider.WifiHandlerContract;
 import net.opencurlybraces.android.projects.wifihandler.data.table.ConfiguredWifi;
+import net.opencurlybraces.android.projects.wifihandler.receiver.WifiStateReceiver;
 import net.opencurlybraces.android.projects.wifihandler.util.WifiUtils;
 
 import java.util.ArrayList;
@@ -33,6 +37,8 @@ public class ContentIntentService extends IntentService {
 
     public static final String ACTION_HANDLE_SAVED_WIFI_UPDATE = SERVICE_ACTION_PREFIX +
             "ACTION_HANDLE_SAVED_WIFI_UPDATE";
+
+    private static final String[] PROJECTION = new String[]{ConfiguredWifi._ID, ConfiguredWifi.SSID};
 
     private WifiManager mWifiManager;
 
@@ -66,7 +72,9 @@ public class ContentIntentService extends IntentService {
                 handleUserWifiInsert();
                 break;
             case ACTION_HANDLE_SAVED_WIFI_UPDATE:
-
+                String ssid = intent.getStringExtra(WifiStateReceiver.EXTRA_CURRENT_SSID);
+                int newState = intent.getIntExtra(WifiStateReceiver.EXTRA_SAVED_WIFI_NEW_STATE, -1);
+                updateSavedWifiStatus(ssid, newState);
                 break;
 
         }
@@ -96,11 +104,39 @@ public class ContentIntentService extends IntentService {
                             .AUTHORITY,
                     (ArrayList<ContentProviderOperation>) batch);
             Log.d(TAG, "ContentProviderResult=" + (results != null ? results.length : 0));
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (OperationApplicationException e) {
+        } catch (RemoteException | OperationApplicationException e) {
             e.printStackTrace();
         }
     }
 
+
+    private void updateSavedWifiStatus(String ssid, int newState) {
+
+        String rowId = getSavedIdForSSID(ssid);
+        Uri uri = ConfiguredWifi.buildConfiguredWifiUri(rowId);
+
+        ContentValues value = new ContentValues(1);
+        value.put(ConfiguredWifi.STATUS, newState);
+        getContentResolver().update(uri, value, ConfiguredWifi
+                ._ID + "=?", new String[]{rowId});
+
+    }
+
+
+    private String getSavedIdForSSID(String savedSSID) {
+        Cursor c = getContentResolver().query(ConfiguredWifi.CONTENT_URI, PROJECTION,
+                ConfiguredWifi.SSID + "=?",
+                new String[]{savedSSID}, null);
+        String rowId = null;
+        if (c != null) {
+            if (c.getCount() > 1) {
+                return null;
+            }
+            if (c.moveToFirst()) {
+                rowId = c.getString(0);
+                c.close();
+            }
+        }
+        return rowId;
+    }
 }
