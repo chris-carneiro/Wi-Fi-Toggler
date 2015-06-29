@@ -35,6 +35,20 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
     }
 
 
+    /**
+     * First event on First application launch: - getConfiguredNetworks - insert configured
+     * networks
+     * <p>TODO onconnected : - Update known networks Database - unregister on scanresult receiver
+     * <p/>
+     * TODO on disconnected : - register scanresultreceiver if no known networks in range, disable
+     * wifi adapter.</p> see http://stackoverflow.com/a/6362468/2445061
+     *
+     * So with this algorithm no need to check for available networks and their signal strengh
+     *, which is a huge battery drainer, since on disconnection it means that the network is not
+     * in range anymore.
+     * TODO add a receiver for WIFI_AP_STATE_CHANGED set in sharedPreferences the state of the
+     * hotspot ap(active or not), at app first launch if active: ask user to disable hotspot.
+     */
     private static class ScanResultAsyncHandler extends AsyncTask<Void, Void, Void> {
 
         private WifiManager mWifiManager = null;
@@ -53,6 +67,7 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             try {
                 List<ScanResult> availableWifiNetworks = mWifiManager
                         .getScanResults();
+                // TODO replace this call with a database query
                 List<WifiConfiguration> configuredWifiNetworks = WifiUtils.getConfiguredWifis
                         (mWifiManager);
 
@@ -63,7 +78,7 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
                     for (WifiConfiguration wifiConfig : configuredWifiNetworks) {
                         String quoteStripped = wifiConfig.SSID.replace("\"", "");
                         if (quoteStripped.equals(wifiNetwork.SSID)) {
-                            Log.d(TAG, "Signal Strength=" + wifiNetwork.level + " SSID=" +
+                            Log.d(TAG, "Signal Strength=" + wifiNetwork.level + " mSSID=" +
                                     wifiNetwork
                                             .SSID);
                             if (wifiNetwork.level > SIGNAL_STRENGTH_THRESHOLD) {

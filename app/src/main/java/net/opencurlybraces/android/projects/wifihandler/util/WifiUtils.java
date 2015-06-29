@@ -41,6 +41,7 @@ public class WifiUtils {
     public static List<WifiConfiguration> getConfiguredWifis(final WifiManager
                                                                      wifiManager) throws
             InterruptedException {
+
         Log.d(TAG, "getConfiguredWifis");
         List<WifiConfiguration> configuredWifis = null;
 

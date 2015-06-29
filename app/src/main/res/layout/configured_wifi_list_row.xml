@@ -13,7 +13,7 @@
         />
 
     <TextView
-        android:id="@+id/configured_wifi_active_state"
+        android:id="@+id/configured_wifi_state"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignStart="@id/configured_wifi_ssid"

@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
@@ -17,6 +18,7 @@ import android.util.Log;
 import net.opencurlybraces.android.projects.wifihandler.ConfiguredWifiListActivity;
 import net.opencurlybraces.android.projects.wifihandler.R;
 import net.opencurlybraces.android.projects.wifihandler.receiver.WifiScanResultsReceiver;
+import net.opencurlybraces.android.projects.wifihandler.receiver.WifiStateReceiver;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 
 /**
@@ -57,6 +59,7 @@ public class WifiHandlerService extends Service {
 
     private WifiManager mWifiManager;
     private WifiScanResultsReceiver mWifiScanResultsReceiver = null;
+    private WifiStateReceiver mWifiStateReceiver = null;
     private static final int NOTIFICATION_ID = 100;
 
     @Override
@@ -68,14 +71,15 @@ public class WifiHandlerService extends Service {
         }
 
         registerScanResultReceiver();
+//        registerWifiStateReceiver();
 
     }
 
     @Override
     public void onDestroy() {
-        if (mWifiScanResultsReceiver != null) {
-            unregisterReceiver(mWifiScanResultsReceiver);
-        }
+        unregisterReceiver(mWifiScanResultsReceiver);
+//        unregisterReceiver(mWifiStateReceiver);
+
     }
 
     @Override
@@ -123,6 +127,13 @@ public class WifiHandlerService extends Service {
         registerReceiver(mWifiScanResultsReceiver, wifiScanFilter);
     }
 
+    private void registerWifiStateReceiver() {
+        IntentFilter wifiStateFilter = new IntentFilter();
+        wifiStateFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        mWifiStateReceiver = new WifiStateReceiver();
+        registerReceiver(mWifiStateReceiver, wifiStateFilter);
+    }
+
     private void sendLocalBroadcastAction(String action) {
         Intent switchIntent = new Intent();
         switchIntent.setAction(action);
@@ -152,7 +163,8 @@ public class WifiHandlerService extends Service {
 
         NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(this)
                 .setContentTitle(res.getString(R.string.app_name))
-                .setContentText(res.getString(R.string.paused_wifi_handler_notification_context_title))
+                .setContentText(res.getString(R.string
+                        .paused_wifi_handler_notification_context_title))
                 .setTicker(res.getString(R.string.disable_notification_ticker_content))
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentIntent(intent);
@@ -178,7 +190,8 @@ public class WifiHandlerService extends Service {
 
         NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(this)
                 .setContentTitle(res.getString(R.string.app_name))
-                .setContentText(res.getString(R.string.active_wifi_handler_notification_context_title))
+                .setContentText(res.getString(R.string
+                        .active_wifi_handler_notification_context_title))
                 .setTicker(res.getString(R.string.enable_notification_ticker_content))
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentIntent(intent);

@@ -27,7 +27,7 @@ public class ConfiguredWifiListAdapter extends BaseAdapter {
 
     static class ViewHolder {
         TextView ssid;
-        TextView active;
+        TextView connected;
     }
 
     @Override
@@ -60,8 +60,8 @@ public class ConfiguredWifiListAdapter extends BaseAdapter {
              **/
             viewHolder.ssid = (TextView) convertView
                     .findViewById(R.id.configured_wifi_ssid);
-            viewHolder.active = (TextView) convertView
-                    .findViewById(R.id.configured_wifi_active_state);
+            viewHolder.connected = (TextView) convertView
+                    .findViewById(R.id.configured_wifi_state);
 
             /** Set the reference of the viewHolder on the Item **/
             convertView.setTag(viewHolder);
@@ -73,16 +73,16 @@ public class ConfiguredWifiListAdapter extends BaseAdapter {
         Resources res = convertView.getContext().getResources();
 
         UserWifi userWifi = getItem(position);
-        viewHolder.ssid.setText(userWifi.SSID);
+        viewHolder.ssid.setText(userWifi.mSSID);
 
-        String isActive = (userWifi.mActive ? "Connected" : "");
-        if (userWifi.mActive) {
-            viewHolder.active.setTextColor(res.getColor(android.R.color.holo_green_dark));
-            viewHolder.active.setVisibility(View.VISIBLE);
+        String isConnected = (userWifi.mConnected ? "Connected" : "");
+        if (userWifi.mConnected) {
+            viewHolder.connected.setTextColor(res.getColor(android.R.color.holo_green_dark));
+            viewHolder.connected.setVisibility(View.VISIBLE);
         } else {
-            viewHolder.active.setVisibility(View.GONE);
+            viewHolder.connected.setVisibility(View.GONE);
         }
-        viewHolder.active.setText(isActive);
+        viewHolder.connected.setText(isConnected);
 
         return convertView;
     }

@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Switch;
@@ -38,8 +39,9 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
     private ListView mWifiHandlerWifiList = null;
     private TextView mEmptyView = null;
 
-    //    private ArrayAdapter<UserWifi> mConfiguredWifiAdapter = null;
-    private ConfiguredWifiListAdapter mConfiguredWifiAdapter = null;
+
+    private ArrayAdapter<UserWifi> mConfiguredWifiAdapter = null;
+//    private ConfiguredWifiListAdapter mConfiguredWifiAdapter = null;
 
 
     @Override
@@ -184,11 +186,11 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
     }
 
     private void setListViewData(List<UserWifi> userWifis) {
-        //        mConfiguredWifiAdapter = new ArrayAdapter<>(this, R.layout
-        //                .configured_wifi_list_row, R.id.configured_wifi_ssid,
-        //                userWifiConfigurations);
+        mConfiguredWifiAdapter = new ArrayAdapter<>(this, R.layout
+                .configured_wifi_list_row, R.id.configured_wifi_ssid,
+                userWifis);
 
-        mConfiguredWifiAdapter = new ConfiguredWifiListAdapter(userWifis);
+//        mConfiguredWifiAdapter = new ConfiguredWifiListAdapter(userWifis);
 
         mWifiHandlerWifiList.setAdapter(mConfiguredWifiAdapter);
         mWifiHandlerWifiList.setEmptyView(mEmptyView);
@@ -228,8 +230,8 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
                 for (WifiConfiguration config : wifiConfigurations) {
 
                     UserWifi userWifi = new UserWifi();
-                    userWifi.SSID = config.SSID.replace("\"", "");
-                    userWifi.mActive = config.status == WifiConfiguration.Status.CURRENT;
+                    userWifi.mSSID = config.SSID.replace("\"", "");
+                    userWifi.mConnected = config.status == WifiConfiguration.Status.CURRENT;
                     userWifis.add(userWifi);
                 }
             } catch (InterruptedException e) {
