@@ -4,19 +4,20 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.wifi.WifiConfiguration;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
-import net.opencurlybraces.android.projects.wifihandler.data.table.ConfiguredWifi;
+import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
 
 /**
  * Created by chris on 13/06/15.
  */
 public class SavedWifiListAdapter extends CursorAdapter {
-
+    private static final String TAG = "SavedWifiListAdapter";
 
     final LayoutInflater mLayoutInflater;
 
@@ -81,10 +82,10 @@ public class SavedWifiListAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-
+        Log.d(TAG, "bindView");
         Resources res = context.getResources();
-        int ssidColumnIndex = cursor.getColumnIndexOrThrow(ConfiguredWifi.SSID);
-        int statusColumnIndex = cursor.getColumnIndexOrThrow(ConfiguredWifi.STATUS);
+        int ssidColumnIndex = cursor.getColumnIndexOrThrow(SavedWifi.SSID);
+        int statusColumnIndex = cursor.getColumnIndexOrThrow(SavedWifi.STATUS);
 
         String ssidValue = cursor.getString(ssidColumnIndex);
         int status = cursor.getInt(statusColumnIndex);

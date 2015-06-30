@@ -8,17 +8,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
-import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import net.opencurlybraces.android.projects.wifihandler.ConfiguredWifiListActivity;
 import net.opencurlybraces.android.projects.wifihandler.R;
+import net.opencurlybraces.android.projects.wifihandler.SavedWifiListActivity;
 import net.opencurlybraces.android.projects.wifihandler.receiver.WifiScanResultsReceiver;
-import net.opencurlybraces.android.projects.wifihandler.receiver.WifiStateReceiver;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 
 /**
@@ -55,23 +53,13 @@ public class WifiHandlerService extends Service {
             ".projects" +
             ".wifihandler.service.action.ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE";
 
-    public static final String ACTION_UNREGISTER_SCAN_RESULT_RECEIVER = "net.opencurlybraces" +
-            ".android" +
-            ".projects" +
-            ".wifihandler.service.action.ACTION_UNREGISTER_SCAN_RESULT_RECEIVER";
-
-    public static final String ACTION_REGISTER_SCAN_RESULT_RECEIVER = "net.opencurlybraces" +
-            ".android" +
-            ".projects" +
-            ".wifihandler.service.action.ACTION_REGISTER_SCAN_RESULT_RECEIVER";
-
     private WifiManager mWifiManager;
     private WifiScanResultsReceiver mWifiScanResultsReceiver = null;
-    private WifiStateReceiver mWifiStateReceiver = null;
     private static final int NOTIFICATION_ID = 100;
 
     @Override
     public void onCreate() {
+        Log.d(TAG, "OnCreate");
         super.onCreate();
         if (mWifiManager == null) {
             mWifiManager = (WifiManager) getSystemService(Context
@@ -79,15 +67,12 @@ public class WifiHandlerService extends Service {
         }
 
         registerScanResultReceiver();
-        //        registerWifiStateReceiver();
-
     }
 
     @Override
     public void onDestroy() {
+        Log.d(TAG, "OnDestroy");
         unregisterReceiver(mWifiScanResultsReceiver);
-        //        unregisterReceiver(mWifiStateReceiver);
-
     }
 
     @Override
@@ -122,12 +107,6 @@ public class WifiHandlerService extends Service {
                 activateWifiHandler();
                 buildForegroundNotification();
                 break;
-            case ACTION_UNREGISTER_SCAN_RESULT_RECEIVER:
-                unregisterReceiver(mWifiScanResultsReceiver);
-                break;
-            case ACTION_REGISTER_SCAN_RESULT_RECEIVER:
-                registerScanResultReceiver();
-                break;
 
         }
 
@@ -136,18 +115,13 @@ public class WifiHandlerService extends Service {
     }
 
     private void registerScanResultReceiver() {
+        Log.d(TAG, "registerScanResultReceiver");
         IntentFilter wifiScanFilter = new IntentFilter();
         wifiScanFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         mWifiScanResultsReceiver = new WifiScanResultsReceiver();
         registerReceiver(mWifiScanResultsReceiver, wifiScanFilter);
     }
 
-    private void registerWifiStateReceiver() {
-        IntentFilter wifiStateFilter = new IntentFilter();
-        wifiStateFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        mWifiStateReceiver = new WifiStateReceiver();
-        registerReceiver(mWifiStateReceiver, wifiStateFilter);
-    }
 
     private void sendLocalBroadcastAction(String action) {
         Intent switchIntent = new Intent();
@@ -169,7 +143,7 @@ public class WifiHandlerService extends Service {
         NotificationManager notifManager = (NotificationManager) getSystemService(Context
                 .NOTIFICATION_SERVICE);
         Resources res = getResources();
-        Intent notificationIntent = new Intent(this, ConfiguredWifiListActivity.class);
+        Intent notificationIntent = new Intent(this, SavedWifiListActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
@@ -196,7 +170,7 @@ public class WifiHandlerService extends Service {
     private void buildForegroundNotification() {
         Resources res = getResources();
 
-        Intent notificationIntent = new Intent(this, ConfiguredWifiListActivity.class);
+        Intent notificationIntent = new Intent(this, SavedWifiListActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 

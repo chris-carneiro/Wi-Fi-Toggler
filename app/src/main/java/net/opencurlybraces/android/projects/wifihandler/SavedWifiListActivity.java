@@ -20,24 +20,19 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import net.opencurlybraces.android.projects.wifihandler.data.model.UserWifi;
-import net.opencurlybraces.android.projects.wifihandler.data.table.ConfiguredWifi;
+import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifihandler.service.ContentIntentService;
 import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.StartupUtils;
-import net.opencurlybraces.android.projects.wifihandler.util.WifiUtils;
-
-import java.util.List;
 
 
-public class ConfiguredWifiListActivity extends AppCompatActivity implements
-        CompoundButton.OnCheckedChangeListener, WifiUtils.UserWifiConfigurationLoadedListener,
+public class SavedWifiListActivity extends AppCompatActivity implements
+        CompoundButton.OnCheckedChangeListener,
         LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final String TAG = "ConfiguredWifiList";
+    private static final String TAG = "SavedWifiList";
 
     private TextView mWifiHandlerSwitchLabel = null;
     private Switch mWifiHandlerActivationSwitch = null;
@@ -154,10 +149,10 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
 
     private void handleNotification(boolean isChecked) {
         if (isChecked) {
-            Intent startForgroundNotificationIntent = new Intent(this, WifiHandlerService.class);
-            startForgroundNotificationIntent.setAction(WifiHandlerService
+            Intent startForegroundNotificationIntent = new Intent(this, WifiHandlerService.class);
+            startForegroundNotificationIntent.setAction(WifiHandlerService
                     .ACTION_HANDLE_ACTIVATE_WIFI_HANDLER);
-            startService(startForgroundNotificationIntent);
+            startService(startForegroundNotificationIntent);
         } else {
             Intent dismissableNotificationIntent = new Intent(this, WifiHandlerService.class);
             dismissableNotificationIntent.setAction(WifiHandlerService
@@ -186,14 +181,6 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
         }
     }
 
-    @Override
-    public void onUserWifiConfigurationLoaded(List<UserWifi> userWifiConfigurations) {
-        if (userWifiConfigurations == null) {
-            mWifiHandlerActivationSwitch.setChecked(false);
-            askUserCheckHotspot();
-            return;
-        }
-    }
 
     private void loadSavedWifiIntoDatabase() {
         Intent handleSavedWifiInsert = new Intent(this, ContentIntentService.class);
@@ -201,17 +188,12 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
         this.startService(handleSavedWifiInsert);
     }
 
-    private void askUserCheckHotspot() {
-        Toast.makeText(this, "WifiConfigurations could not be retrieved, please disable any " +
-                "hotspot or tethering mode and retry", Toast
-                .LENGTH_LONG).show();
-    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String[] projection = {ConfiguredWifi._ID, ConfiguredWifi.SSID, ConfiguredWifi.STATUS};
+        String[] projection = {SavedWifi._ID, SavedWifi.SSID, SavedWifi.STATUS};
         CursorLoader cursorLoader = new CursorLoader(this,
-                ConfiguredWifi.CONTENT_URI, projection, null, null, null);
+                SavedWifi.CONTENT_URI, projection, null, null, null);
         return cursorLoader;
     }
 
@@ -233,7 +215,7 @@ public class ConfiguredWifiListActivity extends AppCompatActivity implements
     private CursorAdapter initAdapter() {
         Log.d(TAG, "initAdapter");
         // Must include the _id column for the adapter to work
-        String[] from = new String[]{ConfiguredWifi.SSID, ConfiguredWifi.STATUS};
+        String[] from = new String[]{SavedWifi.SSID, SavedWifi.STATUS};
         // Fields on the UI to which we map
         int[] to = new int[]{R.id.configured_wifi_ssid, R.id.configured_wifi_state};
 

@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import net.opencurlybraces.android.projects.wifihandler.data.table.ConfiguredWifi;
+import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
 
 /**
  * Created by chris on 03/06/15.
@@ -26,11 +26,11 @@ public class WifiHandlerDatabase extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        ConfiguredWifi.createTable(db);
+        SavedWifi.createTable(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        ConfiguredWifi.upgrade(db, oldVersion, newVersion);
+        SavedWifi.upgrade(db, oldVersion, newVersion);
     }
 }

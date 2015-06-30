@@ -23,11 +23,11 @@ import java.util.List;
  * <p/>
  * Created by chris on 08/06/15.
  */
-public class ConfiguredWifi implements BaseColumns {
+public class SavedWifi implements BaseColumns {
 
-    private static final String TAG = "ConfiguredWifi";
+    private static final String TAG = "SavedWifi";
 
-    private ConfiguredWifi() {
+    private SavedWifi() {
     }
 
     public static final String TABLE = "configured_wifis";
@@ -68,7 +68,7 @@ public class ConfiguredWifi implements BaseColumns {
 
 
     // Database creation SQL statement
-    private static final String CREATE_TABLE = "CREATE TABLE " + ConfiguredWifi.TABLE + " ("
+    private static final String CREATE_TABLE = "CREATE TABLE " + SavedWifi.TABLE + " ("
             + _ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             + SSID + " TEXT NOT NULL DEFAULT UNKNOWN,"
             + AUTO_TOGGLE + " INTEGER NOT NULL DEFAULT 0,"
@@ -82,7 +82,7 @@ public class ConfiguredWifi implements BaseColumns {
 
 
     /**
-     * Creates the table using {@link ConfiguredWifi} fields as columns
+     * Creates the table using {@link SavedWifi} fields as columns
      *
      * @param database
      */
@@ -125,7 +125,7 @@ public class ConfiguredWifi implements BaseColumns {
 
 
     /**
-     * Build {@link Uri} for requested {@code ConfiguredWifi} {@link #_ID}.
+     * Build {@link Uri} for requested {@code SavedWifi} {@link #_ID}.
      */
     public static Uri buildConfiguredWifiUri(String configuredWifiId) {
         if (TextUtils.isEmpty(configuredWifiId)) {
@@ -162,14 +162,14 @@ public class ConfiguredWifi implements BaseColumns {
 
     private static ContentValues buildDefaultWifiContentValues(WifiConfiguration wifi) {
         ContentValues values = new ContentValues();
-        values.put(ConfiguredWifi.SSID, wifi.SSID.replace("\"",""));
-        values.put(ConfiguredWifi.AUTO_TOGGLE, 0);
-        values.put(ConfiguredWifi.OPEN_WIFI, 0);
-        values.put(ConfiguredWifi.PREFERRED, 0);
-        values.put(ConfiguredWifi.BOOSTED, 0);
-        values.put(ConfiguredWifi.IN_RANGE, 0);
-        values.put(ConfiguredWifi.LOCKED, 0);
-        values.put(ConfiguredWifi.STATUS, wifi.status);
+        values.put(SavedWifi.SSID, wifi.SSID.replace("\"",""));
+        values.put(SavedWifi.AUTO_TOGGLE, 0);
+        values.put(SavedWifi.OPEN_WIFI, 0);
+        values.put(SavedWifi.PREFERRED, 0);
+        values.put(SavedWifi.BOOSTED, 0);
+        values.put(SavedWifi.IN_RANGE, 0);
+        values.put(SavedWifi.LOCKED, 0);
+        values.put(SavedWifi.STATUS, wifi.status);
         return values;
     }
 

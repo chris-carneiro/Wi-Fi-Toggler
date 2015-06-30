@@ -1,12 +1,9 @@
 package net.opencurlybraces.android.projects.wifihandler.util;
 
-import android.content.Context;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
-import net.opencurlybraces.android.projects.wifihandler.data.model.UserWifi;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -20,12 +17,6 @@ public class WifiUtils {
     }
 
     private static final String TAG = "WifiUtils";
-
-    public static boolean isWiFiEnabled(final Context context) {
-        final WifiManager wifiManager =
-                (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        return wifiManager.isWifiEnabled();
-    }
 
     /**
      * Helper method to request from the system, user's configured Wifis. Should be executed on a
@@ -114,13 +105,6 @@ public class WifiUtils {
         }
         return false;
     }
-
-    public interface UserWifiConfigurationLoadedListener {
-
-        void onUserWifiConfigurationLoaded(List<UserWifi> userWifiConfigurations);
-    }
-
-
 }
 
 

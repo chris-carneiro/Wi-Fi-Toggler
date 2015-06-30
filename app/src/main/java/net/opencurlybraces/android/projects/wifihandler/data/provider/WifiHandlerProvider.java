@@ -3,7 +3,6 @@ package net.opencurlybraces.android.projects.wifihandler.data.provider;
 import android.content.ContentProvider;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.OperationApplicationException;
 import android.content.UriMatcher;
@@ -15,7 +14,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
-import net.opencurlybraces.android.projects.wifihandler.data.table.ConfiguredWifi;
+import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
 
 import java.util.ArrayList;
 
@@ -36,10 +35,10 @@ public class WifiHandlerProvider extends ContentProvider {
     static {
         sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-        sURIMatcher.addURI(WifiHandlerContract.AUTHORITY, ConfiguredWifi
+        sURIMatcher.addURI(WifiHandlerContract.AUTHORITY, SavedWifi
                         .PATH_CONFIGURED_WIFIS,
                 CONFIGURED_WIFIS);
-        sURIMatcher.addURI(WifiHandlerContract.AUTHORITY, ConfiguredWifi
+        sURIMatcher.addURI(WifiHandlerContract.AUTHORITY, SavedWifi
                         .PATH_CONFIGURED_WIFIS +
                         "/#",
                 CONFIGURED_WIFI_ID);
@@ -57,9 +56,9 @@ public class WifiHandlerProvider extends ContentProvider {
 
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 
-        ConfiguredWifi.checkColumns(projection);
+        SavedWifi.checkColumns(projection);
 
-        queryBuilder.setTables(ConfiguredWifi.TABLE);
+        queryBuilder.setTables(SavedWifi.TABLE);
 
         switch (sURIMatcher.match(uri)) {
 
@@ -67,7 +66,7 @@ public class WifiHandlerProvider extends ContentProvider {
                 break;
             case CONFIGURED_WIFI_ID:
                 // adding the ID to the original query
-                queryBuilder.appendWhere(ConfiguredWifi._ID + "="
+                queryBuilder.appendWhere(SavedWifi._ID + "="
                         + uri.getLastPathSegment());
                 break;
             default:
@@ -107,9 +106,9 @@ public class WifiHandlerProvider extends ContentProvider {
         switch (sURIMatcher.match(uri)) {
             // If the pattern is for notes or live folders, returns the general content type.
             case CONFIGURED_WIFIS:
-                return ConfiguredWifi.CONTENT_TYPE;
+                return SavedWifi.CONTENT_TYPE;
             case CONFIGURED_WIFI_ID:
-                return ConfiguredWifi.CONTENT_ITEM_TYPE;
+                return SavedWifi.CONTENT_ITEM_TYPE;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -123,7 +122,7 @@ public class WifiHandlerProvider extends ContentProvider {
         Log.d(TAG, "Match result=" + result);
         switch (result) {
             case CONFIGURED_WIFIS:
-                rowId = database.insert(ConfiguredWifi.TABLE, null, values);
+                rowId = database.insert(SavedWifi.TABLE, null, values);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
@@ -131,7 +130,7 @@ public class WifiHandlerProvider extends ContentProvider {
 
         // If the insert succeeded, the row ID > 0.
         if (rowId > 0) {
-            Uri noteUri = ConfiguredWifi.buildConfiguredWifiUri(String.valueOf(rowId));
+            Uri noteUri = SavedWifi.buildConfiguredWifiUri(String.valueOf(rowId));
 
             getContext().getContentResolver().notifyChange(uri, null);
             return noteUri;
@@ -152,7 +151,7 @@ public class WifiHandlerProvider extends ContentProvider {
         int updatedRows = 0;
         switch (sURIMatcher.match(uri)) {
             case CONFIGURED_WIFIS:
-                updatedRows = sqlDB.update(ConfiguredWifi.TABLE,
+                updatedRows = sqlDB.update(SavedWifi.TABLE,
                         values,
                         selection,
                         selectionArgs);
@@ -160,14 +159,14 @@ public class WifiHandlerProvider extends ContentProvider {
             case CONFIGURED_WIFI_ID:
                 String id = uri.getLastPathSegment();
                 if (TextUtils.isEmpty(selection)) {
-                    updatedRows = sqlDB.update(ConfiguredWifi.TABLE,
+                    updatedRows = sqlDB.update(SavedWifi.TABLE,
                             values,
-                            ConfiguredWifi._ID + "=" + id,
+                            SavedWifi._ID + "=" + id,
                             null);
                 } else {
-                    updatedRows = sqlDB.update(ConfiguredWifi.TABLE,
+                    updatedRows = sqlDB.update(SavedWifi.TABLE,
                             values,
-                            ConfiguredWifi._ID + "=" + id
+                            SavedWifi._ID + "=" + id
                                     + " AND "
                                     + selection,
                             selectionArgs);

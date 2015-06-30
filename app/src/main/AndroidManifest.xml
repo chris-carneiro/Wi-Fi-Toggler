@@ -16,7 +16,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ConfiguredWifiListActivity"
+            android:name=".SavedWifiListActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/app_name"
             android:launchMode="singleTask">
@@ -37,10 +37,7 @@
         <service
             android:name=".service.ContentIntentService"
             android:exported="false">
-            <intent-filter>
-                <action android:name="net.opencurlybraces.android.projects.wifihandler.service.ACTION_HANDLE_SAVED_WIFI_INSERT"/>
-                <action android:name="net.opencurlybraces.android.projects.wifihandler.service.ACTION_HANDLE_SAVED_WIFI_UPDATE"/>
-            </intent-filter>
+
         </service>
 
         <receiver android:name=".receiver.WifiStateReceiver">
@@ -48,16 +45,11 @@
                 <action android:name="android.net.wifi.WIFI_STATE_CHANGED"/>
             </intent-filter>
         </receiver>
-        <receiver android:name=".receiver.WifiSupplicantState">
+        <receiver android:name=".receiver.WifiSupplicantStateReceiver">
             <intent-filter>
                 <action android:name="android.net.wifi.supplicant.STATE_CHANGE"/>"
             </intent-filter>
         </receiver>
-        <!--<service-->
-        <!--android:name=".service.ScanResultHandlerService"-->
-        <!--android:enabled="true"-->
-        <!--android:exported="false">-->
-        <!--</service>-->
 
         <provider
             android:name=".data.provider.WifiHandlerProvider"
