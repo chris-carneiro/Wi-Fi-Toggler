@@ -17,6 +17,7 @@ import android.util.Log;
 import net.opencurlybraces.android.projects.wifihandler.data.provider.WifiHandlerContract;
 import net.opencurlybraces.android.projects.wifihandler.data.table.ConfiguredWifi;
 import net.opencurlybraces.android.projects.wifihandler.receiver.WifiStateReceiver;
+import net.opencurlybraces.android.projects.wifihandler.receiver.WifiSupplicantState;
 import net.opencurlybraces.android.projects.wifihandler.util.WifiUtils;
 
 import java.util.ArrayList;
@@ -35,10 +36,14 @@ public class ContentIntentService extends IntentService {
     public static final String ACTION_HANDLE_SAVED_WIFI_INSERT = SERVICE_ACTION_PREFIX +
             "ACTION_HANDLE_SAVED_WIFI_INSERT";
 
-    public static final String ACTION_HANDLE_SAVED_WIFI_UPDATE = SERVICE_ACTION_PREFIX +
-            "ACTION_HANDLE_SAVED_WIFI_UPDATE";
+    public static final String ACTION_HANDLE_SAVED_WIFI_UPDATE_CONNECT = SERVICE_ACTION_PREFIX +
+            "ACTION_HANDLE_SAVED_WIFI_UPDATE_CONNECT";
 
-    private static final String[] PROJECTION = new String[]{ConfiguredWifi._ID, ConfiguredWifi.SSID};
+    public static final String ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT = SERVICE_ACTION_PREFIX +
+            "ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT";
+
+    private static final String[] PROJECTION = new String[]{ConfiguredWifi._ID, ConfiguredWifi
+            .SSID};
 
     private WifiManager mWifiManager;
 
@@ -66,17 +71,22 @@ public class ContentIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        Log.d(TAG, "Intent action=" + (intent != null ? intent.getAction() : null));
+        if (intent == null) return;
 
         switch (intent.getAction()) {
             case ACTION_HANDLE_SAVED_WIFI_INSERT:
                 handleUserWifiInsert();
                 break;
-            case ACTION_HANDLE_SAVED_WIFI_UPDATE:
-                String ssid = intent.getStringExtra(WifiStateReceiver.EXTRA_CURRENT_SSID);
+            case ACTION_HANDLE_SAVED_WIFI_UPDATE_CONNECT:
+                String ssid = intent.getStringExtra(WifiSupplicantState.EXTRA_CURRENT_SSID);
                 int newState = intent.getIntExtra(WifiStateReceiver.EXTRA_SAVED_WIFI_NEW_STATE, -1);
                 updateSavedWifiStatus(ssid, newState);
                 break;
-
+            case ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT:
+                int state = intent.getIntExtra(WifiStateReceiver.EXTRA_SAVED_WIFI_NEW_STATE, -1);
+                updateSavedWifiStatus(state);
+                break;
         }
     }
 
@@ -122,6 +132,34 @@ public class ContentIntentService extends IntentService {
 
     }
 
+    private void updateSavedWifiStatus(int newState) {
+        String rowId = getConnectedWifiRowId();
+        Uri uri = ConfiguredWifi.buildConfiguredWifiUri(rowId);
+
+        ContentValues value = new ContentValues(1);
+        value.put(ConfiguredWifi.STATUS, newState);
+        getContentResolver().update(uri, value, ConfiguredWifi
+                ._ID + "=?", new String[]{rowId});
+    }
+
+    //TODO use query builder decrease redundancy
+    private String getConnectedWifiRowId() {
+
+        Cursor c = getContentResolver().query(ConfiguredWifi.CONTENT_URI, PROJECTION,
+                ConfiguredWifi.STATUS + "=?",
+                new String[]{String.valueOf(WifiConfiguration.Status.CURRENT)}, null);
+        String rowId = null;
+        if (c != null) {
+            if (c.getCount() > 1) {
+                return null;
+            }
+            if (c.moveToFirst()) {
+                rowId = c.getString(0);
+                c.close();
+            }
+        }
+        return rowId;
+    }
 
     private String getSavedIdForSSID(String savedSSID) {
         Cursor c = getContentResolver().query(ConfiguredWifi.CONTENT_URI, PROJECTION,
@@ -139,4 +177,6 @@ public class ContentIntentService extends IntentService {
         }
         return rowId;
     }
+
+
 }
