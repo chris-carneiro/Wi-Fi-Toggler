@@ -12,7 +12,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
 
@@ -119,7 +118,7 @@ public class WifiHandlerProvider extends ContentProvider {
         SQLiteDatabase database = mWifiHandlerDatabase.getWritableDatabase();
         long rowId;
         int result = sURIMatcher.match(uri);
-        Log.d(TAG, "Match result=" + result);
+        //        Log.d(TAG, "Match result=" + result);
         switch (result) {
             case CONFIGURED_WIFIS:
                 rowId = database.insert(SavedWifi.TABLE, null, values);

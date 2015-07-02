@@ -17,6 +17,8 @@ import android.util.Log;
 import net.opencurlybraces.android.projects.wifihandler.R;
 import net.opencurlybraces.android.projects.wifihandler.SavedWifiListActivity;
 import net.opencurlybraces.android.projects.wifihandler.receiver.WifiScanResultsReceiver;
+import net.opencurlybraces.android.projects.wifihandler.receiver.WifiStateReceiver;
+import net.opencurlybraces.android.projects.wifihandler.receiver.WifiSupplicantStateReceiver;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 
 /**
@@ -53,8 +55,20 @@ public class WifiHandlerService extends Service {
             ".projects" +
             ".wifihandler.service.action.ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE";
 
+//    public static final String ACTION_UNREGISTER_SCAN_RESULT_RECEIVER = "net.opencurlybraces" +
+//            ".android" +
+//            ".projects" +
+//            ".wifihandler.service.action.ACTION_UNREGISTER_SCAN_RESULT_RECEIVER";
+//
+//    public static final String ACTION_REGISTER_SCAN_RESULT_RECEIVER = "net.opencurlybraces" +
+//            ".android" +
+//            ".projects" +
+//            ".wifihandler.service.action.ACTION_REGISTER_SCAN_RESULT_RECEIVER";
+
     private WifiManager mWifiManager;
     private WifiScanResultsReceiver mWifiScanResultsReceiver = null;
+    private WifiStateReceiver mWifiStateReceiver = null;
+    private WifiSupplicantStateReceiver mWifiSupplicantStateReceiver = null;
     private static final int NOTIFICATION_ID = 100;
 
     @Override
@@ -67,12 +81,17 @@ public class WifiHandlerService extends Service {
         }
 
         registerScanResultReceiver();
+        registerWifiStateReceiver();
+        registerWifiSupplicantStateReceiver();
+
     }
 
     @Override
     public void onDestroy() {
         Log.d(TAG, "OnDestroy");
         unregisterReceiver(mWifiScanResultsReceiver);
+        unregisterReceiver(mWifiStateReceiver);
+        unregisterReceiver(mWifiSupplicantStateReceiver);
     }
 
     @Override
@@ -107,6 +126,13 @@ public class WifiHandlerService extends Service {
                 activateWifiHandler();
                 buildForegroundNotification();
                 break;
+//            case ACTION_UNREGISTER_SCAN_RESULT_RECEIVER:
+//                Log.d(TAG, "unregisterScanresultsReceiver");
+//                unregisterReceiver(mWifiScanResultsReceiver);
+//                break;
+//            case ACTION_REGISTER_SCAN_RESULT_RECEIVER:
+//                registerScanResultReceiver();
+//                break;
 
         }
 
@@ -121,6 +147,44 @@ public class WifiHandlerService extends Service {
         mWifiScanResultsReceiver = new WifiScanResultsReceiver();
         registerReceiver(mWifiScanResultsReceiver, wifiScanFilter);
     }
+
+
+    private void registerWifiStateReceiver() {
+        Log.d(TAG, "registerWifiStateReceiver");
+        IntentFilter wifiStateFilter = new IntentFilter();
+        wifiStateFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        mWifiStateReceiver = new WifiStateReceiver();
+        registerReceiver(mWifiStateReceiver, wifiStateFilter);
+    }
+    private void registerWifiSupplicantStateReceiver() {
+        Log.d(TAG, "registerWifiSupplicantStateReceiver");
+        IntentFilter wifiSupplicantFilter = new IntentFilter();
+        wifiSupplicantFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+        mWifiSupplicantStateReceiver = new WifiSupplicantStateReceiver();
+        registerReceiver(mWifiSupplicantStateReceiver, wifiSupplicantFilter);
+    }
+    //    private void registerManifestReceiver(Class<? extends BroadcastReceiver> receiverClass) {
+    //        PackageManager pm = getPackageManager();
+    //        ComponentName compName =
+    //                new ComponentName(getApplicationContext(),
+    //                        receiverClass);
+    //        pm.setComponentEnabledSetting(
+    //                compName,
+    //                PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
+    //                PackageManager.DONT_KILL_APP);
+    //    }
+    //
+    //    private void unregisterManifestReceiver(Class<? extends BroadcastReceiver>
+    // receiverClass) {
+    //        PackageManager pm = getPackageManager();
+    //        ComponentName compName =
+    //                new ComponentName(getApplicationContext(),
+    //                        receiverClass);
+    //        pm.setComponentEnabledSetting(
+    //                compName,
+    //                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+    //                PackageManager.DONT_KILL_APP);
+    //    }
 
 
     private void sendLocalBroadcastAction(String action) {

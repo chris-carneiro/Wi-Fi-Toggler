@@ -5,11 +5,11 @@
                 android:padding="@dimen/normal_padding">
 
     <TextView
-        android:layout_marginLeft="@dimen/wifi_list_row_margin_left"
         android:id="@+id/configured_wifi_ssid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/holo_blue_dark"
+        android:layout_marginLeft="@dimen/wifi_list_row_margin_left"
+        android:textColor="@android:color/black"
         />
 
     <TextView
@@ -18,6 +18,8 @@
         android:layout_height="wrap_content"
         android:layout_alignStart="@id/configured_wifi_ssid"
         android:layout_below="@id/configured_wifi_ssid"
-        android:textColor="@android:color/holo_blue_dark"/>
+        android:textColor="@android:color/darker_gray"
+        android:textStyle="bold"
+        />
 
 </RelativeLayout>

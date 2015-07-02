@@ -9,7 +9,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
-import net.opencurlybraces.android.projects.wifihandler.service.ContentIntentService;
+import net.opencurlybraces.android.projects.wifihandler.service.ContentHandlerService;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -25,8 +25,10 @@ public class WifiSupplicantStateReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "WIFI_SUPPLICANT_CHANGED_ACTION Received");
+
         SupplicantState state = intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
-        Intent updateSavedWifiState = buildIntentForState(context, state).get();
+
+        Intent updateSavedWifiState = buildIntentForWifiState(context, state).get();
         if (updateSavedWifiState == null || updateSavedWifiState.getAction() == null)
             return;
 
@@ -34,10 +36,11 @@ public class WifiSupplicantStateReceiver extends BroadcastReceiver {
 
     }
 
-    private AtomicReference<Intent> buildIntentForState(final Context context, SupplicantState
-            state) {
+    private static AtomicReference<Intent> buildIntentForWifiState(final Context context,
+                                                                   SupplicantState
+                                                                           state) {
         AtomicReference<Intent> updateSavedWifiState = new AtomicReference<>(new Intent(context,
-                ContentIntentService.class));
+                ContentHandlerService.class));
 
         switch (state) {
             case COMPLETED:
@@ -53,7 +56,7 @@ public class WifiSupplicantStateReceiver extends BroadcastReceiver {
                 updateSavedWifiState.get().putExtra(WifiStateReceiver.EXTRA_SAVED_WIFI_NEW_STATE,
                         WifiConfiguration.Status.CURRENT);
 
-                updateSavedWifiState.get().setAction(ContentIntentService
+                updateSavedWifiState.get().setAction(ContentHandlerService
                         .ACTION_HANDLE_SAVED_WIFI_UPDATE_CONNECT);
                 break;
             case DISCONNECTED:
@@ -61,11 +64,12 @@ public class WifiSupplicantStateReceiver extends BroadcastReceiver {
                 updateSavedWifiState.get().putExtra(WifiStateReceiver.EXTRA_SAVED_WIFI_NEW_STATE,
                         WifiConfiguration
                                 .Status.DISABLED);
-                updateSavedWifiState.get().setAction(ContentIntentService
+                updateSavedWifiState.get().setAction(ContentHandlerService
                         .ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT);
 
                 break;
             default:
+                // Ignore other wifi states
                 Log.d(TAG, "Supplicant state received and ignored=" + state);
                 break;
         }

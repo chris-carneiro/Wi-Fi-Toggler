@@ -95,7 +95,6 @@ public class SavedWifiListAdapter extends CursorAdapter {
 
         TextView wifiStatus = (TextView) view.findViewById(R.id.configured_wifi_state);
         String statusValue = toStringStatus(context, status);
-        wifiStatus.setTextColor(res.getColor(android.R.color.holo_green_dark));
         wifiStatus.setText(statusValue);
     }
 

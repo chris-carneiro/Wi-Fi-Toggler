@@ -84,6 +84,7 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
                                 wifiNetwork
                                         .SSID);
                         if (wifiNetwork.level > SIGNAL_STRENGTH_THRESHOLD) {
+
                             mWifiManager.setWifiEnabled(true);
                             return;
                         }

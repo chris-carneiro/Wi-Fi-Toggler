@@ -22,11 +22,12 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
-import net.opencurlybraces.android.projects.wifihandler.service.ContentIntentService;
+import net.opencurlybraces.android.projects.wifihandler.service.ContentHandlerService;
 import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.StartupUtils;
 
+//TODO create settings layout, start wifi handler at boot, activate notification ?
 
 public class SavedWifiListActivity extends AppCompatActivity implements
         CompoundButton.OnCheckedChangeListener,
@@ -74,6 +75,8 @@ public class SavedWifiListActivity extends AppCompatActivity implements
 
     @Override
     protected void onResume() {
+
+        //TODO check for hotspot and airplane mode, redirect user to settings page if active
         super.onResume();
         Log.d(TAG, "onResume isactive=" + PrefUtils.isWifiHandlerActive(this));
         initLoader();
@@ -183,9 +186,9 @@ public class SavedWifiListActivity extends AppCompatActivity implements
 
 
     private void loadSavedWifiIntoDatabase() {
-        Intent handleSavedWifiInsert = new Intent(this, ContentIntentService.class);
-        handleSavedWifiInsert.setAction(ContentIntentService.ACTION_HANDLE_SAVED_WIFI_INSERT);
-        this.startService(handleSavedWifiInsert);
+        Intent handleSavedWifiInsert = new Intent(this, ContentHandlerService.class);
+        handleSavedWifiInsert.setAction(ContentHandlerService.ACTION_HANDLE_SAVED_WIFI_INSERT);
+        getApplicationContext().startService(handleSavedWifiInsert);
     }
 
 
