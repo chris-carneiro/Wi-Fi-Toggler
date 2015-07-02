@@ -80,10 +80,6 @@ public class ContentHandlerService extends Service implements
                 String ssid = intent.getStringExtra(WifiSupplicantStateReceiver.EXTRA_CURRENT_SSID);
                 int newState = intent.getIntExtra(WifiStateReceiver.EXTRA_SAVED_WIFI_NEW_STATE, -1);
 
-                //                mDataAsyncQueryHandler.startQuery(1, newState, SavedWifi
-                // .CONTENT_URI, PROJECTION,
-                //                        SavedWifi.SSID + "=?",
-                //                        new String[]{ssid}, null);
                 startQuery(newState, SavedWifi.SSID + "=?", new String[]{ssid});
                 break;
             case ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT:
@@ -92,12 +88,6 @@ public class ContentHandlerService extends Service implements
 
                 startQuery(stateDisconnect, SavedWifi.STATUS + "=?", new String[]{String.valueOf
                         (WifiConfiguration.Status.CURRENT)});
-                //                mDataAsyncQueryHandler.startQuery(1, state, SavedWifi
-                // .CONTENT_URI, PROJECTION,
-                //                        SavedWifi.STATUS + "=?",
-                //                        new String[]{String.valueOf(WifiConfiguration.Status
-                // .CURRENT)}, null);
-                disableWifiAdapter();
 
                 break;
         }
@@ -163,10 +153,9 @@ public class ContentHandlerService extends Service implements
     public void onUpdateComplete(int token, int wifiState, int result) {
         Log.d(TAG, "Async Update complete, stopping service, wifiState=" + wifiState);
 
-        //        if (wifiState == WifiConfiguration.Status.DISABLED) {
-        //
-        //        }
-//        stopSelf();
+        if (wifiState == WifiConfiguration.Status.DISABLED) {
+            disableWifiAdapter();
+        }
 
     }
 
