@@ -229,12 +229,18 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
     private String getRowIdFromCursor(final Cursor cursor) {
         String rowId = null;
-        if (cursor != null) {
-            if (cursor.getCount() > 1) {
-                return null;
+        try {
+            if (cursor != null) {
+                if (cursor.getCount() > 1) {
+                    return null;
+                }
+                if (cursor.moveToFirst()) {
+                    rowId = cursor.getString(0);
+                    cursor.close();
+                }
             }
-            if (cursor.moveToFirst()) {
-                rowId = cursor.getString(0);
+        } finally {
+            if (cursor != null) {
                 cursor.close();
             }
         }
@@ -301,7 +307,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
 
     private void activateWifiHandler() {
-        Log.d(TAG,"activateWifiHandler");
+        Log.d(TAG, "activateWifiHandler");
         PrefUtils.setWifiHandlerActive(this, true);
     }
 
@@ -380,32 +386,40 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     @Override
     public void onInsertBatchComplete(int token, Object cookie, ContentProviderResult[] results) {
         Log.d(TAG, "Async Batch Insert complete, stopping service");
-        stopSelf();
+        if (!PrefUtils.isWifiHandlerActive(this)) {
+            stopSelf();
+        }
     }
 
     @Override
     public void onQueryComplete(int token, Object cookie, Cursor cursor) {
         Log.d(TAG, "Query Complete token=" + token + " cookie=" + cookie);
+        try {
+            if (cursor == null || cursor.getCount() <= 0) return;
 
-        if (cursor == null || cursor.getCount() <= 0) return;
+            String rowId = getRowIdFromCursor(cursor);
 
-        String rowId = getRowIdFromCursor(cursor);
+            Uri uri = SavedWifi.buildConfiguredWifiUri(rowId);
 
-        Uri uri = SavedWifi.buildConfiguredWifiUri(rowId);
+            ContentValues value = new ContentValues(1);
+            value.put(SavedWifi.STATUS, (int) cookie);
 
-        ContentValues value = new ContentValues(1);
-        value.put(SavedWifi.STATUS, (int) cookie);
-
-        mDataAsyncQueryHandler.startUpdate(TOKEN_UPDATE, cookie, uri, value, SavedWifi
-                ._ID + "=?", new String[]{rowId});
+            mDataAsyncQueryHandler.startUpdate(TOKEN_UPDATE, cookie, uri, value, SavedWifi
+                    ._ID + "=?", new String[]{rowId});
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 
     @Override
     public void onUpdateComplete(int token, int wifiState, int result) {
-        Log.d(TAG, "Async Update complete, stopping service, wifiState=" + wifiState);
+        Log.d(TAG, "Async Update complete, wifiState=" + wifiState);
 
         if (wifiState == WifiConfiguration.Status.DISABLED) {
             disableWifiAdapter();
+            Log.d(TAG, "Disabling Wifi Adapter");
         }
     }
 }

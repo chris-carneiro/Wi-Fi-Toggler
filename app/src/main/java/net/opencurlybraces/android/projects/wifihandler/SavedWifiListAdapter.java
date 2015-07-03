@@ -84,6 +84,7 @@ public class SavedWifiListAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         Log.d(TAG, "bindView");
         Resources res = context.getResources();
+
         int ssidColumnIndex = cursor.getColumnIndexOrThrow(SavedWifi.SSID);
         int statusColumnIndex = cursor.getColumnIndexOrThrow(SavedWifi.STATUS);
 
@@ -96,6 +97,7 @@ public class SavedWifiListAdapter extends CursorAdapter {
         TextView wifiStatus = (TextView) view.findViewById(R.id.configured_wifi_state);
         String statusValue = toStringStatus(context, status);
         wifiStatus.setText(statusValue);
+
     }
 
     private String toStringStatus(final Context context, int status) {

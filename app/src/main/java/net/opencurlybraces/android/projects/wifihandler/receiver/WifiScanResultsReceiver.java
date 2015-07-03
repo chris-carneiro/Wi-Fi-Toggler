@@ -113,6 +113,8 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
                 if (cursor != null)
                     cursor.close();
                 e.printStackTrace();
+            } finally {
+                if (cursor != null) cursor.close();
             }
             return savedSSIDs;
         }
