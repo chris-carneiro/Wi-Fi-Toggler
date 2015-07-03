@@ -9,7 +9,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
-import net.opencurlybraces.android.projects.wifihandler.service.ContentHandlerService;
+import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -40,7 +40,7 @@ public class WifiSupplicantStateReceiver extends BroadcastReceiver {
                                                                    SupplicantState
                                                                            state) {
         AtomicReference<Intent> updateSavedWifiState = new AtomicReference<>(new Intent(context,
-                ContentHandlerService.class));
+                WifiHandlerService.class));
 
         switch (state) {
             case COMPLETED:
@@ -56,7 +56,7 @@ public class WifiSupplicantStateReceiver extends BroadcastReceiver {
                 updateSavedWifiState.get().putExtra(WifiStateReceiver.EXTRA_SAVED_WIFI_NEW_STATE,
                         WifiConfiguration.Status.CURRENT);
 
-                updateSavedWifiState.get().setAction(ContentHandlerService
+                updateSavedWifiState.get().setAction(WifiHandlerService
                         .ACTION_HANDLE_SAVED_WIFI_UPDATE_CONNECT);
                 break;
             case DISCONNECTED:
@@ -64,7 +64,7 @@ public class WifiSupplicantStateReceiver extends BroadcastReceiver {
                 updateSavedWifiState.get().putExtra(WifiStateReceiver.EXTRA_SAVED_WIFI_NEW_STATE,
                         WifiConfiguration
                                 .Status.DISABLED);
-                updateSavedWifiState.get().setAction(ContentHandlerService
+                updateSavedWifiState.get().setAction(WifiHandlerService
                         .ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT);
 
                 break;

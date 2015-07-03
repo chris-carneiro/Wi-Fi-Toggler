@@ -22,7 +22,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
-import net.opencurlybraces.android.projects.wifihandler.service.ContentHandlerService;
 import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.StartupUtils;
@@ -186,9 +185,9 @@ public class SavedWifiListActivity extends AppCompatActivity implements
 
 
     private void loadSavedWifiIntoDatabase() {
-        Intent handleSavedWifiInsert = new Intent(this, ContentHandlerService.class);
-        handleSavedWifiInsert.setAction(ContentHandlerService.ACTION_HANDLE_SAVED_WIFI_INSERT);
-        getApplicationContext().startService(handleSavedWifiInsert);
+        Intent handleSavedWifiInsert = new Intent(this, WifiHandlerService.class);
+        handleSavedWifiInsert.setAction(WifiHandlerService.ACTION_HANDLE_SAVED_WIFI_INSERT);
+        startService(handleSavedWifiInsert);
     }
 
 
@@ -237,6 +236,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
             case StartupUtils.FIRST_TIME_FOR_VERSION:
                 Log.d(TAG, "Startup mode: FIRST_TIME_FOR_VERSION");
                 loadSavedWifiIntoDatabase();
+                //TODO check hotspot and airplane mode state
                 break;
             case StartupUtils.NORMAL:
                 Log.d(TAG, "Startup mode: NORMAL");

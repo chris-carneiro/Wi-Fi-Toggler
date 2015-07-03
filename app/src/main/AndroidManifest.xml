@@ -33,11 +33,11 @@
             android:label="@string/app_name">
         </service>
 
-        <service
-            android:name=".service.ContentHandlerService"
-            android:exported="false"
-            >
-        </service>
+        <!--<service-->
+            <!--android:name=".service.ContentHandlerService"-->
+            <!--android:exported="false"-->
+            <!-->-->
+        <!--</service>-->
 
 
         <provider
