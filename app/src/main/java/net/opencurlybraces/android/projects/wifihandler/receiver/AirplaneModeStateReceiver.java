@@ -18,14 +18,15 @@ public class AirplaneModeStateReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+
         boolean isAirplaneModeOn = intent.getBooleanExtra(EXTRAS_AIRPLANE_MODE_STATE, false);
 
-        if (PrefUtils.isWifiHandlerActive(context)) {
-            if (isAirplaneModeOn) {
+        if (isAirplaneModeOn) {
+            if (PrefUtils.isWifiHandlerActive(context)) {
                 NetworkUtils.buildAirplaneNotification(context);
-            } else {
-                NetworkUtils.dismissNotification(context, Config.NOTIFICATION_ID_AIRPLANE_MODE);
             }
+        } else {
+            NetworkUtils.dismissNotification(context, Config.NOTIFICATION_ID_AIRPLANE_MODE);
         }
 
     }

@@ -169,14 +169,14 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                 String ssid = intent.getStringExtra(WifiSupplicantStateReceiver.EXTRA_CURRENT_SSID);
                 int newState = intent.getIntExtra(WifiStateReceiver.EXTRA_SAVED_WIFI_NEW_STATE, -1);
 
-                startQuery(newState, SavedWifi.SSID + "=?", new String[]{ssid});
+                getConnectedWifiToUpdateFromDB(newState, SavedWifi.SSID + "=?", new String[]{ssid});
                 break;
             case ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT:
                 int stateDisconnect = intent.getIntExtra(WifiStateReceiver
                         .EXTRA_SAVED_WIFI_NEW_STATE, -1);
 
-                startQuery(stateDisconnect, SavedWifi.STATUS + "=?", new String[]{String.valueOf
-                        (NetworkUtils.WifiAdapterStatus.CONNECTED)});
+                getConnectedWifiToUpdateFromDB(stateDisconnect, SavedWifi.STATUS + "=?", new
+                        String[]{String.valueOf(NetworkUtils.WifiAdapterStatus.CONNECTED)});
 
                 break;
 
@@ -184,6 +184,20 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
         return START_REDELIVER_INTENT;
 
+    }
+
+    /**
+     * Fetches asynchronously from DB a saved wifi to be updated. {@link #onQueryComplete(int,
+     * Object, Cursor)} ()} is called back and the update can be performed using the callback
+     * arguments
+     *
+     * @param newState  the saved wifi new state, to be used as a param in the {@link #startUpdate}
+     *                  query
+     * @param where
+     * @param whereArgs
+     */
+    private void getConnectedWifiToUpdateFromDB(int newState, String where, String[] whereArgs) {
+        startQuery(newState, where, whereArgs);
     }
 
     private void handleSavedWifiInsert() {
@@ -391,13 +405,27 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
             ContentValues value = new ContentValues(1);
             value.put(SavedWifi.STATUS, (int) cookie);
 
-            mDataAsyncQueryHandler.startUpdate(TOKEN_UPDATE, cookie, uri, value, SavedWifi
-                    ._ID + "=?", new String[]{rowId});
+            startUpdate(cookie, rowId, uri, value);
         } finally {
             if (cursor != null) {
                 cursor.close();
             }
         }
+    }
+
+    /**
+     * Issue an async update given the rowid params. Note that wifiState here is used to pass wifi
+     * state value to the {@link #onQueryComplete(int, Object, Cursor)} callback
+     *
+     * @param cookie an object that gets passed to {@link #onUpdateComplete(int, int, int)}, here
+     *               the wifi state is passed
+     * @param rowId  the row to update
+     * @param uri
+     * @param value
+     */
+    private void startUpdate(Object cookie, String rowId, Uri uri, ContentValues value) {
+        mDataAsyncQueryHandler.startUpdate(TOKEN_UPDATE, cookie, uri, value, SavedWifi
+                ._ID + "=?", new String[]{rowId});
     }
 
     @Override

@@ -289,7 +289,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     private void startupCheck() {
         int startupMode = StartupUtils.appStartMode(this);
 
-
         switch (startupMode) {
             case StartupUtils.FIRST_TIME:
                 Log.d(TAG, "Startup mode: FIRST_TIME");

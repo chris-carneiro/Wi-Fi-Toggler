@@ -66,8 +66,7 @@ public class WifiSupplicantStateReceiver extends BroadcastReceiver {
             case DISCONNECTED:
                 Log.d(TAG, "DISCONNECTED supplicant state received=");
                 updateSavedWifiState.putExtra(WifiStateReceiver.EXTRA_SAVED_WIFI_NEW_STATE,
-                        NetworkUtils.WifiAdapterStatus.DISCONNECTED); //TODO change to ENABLED or create Enum
-                        // with
+                        NetworkUtils.WifiAdapterStatus.DISCONNECTED);
 
                 updateSavedWifiState.setAction(WifiHandlerService
                         .ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT);
