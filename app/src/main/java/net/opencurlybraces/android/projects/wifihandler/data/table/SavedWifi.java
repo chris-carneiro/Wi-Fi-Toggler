@@ -151,12 +151,14 @@ public class SavedWifi implements BaseColumns {
         List<ContentProviderOperation> batch = new
                 ArrayList<>();
         for (WifiConfiguration wifi : configuredWifis) {
+            Log.d(TAG, "Saved Wifi ssid=" + wifi.SSID);
             ContentValues values = buildDefaultWifiContentValues(wifi);
             ContentProviderOperation.Builder builder = ContentProviderOperation.
                     newInsert(CONTENT_URI);
             builder.withValues(values);
             batch.add(builder.build());
         }
+
         return batch;
     }
 

@@ -16,5 +16,10 @@
     <string name="disable_notification_ticker_content">Wifi Handler is disabled</string>
     <string name="enable_notification_ticker_content">Wifi Handler is enabled</string>
     <string name="connected_saved_wifi_status">Connected</string>
-
+    <string name="airplane_mode_notification_context_title">Airplane Mode Detected</string>
+    <string name="airplane_mode_notification_ticker">To enjoy wifi auto toggle feature, disable
+        airplane
+    mode :)</string>
+    <string name="airplane_mode_message_banner">Auto toggle unavailable, disable airplane
+        mode</string>
 </resources>

@@ -28,8 +28,8 @@ import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifihandler.receiver.WifiScanResultsReceiver;
 import net.opencurlybraces.android.projects.wifihandler.receiver.WifiStateReceiver;
 import net.opencurlybraces.android.projects.wifihandler.receiver.WifiSupplicantStateReceiver;
+import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
-import net.opencurlybraces.android.projects.wifihandler.util.WifiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,7 @@ import java.util.List;
  * to a view controller. <BR/> Created by chris on 01/06/15.
  */
 public class WifiHandlerService extends Service implements DataAsyncQueryHandler
-        .AsyncQueryListener {
+        .AsyncQueryListener, NetworkUtils.SavedWifiConfigurationListener {
 
     private static final String TAG = "WifiHandlerService";
 
@@ -72,16 +72,6 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
     public static final String ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT = SERVICE_ACTION_PREFIX +
             "ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT";
-    //    public static final String ACTION_UNREGISTER_SCAN_RESULT_RECEIVER = "net
-    // .opencurlybraces" +
-    //            ".android" +
-    //            ".projects" +
-    //            ".wifihandler.service.action.ACTION_UNREGISTER_SCAN_RESULT_RECEIVER";
-    //
-    //    public static final String ACTION_REGISTER_SCAN_RESULT_RECEIVER = "net.opencurlybraces" +
-    //            ".android" +
-    //            ".projects" +
-    //            ".wifihandler.service.action.ACTION_REGISTER_SCAN_RESULT_RECEIVER";
 
     private WifiManager mWifiManager;
     private WifiScanResultsReceiver mWifiScanResultsReceiver = null;
@@ -101,6 +91,16 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     public void onCreate() {
         Log.d(TAG, "OnCreate");
         super.onCreate();
+
+        lazyInit();
+
+        registerScanResultReceiver();
+        registerWifiStateReceiver();
+        registerWifiSupplicantStateReceiver();
+
+    }
+
+    private void lazyInit() {
         if (mWifiManager == null) {
             mWifiManager = (WifiManager) getSystemService(Context
                     .WIFI_SERVICE);
@@ -110,10 +110,16 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
             mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(), this);
         }
 
-        registerScanResultReceiver();
-        registerWifiStateReceiver();
-        registerWifiSupplicantStateReceiver();
+        if (mWifiStateReceiver == null) {
+            mWifiStateReceiver = new WifiStateReceiver();
+        }
 
+        if (mWifiSupplicantStateReceiver == null) {
+            mWifiSupplicantStateReceiver = new WifiSupplicantStateReceiver();
+        }
+        if (mWifiScanResultsReceiver == null) {
+            mWifiScanResultsReceiver = new WifiScanResultsReceiver();
+        }
     }
 
     @Override
@@ -157,7 +163,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                 buildForegroundNotification();
                 break;
             case ACTION_HANDLE_SAVED_WIFI_INSERT:
-                handleUserWifiInsert();
+                handleSavedWifiInsert();
                 break;
             case ACTION_HANDLE_SAVED_WIFI_UPDATE_CONNECT:
                 String ssid = intent.getStringExtra(WifiSupplicantStateReceiver.EXTRA_CURRENT_SSID);
@@ -173,13 +179,6 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                         (WifiConfiguration.Status.CURRENT)});
 
                 break;
-            //            case ACTION_UNREGISTER_SCAN_RESULT_RECEIVER:
-            //                Log.d(TAG, "unregisterScanresultsReceiver");
-            //                unregisterReceiver(mWifiScanResultsReceiver);
-            //                break;
-            //            case ACTION_REGISTER_SCAN_RESULT_RECEIVER:
-            //                registerScanResultReceiver();
-            //                break;
 
         }
 
@@ -187,18 +186,9 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
     }
 
-    private void handleUserWifiInsert() {
-        Log.d(TAG, "handleUserWifiInsert");
-        List<WifiConfiguration> configuredWifis = null;
-        try {
-            configuredWifis = WifiUtils.getConfiguredWifis(mWifiManager);
-            List<ContentProviderOperation> batch = SavedWifi.buildBatch(configuredWifis);
-            insertBatchAsync((ArrayList<ContentProviderOperation>) batch);
-        } catch (IllegalArgumentException e) {
-            Log.w(TAG, "Nothing to build");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    private void handleSavedWifiInsert() {
+        Log.d(TAG, "handleSavedWifiInsert");
+        NetworkUtils.getConfiguredWifis(mWifiManager, this);
 
     }
 
@@ -251,7 +241,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
         Log.d(TAG, "registerScanResultReceiver");
         IntentFilter wifiScanFilter = new IntentFilter();
         wifiScanFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        mWifiScanResultsReceiver = new WifiScanResultsReceiver();
+
         registerReceiver(mWifiScanResultsReceiver, wifiScanFilter);
     }
 
@@ -260,7 +250,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
         Log.d(TAG, "registerWifiStateReceiver");
         IntentFilter wifiStateFilter = new IntentFilter();
         wifiStateFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        mWifiStateReceiver = new WifiStateReceiver();
+
         registerReceiver(mWifiStateReceiver, wifiStateFilter);
     }
 
@@ -268,9 +258,10 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
         Log.d(TAG, "registerWifiSupplicantStateReceiver");
         IntentFilter wifiSupplicantFilter = new IntentFilter();
         wifiSupplicantFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
-        mWifiSupplicantStateReceiver = new WifiSupplicantStateReceiver();
+
         registerReceiver(mWifiSupplicantStateReceiver, wifiSupplicantFilter);
     }
+
     //    private void registerManifestReceiver(Class<? extends BroadcastReceiver> receiverClass) {
     //        PackageManager pm = getPackageManager();
     //        ComponentName compName =
@@ -307,7 +298,6 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
 
     private void activateWifiHandler() {
-        Log.d(TAG, "activateWifiHandler");
         PrefUtils.setWifiHandlerActive(this, true);
     }
 
@@ -385,7 +375,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
     @Override
     public void onInsertBatchComplete(int token, Object cookie, ContentProviderResult[] results) {
-        Log.d(TAG, "Async Batch Insert complete, stopping service");
+        Log.d(TAG, "onInsertBatchComplete: Async Batch Insert complete, stopping service");
         if (!PrefUtils.isWifiHandlerActive(this)) {
             stopSelf();
         }
@@ -393,7 +383,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
     @Override
     public void onQueryComplete(int token, Object cookie, Cursor cursor) {
-        Log.d(TAG, "Query Complete token=" + token + " cookie=" + cookie);
+        Log.d(TAG, "onQueryComplete: Query Complete token=" + token + " cookie=" + cookie);
         try {
             if (cursor == null || cursor.getCount() <= 0) return;
 
@@ -415,11 +405,25 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
     @Override
     public void onUpdateComplete(int token, int wifiState, int result) {
-        Log.d(TAG, "Async Update complete, wifiState=" + wifiState);
+        Log.d(TAG, "onUpdateComplete: Async Update complete, wifiState=" + wifiState);
 
         if (wifiState == WifiConfiguration.Status.DISABLED) {
             disableWifiAdapter();
             Log.d(TAG, "Disabling Wifi Adapter");
+        }
+    }
+
+    @Override
+    public void onSavedWifiLoaded(List<WifiConfiguration> savedWifis) {
+        Log.d(TAG, "onSavedWifiLoaded savedWifis count" + (savedWifis != null ? savedWifis.size()
+                : null));
+        try {
+            List<ContentProviderOperation> batch = SavedWifi.buildBatch(savedWifis);
+
+            insertBatchAsync((ArrayList<ContentProviderOperation>) batch);
+        } catch (IllegalArgumentException e) {
+            Log.d(TAG, "Nothing to build");
+            //TODO handle
         }
     }
 }

@@ -10,8 +10,7 @@ import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
-
-import java.util.concurrent.atomic.AtomicReference;
+import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 
 /**
  * Created by chris on 30/06/15.
@@ -24,23 +23,26 @@ public class WifiSupplicantStateReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "WIFI_SUPPLICANT_CHANGED_ACTION Received");
 
-        SupplicantState state = intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
 
-        Intent updateSavedWifiState = buildIntentForWifiState(context, state).get();
-        if (updateSavedWifiState == null || updateSavedWifiState.getAction() == null)
-            return;
+        if (PrefUtils.isWifiHandlerActive(context)) {
+            SupplicantState state = intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
+            Intent updateSavedWifiState = buildIntentForWifiState(context, state);
+            if (updateSavedWifiState == null || updateSavedWifiState.getAction() == null)
+                return;
 
-        context.startService(updateSavedWifiState);
+            context.startService(updateSavedWifiState);
+        } else {
+            Log.d(TAG, "WifiHandler inactive ignoring SupplicantStateChanged events");
+        }
 
     }
 
-    private static AtomicReference<Intent> buildIntentForWifiState(final Context context,
-                                                                   SupplicantState
-                                                                           state) {
-        AtomicReference<Intent> updateSavedWifiState = new AtomicReference<>(new Intent(context,
-                WifiHandlerService.class));
+    private static Intent buildIntentForWifiState(final Context context,
+                                                  SupplicantState
+                                                          state) {
+        Intent updateSavedWifiState = new Intent(context,
+                WifiHandlerService.class);
 
         switch (state) {
             case COMPLETED:
@@ -50,22 +52,27 @@ public class WifiSupplicantStateReceiver extends BroadcastReceiver {
                 WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 
                 String strippedSSID = wifiInfo.getSSID().replace("\"", "");
-                updateSavedWifiState.get().putExtra(EXTRA_CURRENT_SSID,
+                updateSavedWifiState.putExtra(EXTRA_CURRENT_SSID,
                         strippedSSID);
 
-                updateSavedWifiState.get().putExtra(WifiStateReceiver.EXTRA_SAVED_WIFI_NEW_STATE,
+                updateSavedWifiState.putExtra(WifiStateReceiver.EXTRA_SAVED_WIFI_NEW_STATE,
                         WifiConfiguration.Status.CURRENT);
 
-                updateSavedWifiState.get().setAction(WifiHandlerService
+                updateSavedWifiState.setAction(WifiHandlerService
                         .ACTION_HANDLE_SAVED_WIFI_UPDATE_CONNECT);
+
+                PrefUtils.setWifiConnected(context, true);
+
                 break;
             case DISCONNECTED:
                 Log.d(TAG, "DISCONNECTED supplicant state received=");
-                updateSavedWifiState.get().putExtra(WifiStateReceiver.EXTRA_SAVED_WIFI_NEW_STATE,
+                updateSavedWifiState.putExtra(WifiStateReceiver.EXTRA_SAVED_WIFI_NEW_STATE,
                         WifiConfiguration
-                                .Status.DISABLED);
-                updateSavedWifiState.get().setAction(WifiHandlerService
+                                .Status.DISABLED); //TODO change to ENABLED or create Enum with
+
+                updateSavedWifiState.setAction(WifiHandlerService
                         .ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT);
+                PrefUtils.setWifiConnected(context, false);
 
                 break;
             default:

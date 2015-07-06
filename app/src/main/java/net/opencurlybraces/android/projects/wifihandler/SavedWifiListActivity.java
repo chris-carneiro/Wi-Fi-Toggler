@@ -1,9 +1,11 @@
 package net.opencurlybraces.android.projects.wifihandler;
 
+import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
@@ -15,14 +17,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
+import net.opencurlybraces.android.projects.wifihandler.io.WifiLockedOffException;
+import net.opencurlybraces.android.projects.wifihandler.receiver.AirplaneModeStateReceiver;
 import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
+import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.StartupUtils;
 
@@ -30,7 +37,8 @@ import net.opencurlybraces.android.projects.wifihandler.util.StartupUtils;
 
 public class SavedWifiListActivity extends AppCompatActivity implements
         CompoundButton.OnCheckedChangeListener,
-        LoaderManager.LoaderCallbacks<Cursor> {
+        LoaderManager.LoaderCallbacks<Cursor>, DialogInterface.OnClickListener,
+        DialogInterface.OnCancelListener {
 
     private static final String TAG = "SavedWifiList";
 
@@ -38,7 +46,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     private Switch mWifiHandlerActivationSwitch = null;
     private ListView mWifiHandlerWifiList = null;
     private TextView mEmptyView = null;
-
+    private RelativeLayout mBanner = null;
     private CursorAdapter mSavedWifiCursorAdapter = null;
 
 
@@ -52,7 +60,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         mWifiHandlerWifiList = (ListView) findViewById(android.R.id.list);
         mEmptyView = (TextView) findViewById(android.R.id.empty);
         mWifiHandlerActivationSwitch.setOnCheckedChangeListener(this);
-
+        mBanner = (RelativeLayout) findViewById(R.id.wifi_handler_message_banner);
         startupCheck();
 
     }
@@ -72,21 +80,70 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         }
     };
 
+    private BroadcastReceiver mApSystemReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean isAirplaneModeOn = intent.getBooleanExtra(AirplaneModeStateReceiver
+                    .EXTRAS_AIRPLANE_MODE_STATE, false);
+
+            if (isAirplaneModeOn) {
+                NetworkUtils.buildAirplaneNotification(context);
+                mBanner.setVisibility(View.VISIBLE);
+            } else {
+                mWifiHandlerActivationSwitch.setEnabled(true);
+                mBanner.setVisibility(View.GONE);
+                NetworkUtils.dismissNotification(context, Config
+                        .NOTIFICATION_ID_AIRPLANE_MODE);
+            }
+        }
+    };
+
     @Override
     protected void onResume() {
 
         //TODO check for hotspot and airplane mode, redirect user to settings page if active
         super.onResume();
-        Log.d(TAG, "onResume isactive=" + PrefUtils.isWifiHandlerActive(this));
-        initLoader();
+        Log.d(TAG, "onResume");
+
+        initCursorLoader();
         mSavedWifiCursorAdapter = initAdapter();
+        setListAdapterAccordingToSwitchState();
+        registerReceivers();
+        showBannerAccordingAirplaneMode();
+
+    }
+
+    private void setListAdapterAccordingToSwitchState() {
         if (PrefUtils.isWifiHandlerActive(this)) {
             mWifiHandlerActivationSwitch.setChecked(true);
             mWifiHandlerWifiList.setAdapter(mSavedWifiCursorAdapter);
         } else {
             mWifiHandlerActivationSwitch.setChecked(false);
         }
+    }
 
+    private void registerReceivers() {
+        registerNotificationReceiver();
+        registerAirplaneModeReceiver();
+    }
+
+    private void showBannerAccordingAirplaneMode() {
+        if (NetworkUtils.isAirplaneModeOn(this)) {
+            mBanner.setVisibility(View.VISIBLE);
+        } else {
+            mBanner.setVisibility(View.GONE);
+        }
+    }
+
+    private void registerAirplaneModeReceiver() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        registerReceiver(mApSystemReceiver,
+                intentFilter);
+    }
+
+
+    private void registerNotificationReceiver() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE);
         intentFilter.addAction(WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE);
@@ -99,6 +156,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     protected void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mNotificationActionsReceiver);
+        unregisterReceiver(mApSystemReceiver);
     }
 
     @Override
@@ -210,7 +268,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         mSavedWifiCursorAdapter.swapCursor(null);
     }
 
-    private void initLoader() {
+    private void initCursorLoader() {
         getLoaderManager().initLoader(0, null, this);
     }
 
@@ -230,12 +288,35 @@ public class SavedWifiListActivity extends AppCompatActivity implements
 
     private void startupCheck() {
         int startupMode = StartupUtils.appStartMode(this);
+
+
         switch (startupMode) {
             case StartupUtils.FIRST_TIME:
                 Log.d(TAG, "Startup mode: FIRST_TIME");
             case StartupUtils.FIRST_TIME_FOR_VERSION:
                 Log.d(TAG, "Startup mode: FIRST_TIME_FOR_VERSION");
-                loadSavedWifiIntoDatabase();
+                try {
+                    checkNetworkState();
+                    loadSavedWifiIntoDatabase();
+                } catch (WifiLockedOffException e) {
+                    mWifiHandlerActivationSwitch.setEnabled(false);
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Saved Wifi configurations could not be retrieved because ");
+                    AlertDialog.Builder askUserChangeSettings = new AlertDialog.Builder(this);
+                    switch (e.getReason()) {
+                        case WifiLockedOffException.AIRPLANE_MODE_ON:
+                            sb.append("airplane mode is on");
+                            break;
+                        case WifiLockedOffException.HOTSPOT_AP_ON:
+                            sb.append("Wifi is in hotspot mode");
+                            break;
+                    }
+                    askUserChangeSettings.setMessage(sb.toString());
+                    askUserChangeSettings.setPositiveButton("Go to settings", this);
+                    askUserChangeSettings.setNegativeButton("Not now", this);
+                    askUserChangeSettings.show();
+
+                }
                 //TODO check hotspot and airplane mode state
                 break;
             case StartupUtils.NORMAL:
@@ -244,5 +325,23 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         }
     }
 
+    private void checkNetworkState() throws WifiLockedOffException {
+        if (NetworkUtils.isAirplaneModeOn(this)) {
+            throw new WifiLockedOffException(WifiLockedOffException.AIRPLANE_MODE_ON);
+        }
+        if (NetworkUtils.isHotspotOn(this)) {
+            throw new WifiLockedOffException(WifiLockedOffException.HOTSPOT_AP_ON);
+        }
+    }
 
+
+    @Override
+    public void onCancel(DialogInterface dialog) {
+
+    }
+
+    @Override
+    public void onClick(DialogInterface dialog, int which) {
+        dialog.cancel();
+    }
 }

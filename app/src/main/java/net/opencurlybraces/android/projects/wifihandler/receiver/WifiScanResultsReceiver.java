@@ -4,14 +4,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
+import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,28 +24,21 @@ import java.util.List;
  */
 public class WifiScanResultsReceiver extends BroadcastReceiver {
     private static final String TAG = WifiScanResultsReceiver.class.getSimpleName();
-    ConnectivityManager mConnectivityManager = null;
-    NetworkInfo mWifiInfo = null;
     private static final int SIGNAL_STRENGTH_THRESHOLD = -80;
 
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        lazyInit(context);
-
-        if (!mWifiInfo.isConnectedOrConnecting()) {
+        Log.d(TAG, "Wifi Connected=" + NetworkUtils.isWifiConnected(context));
+        if (!NetworkUtils.isWifiConnected(context)) {
             Log.d(TAG, "SCAN_RESULTS received");
             new ScanResultAsyncHandler(context).execute();
+        } else {
+            Log.d(TAG, "already connected");
+
         }
-    }
 
-    private void lazyInit(final Context context) {
-        if (mConnectivityManager == null)
-            mConnectivityManager = (ConnectivityManager) context.getSystemService(Context
-                    .CONNECTIVITY_SERVICE);
 
-        if (mWifiInfo == null)
-            mWifiInfo = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
     }
 
     /**
@@ -83,10 +75,12 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
                         Log.d(TAG, "Signal Strength=" + wifiNetwork.level + " mSSID=" +
                                 wifiNetwork
                                         .SSID);
-                        if (wifiNetwork.level > SIGNAL_STRENGTH_THRESHOLD) {
-
+                        if (wifiNetwork.level >= SIGNAL_STRENGTH_THRESHOLD) {
                             mWifiManager.setWifiEnabled(true);
+                            Log.d(TAG, "Saved wifi in range, enabling wifi adapter");
                             return;
+                        } else {
+                            mWifiManager.setWifiEnabled(false);
                         }
                     }
                 }
@@ -118,6 +112,5 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             }
             return savedSSIDs;
         }
-
     }
 }

@@ -34,10 +34,31 @@
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/wifi_handler_message_banner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/wifi_handler_switch_banner"
+        android:gravity="center"
+        android:background="@android:color/holo_orange_dark"
+        android:padding="@dimen/normal_padding">
+
+        <TextView
+            android:id="@+id/wifi_handler_message_banner_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="@string/airplane_mode_message_banner"
+            android:textColor="@color/primary_material_light"
+            android:textSize="@dimen/message_banner_text_size"
+            />
+
+    </RelativeLayout>
+
+    <RelativeLayout
         android:id="@+id/list_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/wifi_handler_switch_banner">
+        android:layout_below="@id/wifi_handler_message_banner">
 
         <ListView
             android:id="@android:id/list"
