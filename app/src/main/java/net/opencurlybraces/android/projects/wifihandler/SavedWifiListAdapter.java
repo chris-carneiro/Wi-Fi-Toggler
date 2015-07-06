@@ -3,7 +3,6 @@ package net.opencurlybraces.android.projects.wifihandler;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.net.wifi.WifiConfiguration;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +11,7 @@ import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
+import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
 
 /**
  * Created by chris on 13/06/15.
@@ -103,13 +103,9 @@ public class SavedWifiListAdapter extends CursorAdapter {
     private String toStringStatus(final Context context, int status) {
         String wifiStatus = "";
         switch (status) {
-            case WifiConfiguration.Status.CURRENT:
+            case NetworkUtils.WifiAdapterStatus.CONNECTED:
                 wifiStatus = context.getString(R.string.connected_saved_wifi_status);
                 break;
-            case WifiConfiguration.Status.DISABLED:
-            case WifiConfiguration.Status.ENABLED:
-                break;
-
         }
         return wifiStatus;
     }

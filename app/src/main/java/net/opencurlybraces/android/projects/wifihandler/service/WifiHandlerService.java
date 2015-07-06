@@ -176,7 +176,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                         .EXTRA_SAVED_WIFI_NEW_STATE, -1);
 
                 startQuery(stateDisconnect, SavedWifi.STATUS + "=?", new String[]{String.valueOf
-                        (WifiConfiguration.Status.CURRENT)});
+                        (NetworkUtils.WifiAdapterStatus.CONNECTED)});
 
                 break;
 
@@ -199,9 +199,6 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
     }
 
-    private void disableWifiAdapter() {
-        mWifiManager.setWifiEnabled(false);
-    }
 
     /**
      * Issue an async Query given the selection params. Note that wifiState here is used to pass
@@ -406,11 +403,6 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     @Override
     public void onUpdateComplete(int token, int wifiState, int result) {
         Log.d(TAG, "onUpdateComplete: Async Update complete, wifiState=" + wifiState);
-
-        if (wifiState == WifiConfiguration.Status.DISABLED) {
-            disableWifiAdapter();
-            Log.d(TAG, "Disabling Wifi Adapter");
-        }
     }
 
     @Override

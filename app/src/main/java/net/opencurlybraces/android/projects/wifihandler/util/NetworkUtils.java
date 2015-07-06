@@ -32,6 +32,18 @@ public class NetworkUtils {
     private NetworkUtils() {
     }
 
+    /**
+     * Gathers the wifi adapter's states to use in receivers' #onReceive() callback.
+     */
+    public static class WifiAdapterStatus {
+        private WifiAdapterStatus() {
+        }
+
+        public static final int CONNECTED = 0;
+        public static final int DISABLED = 1;
+        public static final int DISCONNECTED = 2;
+    }
+
     private static final String TAG = "NetworkUtils";
 
     /**

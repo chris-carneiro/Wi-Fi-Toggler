@@ -10,6 +10,7 @@ import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
+import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 
 /**
@@ -56,23 +57,20 @@ public class WifiSupplicantStateReceiver extends BroadcastReceiver {
                         strippedSSID);
 
                 updateSavedWifiState.putExtra(WifiStateReceiver.EXTRA_SAVED_WIFI_NEW_STATE,
-                        WifiConfiguration.Status.CURRENT);
+                        NetworkUtils.WifiAdapterStatus.CONNECTED);
 
                 updateSavedWifiState.setAction(WifiHandlerService
                         .ACTION_HANDLE_SAVED_WIFI_UPDATE_CONNECT);
-
-                PrefUtils.setWifiConnected(context, true);
 
                 break;
             case DISCONNECTED:
                 Log.d(TAG, "DISCONNECTED supplicant state received=");
                 updateSavedWifiState.putExtra(WifiStateReceiver.EXTRA_SAVED_WIFI_NEW_STATE,
-                        WifiConfiguration
-                                .Status.DISABLED); //TODO change to ENABLED or create Enum with
+                        NetworkUtils.WifiAdapterStatus.DISCONNECTED); //TODO change to ENABLED or create Enum
+                        // with
 
                 updateSavedWifiState.setAction(WifiHandlerService
                         .ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT);
-                PrefUtils.setWifiConnected(context, false);
 
                 break;
             default:

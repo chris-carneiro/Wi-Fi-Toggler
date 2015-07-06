@@ -31,24 +31,6 @@ public class PrefUtils {
         return sp.getBoolean(PREF_WIFI_HANDLER_ACTIVE, false);
     }
 
-    public static void setWifiConnected(final Context context, boolean active) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_WIFI_CONNECTED, active).apply();
-    }
-
-    /**
-     * For some reason NetworkInfo.isConnected() returns false even if the wifi ap is actually
-     * associated and connected. <p>This method returns the value set by the {@link
-     * #setWifiConnected} </p>
-     *
-     * @param context
-     * @return
-     */
-    public static boolean isWifiConnected(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_WIFI_CONNECTED, false);
-    }
-
     public static void setAirplaneModeOn(final Context context, boolean on) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.edit().putBoolean(PREF_AIRPLANE_MODE_ON, on).apply();
