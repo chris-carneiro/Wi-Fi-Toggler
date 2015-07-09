@@ -166,23 +166,10 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                 handleSavedWifiInsert();
                 break;
             case ACTION_HANDLE_SAVED_WIFI_UPDATE_CONNECT:
-                String ssid = intent.getStringExtra(WifiConnectionStateReceiver
-                        .EXTRA_CURRENT_SSID);
-                ContentValues cv = new ContentValues();
-                cv.put(SavedWifi.STATUS, NetworkUtils.WifiAdapterStatus
-                        .CONNECTED);
-                mDataAsyncQueryHandler.startUpdate(TOKEN_UPDATE, 0, SavedWifi
-                                .CONTENT_URI,
-                        cv,
-                        SavedWifi.SSID + "=?", new String[]{ssid});
+                insertWifiConnected(intent);
                 break;
             case ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT:
-                ContentValues values = new ContentValues();
-                values.put(SavedWifi.STATUS, NetworkUtils.WifiAdapterStatus.DISCONNECTED);
-                mDataAsyncQueryHandler.startUpdate(TOKEN_UPDATE, 0, SavedWifi.CONTENT_URI,
-                        values,
-                        SavedWifi.STATUS + "=?", new String[]{String.valueOf(NetworkUtils
-                                .WifiAdapterStatus.CONNECTED)});
+                insertWifiDisconnected();
 
                 break;
 
@@ -190,6 +177,27 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
         return START_REDELIVER_INTENT;
 
+    }
+
+    private void insertWifiConnected(Intent intent) {
+        String ssid = intent.getStringExtra(WifiConnectionStateReceiver
+                .EXTRA_CURRENT_SSID);
+        ContentValues cv = new ContentValues();
+        cv.put(SavedWifi.STATUS, NetworkUtils.WifiAdapterStatus
+                .CONNECTED);
+        mDataAsyncQueryHandler.startUpdate(TOKEN_UPDATE, null, SavedWifi
+                        .CONTENT_URI,
+                cv,
+                SavedWifi.SSID + "=?", new String[]{ssid});
+    }
+
+    private void insertWifiDisconnected() {
+        ContentValues values = new ContentValues();
+        values.put(SavedWifi.STATUS, NetworkUtils.WifiAdapterStatus.DISCONNECTED);
+        mDataAsyncQueryHandler.startUpdate(TOKEN_UPDATE, null, SavedWifi.CONTENT_URI,
+                values,
+                SavedWifi.STATUS + "=?", new String[]{String.valueOf(NetworkUtils
+                        .WifiAdapterStatus.CONNECTED)});
     }
 
     private void handleSavedWifiInsert() {
@@ -408,7 +416,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
      * Issue an async update given the rowid params. Note that wifiState here is used to pass wifi
      * state value to the {@link #onQueryComplete(int, Object, Cursor)} callback
      *
-     * @param cookie an object that gets passed to {@link #onUpdateComplete(int, int, int)}, here
+     * @param cookie an object that gets passed to {@link #onUpdateComplete(int, Object, int)}, here
      *               the wifi state is passed
      * @param rowId  the row to update
      * @param uri
@@ -420,8 +428,8 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     }
 
     @Override
-    public void onUpdateComplete(int token, int wifiState, int result) {
-        Log.d(TAG, "onUpdateComplete: Async Update complete, wifiState=" + wifiState);
+    public void onUpdateComplete(int token, Object cookie, int result) {
+        Log.d(TAG, "onUpdateComplete: Async Update complete" );
     }
 
     @Override

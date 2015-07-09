@@ -125,10 +125,10 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
          * Called when an asynchronous update is completed.
          *
          * @param token  the token to identify the query, passed in from {@link #startQuery}.
-         * @param wifiState the wifiState passed in from {@link #startUpdate}.
+         * @param cookie
          * @param result The number of updated rows
          */
-        void onUpdateComplete(int token, int wifiState, int result);
+        void onUpdateComplete(int token, Object cookie, int result);
 
     }
 
@@ -159,7 +159,7 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
     protected void onUpdateComplete(int token, Object cookie, int result) {
         final AsyncQueryListener listener = mListener.get();
         if (listener != null) {
-            listener.onUpdateComplete(token, (int) cookie, result);
+            listener.onUpdateComplete(token, cookie, result);
         }
     }
 
