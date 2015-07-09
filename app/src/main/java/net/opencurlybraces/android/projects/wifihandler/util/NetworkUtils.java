@@ -143,6 +143,12 @@ public class NetworkUtils {
         return wifiInfo.getIpAddress() != 0;
     }
 
+    public static String getCurrentSSID(final Context context) {
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        return wifiInfo.getSSID();
+    }
+
     public static void buildAirplaneNotification(final Context context) {
         NotificationManager notifManager = (NotificationManager) context.getSystemService(Context
                 .NOTIFICATION_SERVICE);

@@ -10,6 +10,6 @@ import java.util.Comparator;
 public class WifiComparator implements Comparator<WifiConfiguration> {
     @Override
     public int compare(WifiConfiguration lhs, WifiConfiguration rhs) {
-        return lhs.SSID.compareTo(rhs.SSID);
+        return lhs.SSID.compareToIgnoreCase(rhs.SSID);
     }
 }
