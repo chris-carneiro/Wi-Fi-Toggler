@@ -151,7 +151,8 @@ public class SavedWifi implements BaseColumns {
         List<ContentProviderOperation> batch = new
                 ArrayList<>();
         for (WifiConfiguration wifi : configuredWifis) {
-            Log.d(TAG, "Saved Wifi ssid=" + wifi.SSID);
+            Log.d(TAG, "Saved Wifi ssid=" + wifi.SSID + (wifi.status == WifiConfiguration.Status
+                    .CURRENT ? " connected" : ""));
             ContentValues values = buildDefaultWifiContentValues(wifi);
             ContentProviderOperation.Builder builder = ContentProviderOperation.
                     newInsert(CONTENT_URI);
@@ -164,7 +165,7 @@ public class SavedWifi implements BaseColumns {
 
     private static ContentValues buildDefaultWifiContentValues(WifiConfiguration wifi) {
         ContentValues values = new ContentValues();
-        values.put(SavedWifi.SSID, wifi.SSID.replace("\"",""));
+        values.put(SavedWifi.SSID, wifi.SSID.replace("\"", ""));
         values.put(SavedWifi.AUTO_TOGGLE, 0);
         values.put(SavedWifi.OPEN_WIFI, 0);
         values.put(SavedWifi.PREFERRED, 0);

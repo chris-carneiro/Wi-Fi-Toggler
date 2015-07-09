@@ -4,8 +4,10 @@ import android.content.AsyncQueryHandler;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -105,7 +107,7 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
          *
          * @param token   the token to identify the query, passed in from {@link
          *                #startInsertBatch}.
-         * @param cookie  the cookie object passed in from {@link #startInsertBatch}.
+         * @param cookie  the cookie object passed in from {@link #startInsertBatch(int, Object, String, ArrayList)}.
          * @param results the results of the operations
          */
         void onInsertBatchComplete(int token, Object cookie, ContentProviderResult[]
@@ -124,11 +126,20 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
         /**
          * Called when an asynchronous update is completed.
          *
-         * @param token  the token to identify the query, passed in from {@link #startQuery}.
+         * @param token  the token to identify the query, passed in from {@link #startUpdate(int, Object, Uri, ContentValues, String, String[])}.
          * @param cookie
          * @param result The number of updated rows
          */
         void onUpdateComplete(int token, Object cookie, int result);
+
+        /**
+         * Called when an asynchronous delete is completed.
+         *
+         * @param token  the token to identify the query, passed in from {@link #startDelete(int, Object, Uri, String, String[])}.
+         * @param cookie
+         * @param result The number of updated rows
+         */
+//        void onDeleteComplete(int token, Object cookie, int result);
 
     }
 
@@ -154,6 +165,13 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
         }
     }
 
+//    @Override
+//    protected void onDeleteComplete(int token, Object cookie, int result) {
+//        final AsyncQueryListener listener = mListener.get();
+//        if (listener != null) {
+//            listener.onDeleteComplete(token, cookie, result);
+//        }
+//    }
 
     @Override
     protected void onUpdateComplete(int token, Object cookie, int result) {

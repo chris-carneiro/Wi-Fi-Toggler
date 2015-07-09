@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -59,11 +60,34 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
 
         @Override
         protected Void doInBackground(Void... params) {
-            handleScanResults(mWifiManager.getScanResults());
+            List<String> ssiDsFromDB = getSavedSSIDsFromDB();
+
+            handleScanResults(mWifiManager.getScanResults(), ssiDsFromDB);
+
+            removeUserUnwantedSavedWifi(ssiDsFromDB);
             return null;
         }
 
-        private void handleScanResults(List<ScanResult> availableWifiNetworks) {
+        /**
+         * Compare the list of saved wifi from db with the system user's saved wifis and remove from
+         * db the ones that aren't in the system anymore
+         *
+         * @param ssiDsFromDB
+         */
+        private void removeUserUnwantedSavedWifi(List<String> ssiDsFromDB) {
+            List<WifiConfiguration> savedWifis = mWifiManager.getConfiguredNetworks();
+            List<String> userSsids = extractSsidListFromSavedWifi(savedWifis);
+
+            for (String ssidDb : ssiDsFromDB) {
+                if (!userSsids.contains(ssidDb)) {
+                    mContext.getContentResolver().delete(SavedWifi.CONTENT_URI, SavedWifi.SSID +
+                            "=?", new String[]{ssidDb});
+                }
+            }
+        }
+
+        private void handleScanResults(List<ScanResult> availableWifiNetworks, List<String>
+                savedSsids) {
             List<String> savedSSIDsFromDb = getSavedSSIDsFromDB();
 
             if (savedSSIDsFromDb == null || availableWifiNetworks == null) {
@@ -85,6 +109,16 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
                     }
                 }
             }
+        }
+
+        private List<String> extractSsidListFromSavedWifi(List<WifiConfiguration> savedWifis) {
+            if (savedWifis == null || savedWifis.size() == 0) return null;
+            List<String> ssids = new ArrayList<>(savedWifis.size());
+            for (WifiConfiguration wifi : savedWifis) {
+                ssids.add(wifi.SSID.replace("\"", ""));
+            }
+
+            return ssids;
         }
 
         private List<String> getSavedSSIDsFromDB() {

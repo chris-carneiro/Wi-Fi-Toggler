@@ -28,10 +28,10 @@ public class WifiAdapterStateReceiver extends BroadcastReceiver {
                     Log.d(TAG, "WIFI_STATE_DISABLED Event received");
                     Intent updateSavedWifi = new Intent(context, WifiHandlerService
                             .class);
-                    updateSavedWifi.putExtra(WifiConnectionStateReceiver
-                                    .EXTRA_SAVED_WIFI_NEW_STATE, NetworkUtils
-                                    .WifiAdapterStatus.DISABLED
-                    );
+////                    updateSavedWifi.putExtra(WifiConnectionStateReceiver
+////                                    .EXTRA_SAVED_WIFI_NEW_STATE, NetworkUtils
+////                                    .WifiAdapterStatus.DISABLED
+//                    );
                     updateSavedWifi.setAction(WifiHandlerService
                             .ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT);
 

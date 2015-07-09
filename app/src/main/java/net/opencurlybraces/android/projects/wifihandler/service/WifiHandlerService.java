@@ -73,6 +73,9 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     public static final String ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT = SERVICE_ACTION_PREFIX +
             "ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT";
 
+    public static final String ACTION_HANDLE_INSERT_NEW_CONNECTED_WIFI = SERVICE_ACTION_PREFIX +
+            "ACTION_HANDLE_INSERT_NEW_CONNECTED_WIFI";
+
     private WifiManager mWifiManager;
     private WifiScanResultsReceiver mWifiScanResultsReceiver = null;
     private WifiAdapterStateReceiver mWifiAdapterStateReceiver = null;
@@ -84,8 +87,12 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
 
     private static final int TOKEN_QUERY = 1;
+    private static final int TOKEN_INSERT = 2;
     private static final int TOKEN_UPDATE = 3;
     private static final int TOKEN_INSERT_BATCH = 5;
+
+    private static final int QUERY_SINGLE_ROW = 100;
+
 
     @Override
     public void onCreate() {
@@ -166,20 +173,32 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                 handleSavedWifiInsert();
                 break;
             case ACTION_HANDLE_SAVED_WIFI_UPDATE_CONNECT:
-                insertWifiConnected(intent);
+                updateConnectedWifi(intent);
                 break;
             case ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT:
-                insertWifiDisconnected();
-
+                updateWifiDisconnected();
                 break;
-
+            case ACTION_HANDLE_INSERT_NEW_CONNECTED_WIFI:
+                insertNewConnectedWifi(intent);
+                break;
         }
 
         return START_REDELIVER_INTENT;
 
     }
 
-    private void insertWifiConnected(Intent intent) {
+    private void insertNewConnectedWifi(Intent intent) {
+        String ssidToInsert = intent.getStringExtra(WifiConnectionStateReceiver
+                .EXTRA_CURRENT_SSID);
+        ContentValues values = new ContentValues();
+        values.put(SavedWifi.SSID, ssidToInsert);
+        values.put(SavedWifi.STATUS, NetworkUtils.WifiAdapterStatus.CONNECTED);
+
+        mDataAsyncQueryHandler.startInsert(TOKEN_INSERT, null, SavedWifi.CONTENT_URI,
+                values);
+    }
+
+    private void updateConnectedWifi(Intent intent) {
         String ssid = intent.getStringExtra(WifiConnectionStateReceiver
                 .EXTRA_CURRENT_SSID);
         ContentValues cv = new ContentValues();
@@ -191,7 +210,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                 SavedWifi.SSID + "=?", new String[]{ssid});
     }
 
-    private void insertWifiDisconnected() {
+    private void updateWifiDisconnected() {
         ContentValues values = new ContentValues();
         values.put(SavedWifi.STATUS, NetworkUtils.WifiAdapterStatus.DISCONNECTED);
         mDataAsyncQueryHandler.startUpdate(TOKEN_UPDATE, null, SavedWifi.CONTENT_URI,
@@ -218,12 +237,12 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
      * Issue an async Query given the selection params. Note that wifiState here is used to pass
      * wifi state value to the #onQueryComplete callback
      *
-     * @param wifiState
+     * @param queryType
      * @param where
      * @param whereArgs
      */
-    private void startQuery(int wifiState, String where, String[] whereArgs) {
-        mDataAsyncQueryHandler.startQuery(TOKEN_QUERY, wifiState, SavedWifi.CONTENT_URI, PROJECTION,
+    private void startQuery(int queryType, String where, String[] whereArgs) {
+        mDataAsyncQueryHandler.startQuery(TOKEN_QUERY, queryType, SavedWifi.CONTENT_URI, PROJECTION,
                 where,
                 whereArgs, null);
     }
@@ -394,6 +413,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     @Override
     public void onQueryComplete(int token, Object cookie, Cursor cursor) {
         Log.d(TAG, "onQueryComplete: Query Complete token=" + token + " cookie=" + cookie);
+
         try {
             if (cursor == null || cursor.getCount() <= 0) return;
 
@@ -429,7 +449,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
     @Override
     public void onUpdateComplete(int token, Object cookie, int result) {
-        Log.d(TAG, "onUpdateComplete: Async Update complete" );
+        Log.d(TAG, "onUpdateComplete: Async Update complete");
     }
 
     @Override

@@ -141,7 +141,20 @@ public class WifiHandlerProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        throw new UnsupportedOperationException("Unimplemented method");
+        SQLiteDatabase sqlDB = mWifiHandlerDatabase.getWritableDatabase();
+        int deletedRows = 0;
+        switch (sURIMatcher.match(uri)) {
+            case CONFIGURED_WIFIS:
+                deletedRows = sqlDB.delete(SavedWifi.TABLE, selection, selectionArgs);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown URI: " + uri);
+        }
+        if( deletedRows > 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        return deletedRows;
     }
 
     @Override
