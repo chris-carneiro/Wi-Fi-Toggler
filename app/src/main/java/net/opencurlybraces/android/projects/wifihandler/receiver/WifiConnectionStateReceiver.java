@@ -30,9 +30,9 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver {
 
 
         if (PrefUtils.isWifiHandlerActive(context)) {
-            //            SupplicantState state = intent.getParcelableExtra(WifiManager
-            // .EXTRA_NEW_STATE);
-            Intent updateSavedWifiState = buildIntentForWifiConnectionState(context);
+             SupplicantState state = intent.getParcelableExtra(WifiManager
+             .EXTRA_NEW_STATE);
+            Intent updateSavedWifiState = buildIntentForWifiState(context, state);
             if (updateSavedWifiState == null || updateSavedWifiState.getAction() == null)
                 return;
 
@@ -85,39 +85,5 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver {
     }
 
 
-    private Intent buildIntentForWifiConnectionState(final Context context) {
-        ConnectivityManager connection = (ConnectivityManager) context.getSystemService(Context
-                .CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connection.getActiveNetworkInfo();
-        Intent updateSavedWifiState = new Intent(context,
-                WifiHandlerService.class);
-        if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-            NetworkInfo.DetailedState state = networkInfo.getDetailedState();
 
-            Log.d(TAG, "state=" + state);
-            if (NetworkInfo.DetailedState.CONNECTED == state) {
-                String strippedSSID = NetworkUtils.getCurrentSSID(context).replace("\"", "");
-                //                String ssid = NetworkUtils.getCurrentSSID(context);
-                Log.d(TAG, "Wifi connected=" + strippedSSID);
-                updateSavedWifiState.putExtra(EXTRA_CURRENT_SSID, strippedSSID
-                );
-
-                updateSavedWifiState.putExtra(WifiConnectionStateReceiver.EXTRA_SAVED_WIFI_NEW_STATE,
-                        NetworkUtils.WifiAdapterStatus.CONNECTED);
-
-                updateSavedWifiState.setAction(WifiHandlerService
-                        .ACTION_HANDLE_SAVED_WIFI_UPDATE_CONNECT);
-                return updateSavedWifiState;
-            } else {
-                updateSavedWifiState.putExtra(WifiConnectionStateReceiver.EXTRA_SAVED_WIFI_NEW_STATE,
-                        NetworkUtils.WifiAdapterStatus.DISCONNECTED);
-
-                updateSavedWifiState.setAction(WifiHandlerService
-                        .ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT);
-                Log.d(TAG, "not connected");
-                return updateSavedWifiState;
-            }
-        }
-        return null;
-    }
 }

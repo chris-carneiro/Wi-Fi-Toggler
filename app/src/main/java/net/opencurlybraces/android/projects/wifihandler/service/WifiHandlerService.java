@@ -12,7 +12,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
@@ -26,6 +25,7 @@ import net.opencurlybraces.android.projects.wifihandler.SavedWifiListActivity;
 import net.opencurlybraces.android.projects.wifihandler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifihandler.data.provider.WifiHandlerContract;
 import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
+import net.opencurlybraces.android.projects.wifihandler.receiver.WifiAdapterStateReceiver;
 import net.opencurlybraces.android.projects.wifihandler.receiver.WifiConnectionStateReceiver;
 import net.opencurlybraces.android.projects.wifihandler.receiver.WifiScanResultsReceiver;
 import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
@@ -75,7 +75,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
     private WifiManager mWifiManager;
     private WifiScanResultsReceiver mWifiScanResultsReceiver = null;
-    //    private WifiStateReceiver mWifiStateReceiver = null;
+    private WifiAdapterStateReceiver mWifiAdapterStateReceiver = null;
     private WifiConnectionStateReceiver mWifiConnectionStateReceiver = null;
     private static final int NOTIFICATION_ID = 100;
     private static final String[] PROJECTION = new String[]{SavedWifi._ID, SavedWifi
@@ -95,7 +95,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
         lazyInit();
 
         registerScanResultReceiver();
-        //        registerWifiStateReceiver();
+        registerWifiStateReceiver();
         registerWifiSupplicantStateReceiver();
 
     }
@@ -110,9 +110,9 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
             mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(), this);
         }
 
-        //        if (mWifiStateReceiver == null) {
-        //            mWifiStateReceiver = new WifiStateReceiver();
-        //        }
+        if (mWifiAdapterStateReceiver == null) {
+            mWifiAdapterStateReceiver = new WifiAdapterStateReceiver();
+        }
 
         if (mWifiConnectionStateReceiver == null) {
             mWifiConnectionStateReceiver = new WifiConnectionStateReceiver();
@@ -126,7 +126,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     public void onDestroy() {
         Log.d(TAG, "OnDestroy");
         unregisterReceiver(mWifiScanResultsReceiver);
-        //        unregisterReceiver(mWifiStateReceiver);
+        unregisterReceiver(mWifiAdapterStateReceiver);
         unregisterReceiver(mWifiConnectionStateReceiver);
     }
 
@@ -166,13 +166,6 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                 handleSavedWifiInsert();
                 break;
             case ACTION_HANDLE_SAVED_WIFI_UPDATE_CONNECT:
-                //                String ssid = intent.getStringExtra(WifiConnectionStateReceiver
-                // .EXTRA_CURRENT_SSID);
-                //                int newState = intent.getIntExtra(WifiConnectionStateReceiver
-                //                        .EXTRA_SAVED_WIFI_NEW_STATE, -1);
-                //
-                //                getConnectedWifiToUpdateFromDB(newState, SavedWifi.SSID + "=?",
-                // new String[]{ssid});
                 String ssid = intent.getStringExtra(WifiConnectionStateReceiver
                         .EXTRA_CURRENT_SSID);
                 ContentValues cv = new ContentValues();
@@ -184,14 +177,6 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                         SavedWifi.SSID + "=?", new String[]{ssid});
                 break;
             case ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT:
-                //                int stateDisconnect = intent.getIntExtra
-                // (WifiConnectionStateReceiver
-                //                        .EXTRA_SAVED_WIFI_NEW_STATE, -1);
-                //
-                //                getConnectedWifiToUpdateFromDB(stateDisconnect, SavedWifi
-                // .STATUS + "=?", new
-                //                        String[]{String.valueOf(NetworkUtils.WifiAdapterStatus
-                // .CONNECTED)});
                 ContentValues values = new ContentValues();
                 values.put(SavedWifi.STATUS, NetworkUtils.WifiAdapterStatus.DISCONNECTED);
                 mDataAsyncQueryHandler.startUpdate(TOKEN_UPDATE, 0, SavedWifi.CONTENT_URI,
@@ -205,20 +190,6 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
         return START_REDELIVER_INTENT;
 
-    }
-
-    /**
-     * Fetches asynchronously from DB a saved wifi to be updated. {@link #onQueryComplete(int,
-     * Object, Cursor)} ()} is called back and the update can be performed using the callback
-     * arguments
-     *
-     * @param newState  the saved wifi new state, to be used as a param in the {@link #startUpdate}
-     *                  query
-     * @param where
-     * @param whereArgs
-     */
-    private void getConnectedWifiToUpdateFromDB(int newState, String where, String[] whereArgs) {
-        startQuery(newState, where, whereArgs);
     }
 
     private void handleSavedWifiInsert() {
@@ -278,19 +249,18 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     }
 
 
-    //    private void registerWifiStateReceiver() {
-    //        Log.d(TAG, "registerWifiStateReceiver");
-    //        IntentFilter wifiStateFilter = new IntentFilter();
-    //        wifiStateFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-    //
-    //        registerReceiver(mWifiStateReceiver, wifiStateFilter);
-    //    }
+    private void registerWifiStateReceiver() {
+        Log.d(TAG, "registerWifiStateReceiver");
+        IntentFilter wifiStateFilter = new IntentFilter();
+        wifiStateFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+
+        registerReceiver(mWifiAdapterStateReceiver, wifiStateFilter);
+    }
 
     private void registerWifiSupplicantStateReceiver() {
         Log.d(TAG, "registerWifiSupplicantStateReceiver");
         IntentFilter wifiSupplicantFilter = new IntentFilter();
-        wifiSupplicantFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-
+        wifiSupplicantFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         registerReceiver(mWifiConnectionStateReceiver, wifiSupplicantFilter);
     }
 
