@@ -3,11 +3,14 @@ package net.opencurlybraces.android.projects.wifihandler.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 /**
  * Created by chris on 12/06/15.
  */
 public class PrefUtils {
+
+    private static final String TAG = "PrefUtils";
 
     private static final String PREF_PREFIX = "net.opencurlybraces.android.projects.wifihandler" +
             ".prefs.";
@@ -27,6 +30,7 @@ public class PrefUtils {
     }
 
     public static boolean isWifiHandlerActive(final Context context) {
+        Log.d(TAG, "isWifiHandlerActive");
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getBoolean(PREF_WIFI_HANDLER_ACTIVE, false);
     }

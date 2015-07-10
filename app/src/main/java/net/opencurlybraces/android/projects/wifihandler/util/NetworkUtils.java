@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.NetworkInfo;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -54,14 +55,15 @@ public class NetworkUtils {
      * alphabetical order according to SSIDs</p>
      *
      * @param wifiManager
-     * @param listener
+     * @param callback
      */
-    public static void getConfiguredWifis(@NonNull final WifiManager
-                                                  wifiManager,
-                                          @NonNull final
-                                          SavedWifiConfigurationListener
-                                                  listener) {
+    public static void getSavedWifiAsync(@NonNull final WifiManager
+                                                 wifiManager,
+                                         @NonNull final
+                                         SavedWifiConfigurationListener
+                                                 callback) {
 
+        Log.d(TAG, "getSavedWifiAsync");
         new AsyncTask<Void, Void, List<WifiConfiguration>>() {
 
             @Override
@@ -98,7 +100,7 @@ public class NetworkUtils {
 
             @Override
             protected void onPostExecute(List<WifiConfiguration> savedWifis) {
-                listener.onSavedWifiLoaded(savedWifis);
+                callback.onSavedWifiLoaded(savedWifis);
             }
         }.execute();
     }
@@ -138,15 +140,40 @@ public class NetworkUtils {
      * @return
      */
     public static boolean isWifiConnected(final Context context) {
+        Log.d(TAG, "isWifiConnected");
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
         return wifiInfo.getIpAddress() != 0;
     }
 
-    public static String getCurrentSSID(final Context context) {
+    public static boolean isWifiEnabled(final Context context) {
+        Log.d(TAG, "isWifiEnabled");
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-        return wifiInfo.getSSID();
+        return wifiManager.isWifiEnabled();
+    }
+
+    public static void disableWifiAdapter(final Context context) {
+        Log.d(TAG, "disableWifiAdapter");
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        wifiManager.setWifiEnabled(false);
+    }
+
+    public static void enableWifiAdapter(final Context context) {
+        Log.d(TAG, "enableWifiAdapter");
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        wifiManager.setWifiEnabled(true);
+    }
+
+    public static List<WifiConfiguration> getSavedWifiSync(final Context context) {
+        Log.d(TAG, "getSavedWifiSync");
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        return wifiManager.getConfiguredNetworks();
+    }
+
+    public static List<ScanResult> getAvailableWifi(final Context context) {
+        Log.d(TAG, "getAvailableWifi");
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        return wifiManager.getScanResults();
     }
 
     public static void buildAirplaneNotification(final Context context) {
@@ -174,6 +201,7 @@ public class NetworkUtils {
 
 
     public static void dismissNotification(final Context context, int notificationId) {
+        Log.d(TAG, "dismissNotification notificationID=" + notificationId);
         NotificationManager notifManager = (NotificationManager) context.getSystemService(Context
                 .NOTIFICATION_SERVICE);
 

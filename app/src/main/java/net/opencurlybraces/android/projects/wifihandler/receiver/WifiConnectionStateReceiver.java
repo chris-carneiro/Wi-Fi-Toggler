@@ -15,6 +15,7 @@ import android.util.Log;
 import net.opencurlybraces.android.projects.wifihandler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
+import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 
 /**
@@ -40,25 +41,24 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
 
 
         if (PrefUtils.isWifiHandlerActive(context)) {
-            if (mDataAsyncQueryHandler == null) {
-                mDataAsyncQueryHandler = new DataAsyncQueryHandler(context.getContentResolver(),
-                        this);
-            }
-            if (mContext == null) {
-                mContext = context;
-            }
+            lazyInit(context);
             SupplicantState state = intent.getParcelableExtra(WifiManager
                     .EXTRA_NEW_STATE);
             updateCurrentWifiState(context, state);
-            //            if (updateSavedWifiState == null || updateSavedWifiState.getAction() ==
-            // null)
-            //                return;
-            //
-            //            context.startService(updateSavedWifiState);
         } else {
             Log.d(TAG, "WifiHandler inactive ignoring SupplicantStateChanged events");
         }
 
+    }
+
+    private void lazyInit(Context context) {
+        if (mDataAsyncQueryHandler == null) {
+            mDataAsyncQueryHandler = new DataAsyncQueryHandler(context.getContentResolver(),
+                    this);
+        }
+        if (mContext == null) {
+            mContext = context;
+        }
     }
 
     private void updateCurrentWifiState(final Context context,
@@ -76,6 +76,7 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
                 mDataAsyncQueryHandler.startQuery(1, strippedSSID, SavedWifi.CONTENT_URI,
                         PROJECTION_SSID,
                         SavedWifi.SSID + "=?", new String[]{strippedSSID}, null);
+                break;
             case DISCONNECTED:
                 Log.d(TAG, "DISCONNECTED supplicant state received=");
                 //                updateSavedWifiState.putExtra(EXTRA_SAVED_WIFI_NEW_STATE,
@@ -85,6 +86,7 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
                 disconnectSavedWifi.setAction(WifiHandlerService
                         .ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT);
                 context.startService(disconnectSavedWifi);
+                NetworkUtils.disableWifiAdapter(context);
                 break;
             default:
                 // Ignore other wifi states
