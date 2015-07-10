@@ -76,7 +76,9 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
          */
         private void removeUserUnwantedSavedWifi(List<String> ssiDsFromDB) {
             List<WifiConfiguration> savedWifis = mWifiManager.getConfiguredNetworks();
+            if (savedWifis == null) return;
             List<String> userSsids = extractSsidListFromSavedWifi(savedWifis);
+            //TODO add robustness
 
             for (String ssidDb : ssiDsFromDB) {
                 if (!userSsids.contains(ssidDb)) {
@@ -87,8 +89,7 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
         }
 
         private void handleScanResults(List<ScanResult> availableWifiNetworks, List<String>
-                savedSsids) {
-            List<String> savedSSIDsFromDb = getSavedSSIDsFromDB();
+                savedSSIDsFromDb) {
 
             if (savedSSIDsFromDb == null || availableWifiNetworks == null) {
                 return;
