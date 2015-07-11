@@ -75,7 +75,7 @@ public class WifiHandlerProvider extends ContentProvider {
         String orderBy;
 
         if (TextUtils.isEmpty(sortOrder)) {
-            orderBy = "status ASC";
+            orderBy = "status ASC, ssid COLLATE NOCASE ASC";
         } else {
             orderBy = sortOrder;
         }

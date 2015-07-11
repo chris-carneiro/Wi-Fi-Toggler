@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -45,7 +46,7 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
      * TODO add a receiver for WIFI_AP_STATE_CHANGED set in sharedPreferences the state of the
      * hotspot ap(active or not), at app first launch if active: ask user to disable hotspot.
      */
-    private static class ScanResultAsyncHandler extends AsyncTask<Void, Void, Void> {
+    private static class ScanResultAsyncHandler extends AsyncTask<Void, Void, Boolean> {
         private final Context mContext;
 
         private static final String[] PROJECTION = new String[]{SavedWifi.SSID};
@@ -55,17 +56,25 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
-            android.os.Debug.waitForDebugger();
+        protected Boolean doInBackground(Void... params) {
+            //            android.os.Debug.waitForDebugger(); THIS IS EVIL
             List<String> ssiDsFromDB = getSavedSSIDsFromDB();
             List<ScanResult> availableWifis = NetworkUtils.getAvailableWifi(mContext);
             if (availableWifis == null) {
-                throw new NullPointerException();
+                return false;
             }
-            handleScanResults(availableWifis, ssiDsFromDB);
+            boolean enableWifiAdapter = savedWifiInRange(availableWifis, ssiDsFromDB);
 
             removeUserUnwantedSavedWifi(ssiDsFromDB);
-            return null;
+            return enableWifiAdapter;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean enableWifi) {
+            Log.d(TAG, "enableWifi=" + enableWifi);
+            if (enableWifi) {
+                NetworkUtils.enableWifiAdapter(mContext);
+            }
         }
 
         /**
@@ -77,7 +86,7 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
         private void removeUserUnwantedSavedWifi(List<String> ssiDsFromDB) {
             List<WifiConfiguration> savedWifis = NetworkUtils.getSavedWifiSync(mContext);
             if (savedWifis == null) {
-                throw new NullPointerException();
+                return;
             }
             List<String> userSsids = extractSsidListFromSavedWifi(savedWifis);
             //TODO add robustness
@@ -90,37 +99,32 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             }
         }
 
-        private void handleScanResults(List<ScanResult> availableWifiNetworks, List<String>
+        private boolean savedWifiInRange(List<ScanResult> availableWifiNetworks, List<String>
                 savedSSIDsFromDb) {
-            Log.d(TAG, "handleScanResults availableWifiNetworks=" + (availableWifiNetworks !=
+            Log.d(TAG, "savedWifiInRange availableWifiNetworks=" + (availableWifiNetworks !=
                     null) +
                     " savedSSIDsFromDb=" + (savedSSIDsFromDb != null));
             if (savedSSIDsFromDb == null || availableWifiNetworks == null) {
-                return;
+                return false;
             }
             for (ScanResult wifiNetwork : availableWifiNetworks) {
                 for (String savedWifi : savedSSIDsFromDb) {
-                    //                    Log.d(TAG, "savedWifi=" + savedWifi);
                     if (savedWifi.equals(wifiNetwork.SSID)) {
                         Log.d(TAG, "Signal Strength=" + wifiNetwork.level + " mSSID=" +
                                 wifiNetwork
                                         .SSID);
                         if (wifiNetwork.level >= SIGNAL_STRENGTH_THRESHOLD) {
-                                NetworkUtils.enableWifiAdapter(mContext);
-                            return;
+                            return true;
                         }
-//                        else {
-//                            if (!NetworkUtils.isWifiConnected(mContext)) {
-//                                NetworkUtils.disableWifiAdapter(mContext);
-//                            }
-//                        }
                     }
                 }
             }
+            return false;
         }
 
         private List<String> extractSsidListFromSavedWifi(List<WifiConfiguration> savedWifis) {
             if (savedWifis == null || savedWifis.size() == 0) return null;
+
             List<String> ssids = new ArrayList<>(savedWifis.size());
             for (WifiConfiguration wifi : savedWifis) {
                 ssids.add(wifi.SSID.replace("\"", ""));

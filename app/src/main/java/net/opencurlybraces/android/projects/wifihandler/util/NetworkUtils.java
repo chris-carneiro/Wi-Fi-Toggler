@@ -22,7 +22,6 @@ import net.opencurlybraces.android.projects.wifihandler.R;
 import net.opencurlybraces.android.projects.wifihandler.SavedWifiListActivity;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -51,8 +50,7 @@ public class NetworkUtils {
      * Helper method to request from the system, user's configured Wifis. Should be executed on a
      * worker thread. <BR/> As wifi must be enabled to get the configured networks, the wifi adapter
      * is enabled (Uses {@link android.net.wifi.WifiManager.WifiLock}) and disabled right away in
-     * order to always get user's configured Wifis (if any).<p>Note that, the list is sorted in
-     * alphabetical order according to SSIDs</p>
+     * order to always get user's configured Wifis (if any).
      *
      * @param wifiManager
      * @param callback
@@ -71,9 +69,6 @@ public class NetworkUtils {
                 List<WifiConfiguration> configuredWifis = null;
 
                 if (!wifiManager.isWifiEnabled()) {
-                    //            if (isHotspotOn(wifiManager)) {
-                    //                disableHotspot(wifiManager);
-                    //            }
                     if (wifiManager.setWifiEnabled(true)) {
                         WifiManager.WifiLock wifiLock = wifiManager.createWifiLock(WifiManager
                                 .WIFI_MODE_SCAN_ONLY, null);
@@ -93,7 +88,6 @@ public class NetworkUtils {
                 } else {
                     configuredWifis = wifiManager.getConfiguredNetworks();
                 }
-                Collections.sort(configuredWifis, new WifiComparator());
 
                 return configuredWifis;
             }

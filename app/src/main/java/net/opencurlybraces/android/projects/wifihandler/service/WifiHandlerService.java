@@ -88,7 +88,6 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     private static final int TOKEN_INSERT_BATCH = 5;
 
 
-
     @Override
     public void onCreate() {
         Log.d(TAG, "OnCreate");
@@ -174,6 +173,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                 updateWifiDisconnected();
                 break;
             case ACTION_HANDLE_INSERT_NEW_CONNECTED_WIFI:
+                //TODO maybe here notify the user the new ssid is now auto toggle
                 insertNewConnectedWifi(intent);
                 break;
         }
@@ -226,41 +226,6 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                 .AUTHORITY, batch);
 
     }
-
-
-//    /**
-//     * Issue an async Query given the selection params. Note that wifiState here is used to pass
-//     * wifi state value to the #onQueryComplete callback
-//     *
-//     * @param queryType
-//     * @param where
-//     * @param whereArgs
-//     */
-//    private void startQuery(int queryType, String where, String[] whereArgs) {
-//        mDataAsyncQueryHandler.startQuery(TOKEN_QUERY, queryType, SavedWifi.CONTENT_URI, PROJECTION,
-//                where,
-//                whereArgs, null);
-//    }
-//
-//    private String getRowIdFromCursor(final Cursor cursor) {
-//        String rowId = null;
-//        try {
-//            if (cursor != null) {
-//                if (cursor.getCount() > 1) {
-//                    return null;
-//                }
-//                if (cursor.moveToFirst()) {
-//                    rowId = cursor.getString(0);
-//                    cursor.close();
-//                }
-//            }
-//        } finally {
-//            if (cursor != null) {
-//                cursor.close();
-//            }
-//        }
-//        return rowId;
-//    }
 
     private void registerScanResultReceiver() {
         Log.d(TAG, "registerScanResultReceiver");
@@ -409,38 +374,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     public void onQueryComplete(int token, Object cookie, Cursor cursor) {
         Log.d(TAG, "onQueryComplete: Query Complete token=" + token + " cookie=" + cookie);
 
-//        try {
-//            if (cursor == null || cursor.getCount() <= 0) return;
-//
-//            String rowId = getRowIdFromCursor(cursor);
-//
-//            Uri uri = SavedWifi.buildConfiguredWifiUri(rowId);
-//
-//            ContentValues value = new ContentValues(1);
-//            value.put(SavedWifi.STATUS, (int) cookie);
-//
-//            startUpdate(cookie, rowId, uri, value);
-//        } finally {
-//            if (cursor != null) {
-//                cursor.close();
-//            }
-//        }
     }
-//
-//    /**
-//     * Issue an async update given the rowid params. Note that wifiState here is used to pass wifi
-//     * state value to the {@link #onQueryComplete(int, Object, Cursor)} callback
-//     *
-//     * @param cookie an object that gets passed to {@link #onUpdateComplete(int, Object, int)}, here
-//     *               the wifi state is passed
-//     * @param rowId  the row to update
-//     * @param uri
-//     * @param value
-//     */
-//    private void startUpdate(Object cookie, String rowId, Uri uri, ContentValues value) {
-//        mDataAsyncQueryHandler.startUpdate(TOKEN_UPDATE, cookie, uri, value, SavedWifi
-//                ._ID + "=?", new String[]{rowId});
-//    }
 
     @Override
     public void onUpdateComplete(int token, Object cookie, int result) {

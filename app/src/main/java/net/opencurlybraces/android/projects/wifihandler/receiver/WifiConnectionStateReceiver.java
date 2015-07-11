@@ -33,7 +33,7 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
     private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
     private static final String[] PROJECTION_SSID = new String[]{SavedWifi._ID, SavedWifi
             .SSID};
-
+    private static final String UNKNOWN_SSID = "<unknown ssid>";
     private Context mContext = null;
 
     @Override
@@ -79,8 +79,6 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
                 break;
             case DISCONNECTED:
                 Log.d(TAG, "DISCONNECTED supplicant state received=");
-                //                updateSavedWifiState.putExtra(EXTRA_SAVED_WIFI_NEW_STATE,
-                //                        NetworkUtils.WifiAdapterStatus.DISCONNECTED);
                 Intent disconnectSavedWifi = new Intent(context,
                         WifiHandlerService.class);
                 disconnectSavedWifi.setAction(WifiHandlerService
@@ -103,7 +101,7 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
 
     @Override
     public void onQueryComplete(int token, Object availableSsid, Cursor cursor) {
-
+        if (UNKNOWN_SSID.equals(availableSsid)) return;
         String ssidFromDB = connectedWifiExistInDB(cursor);
 
         Intent insertSavedWifiState = buildUpdateIntentAccordingSsidValue((String) availableSsid,
