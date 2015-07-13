@@ -19,7 +19,7 @@ import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifihandler.Config;
 import net.opencurlybraces.android.projects.wifihandler.R;
-import net.opencurlybraces.android.projects.wifihandler.SavedWifiListActivity;
+import net.opencurlybraces.android.projects.wifihandler.ui.SavedWifiListActivity;
 
 import java.lang.reflect.Method;
 import java.util.List;

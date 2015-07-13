@@ -20,7 +20,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifihandler.R;
-import net.opencurlybraces.android.projects.wifihandler.SavedWifiListActivity;
+import net.opencurlybraces.android.projects.wifihandler.ui.SavedWifiListActivity;
 import net.opencurlybraces.android.projects.wifihandler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifihandler.data.provider.WifiHandlerContract;
 import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;

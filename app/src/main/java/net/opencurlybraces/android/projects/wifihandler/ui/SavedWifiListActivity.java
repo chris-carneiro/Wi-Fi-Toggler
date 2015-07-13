@@ -1,4 +1,4 @@
-package net.opencurlybraces.android.projects.wifihandler;
+package net.opencurlybraces.android.projects.wifihandler.ui;
 
 import android.app.AlertDialog;
 import android.app.LoaderManager;
@@ -25,6 +25,8 @@ import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import net.opencurlybraces.android.projects.wifihandler.Config;
+import net.opencurlybraces.android.projects.wifihandler.R;
 import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifihandler.io.WifiLockedOffException;
 import net.opencurlybraces.android.projects.wifihandler.receiver.AirplaneModeStateReceiver;
@@ -177,13 +179,18 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            handleDisplaySettings();
             return true;
         }
 
-        return super.onOptionsItemSelected(item);
+        return false;
+    }
+
+    private void handleDisplaySettings() {
+        Intent preferencesIntent = new Intent(this, SettingsActivity.class);
+        startActivity(preferencesIntent);
     }
 
     @Override

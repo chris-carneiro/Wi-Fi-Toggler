@@ -1,4 +1,4 @@
-package net.opencurlybraces.android.projects.wifihandler;
+package net.opencurlybraces.android.projects.wifihandler.ui;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
+import net.opencurlybraces.android.projects.wifihandler.R;
 import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
 
