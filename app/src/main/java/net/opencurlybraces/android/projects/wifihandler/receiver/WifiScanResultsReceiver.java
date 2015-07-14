@@ -12,6 +12,7 @@ import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
+import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,8 +37,18 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             Log.d(TAG, "SCAN_RESULTS received");
             new ScanResultAsyncHandler(context).execute();
         } else {
-            Log.d(TAG, "already connected");
-
+            Log.d(TAG, "already connected checking wifi strength");
+            WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            int rssi = wifiManager.getConnectionInfo().getRssi();
+            int signalStrength = WifiManager.calculateSignalLevel
+                    (rssi, 5);
+            Log.d(TAG, "wifi Strength=" + signalStrength + " threshold=" + PrefUtils
+                    .getWifiSignalStrengthThreshold
+                    (context));
+            if (signalStrength < PrefUtils.getWifiSignalStrengthThreshold
+                    (context)) {
+                NetworkUtils.disableWifiAdapter(context);
+            }
         }
 
     }
@@ -74,6 +85,11 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             Log.d(TAG, "enableWifi=" + enableWifi);
             if (enableWifi) {
                 NetworkUtils.enableWifiAdapter(mContext);
+            } else {
+                if (NetworkUtils.isWifiEnabled(mContext)) {
+
+                    NetworkUtils.disableWifiAdapter(mContext);
+                }
             }
         }
 
@@ -113,7 +129,14 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
                         Log.d(TAG, "Signal Strength=" + wifiNetwork.level + " mSSID=" +
                                 wifiNetwork
                                         .SSID);
-                        if (wifiNetwork.level >= SIGNAL_STRENGTH_THRESHOLD) {
+                        Log.d(TAG, "Wifi Signal strength level=" + WifiManager.calculateSignalLevel
+                                (wifiNetwork.level, 5) + " Threshold=" + PrefUtils
+                                .getWifiSignalStrengthThreshold
+                                (mContext));
+                        int signalStrength = WifiManager.calculateSignalLevel
+                                (wifiNetwork.level, 5);
+                        if (signalStrength >= PrefUtils.getWifiSignalStrengthThreshold
+                                (mContext)) {
                             return true;
                         }
                     }

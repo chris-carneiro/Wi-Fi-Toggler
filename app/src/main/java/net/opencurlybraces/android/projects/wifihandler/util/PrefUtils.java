@@ -23,6 +23,11 @@ public class PrefUtils {
 
     public static final String PREF_RUN_AT_STARTUP = PREF_PREFIX + "run_at_startup";
 
+    public static final String PREF_WARNING_NOTIFICATIONS = PREF_PREFIX + "warning_notifications";
+
+    public static final String PREF_SIGNAL_STRENGTH_THRESHOLD = PREF_PREFIX +
+            "signal_quality_threshold";
+
     private PrefUtils() {
     }
 
@@ -50,7 +55,17 @@ public class PrefUtils {
     public static boolean isRunAtStartupEnabled(final Context context) {
         Log.d(TAG, "isRunAtStartupEnabled");
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_RUN_AT_STARTUP, false);
+        return sp.getBoolean(PREF_RUN_AT_STARTUP, true);
+    }
+
+    public static boolean areWarningNotificationsEnabled(final Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getBoolean(PREF_WARNING_NOTIFICATIONS, true);
+    }
+
+    public static int getWifiSignalStrengthThreshold(final Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return Integer.parseInt(sp.getString(PREF_SIGNAL_STRENGTH_THRESHOLD, "2"));
     }
 
 }

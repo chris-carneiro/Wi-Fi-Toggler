@@ -89,7 +89,9 @@ public class SavedWifiListActivity extends AppCompatActivity implements
                     .EXTRAS_AIRPLANE_MODE_STATE, false);
 
             if (isAirplaneModeOn) {
-                NetworkUtils.buildAirplaneNotification(context);
+                if (PrefUtils.areWarningNotificationsEnabled(context)) {
+                    NetworkUtils.buildAirplaneNotification(context);
+                }
                 mBanner.setVisibility(View.VISIBLE);
             } else {
                 mWifiHandlerActivationSwitch.setEnabled(true);
