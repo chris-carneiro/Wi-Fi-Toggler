@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.opencurlybraces.android.projects.wifihandler.Config;
+
 /**
  * Created by chris on 12/06/15.
  */
@@ -65,7 +67,8 @@ public class PrefUtils {
 
     public static int getWifiSignalStrengthThreshold(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return Integer.parseInt(sp.getString(PREF_SIGNAL_STRENGTH_THRESHOLD, "2"));
+        return Integer.parseInt(sp.getString(PREF_SIGNAL_STRENGTH_THRESHOLD, Config
+                .DEFAULT_SIGNAL_STRENGTH_THRESHOLD));
     }
 
 }

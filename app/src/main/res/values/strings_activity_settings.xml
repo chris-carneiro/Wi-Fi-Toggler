@@ -12,10 +12,10 @@
     <string name="pref_title_signal_quality_threshold">Signal quality threshold before
         toggling</string>
     <string-array name="pref_wifi_signal_quality_list_values">
+        <item>6</item>
         <item>4</item>
-        <item>3</item>
         <item>2</item>
-        <item>1</item>
+        <item>0</item>
     </string-array>
 
     <string-array name="pref_wifi_signal_quality_list_titles">

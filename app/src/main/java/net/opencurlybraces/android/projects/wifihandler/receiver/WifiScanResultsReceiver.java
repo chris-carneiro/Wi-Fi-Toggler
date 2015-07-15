@@ -10,6 +10,7 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import net.opencurlybraces.android.projects.wifihandler.Config;
 import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
@@ -26,7 +27,6 @@ import java.util.List;
  */
 public class WifiScanResultsReceiver extends BroadcastReceiver {
     private static final String TAG = "WifiScanResultsReceiver";
-    private static final int SIGNAL_STRENGTH_THRESHOLD = -85;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -41,10 +41,10 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
             int rssi = wifiManager.getConnectionInfo().getRssi();
             int signalStrength = WifiManager.calculateSignalLevel
-                    (rssi, 5);
+                    (rssi, Config.WIFI_SIGNAL_STRENGTHLEVELS);
             Log.d(TAG, "wifi Strength=" + signalStrength + " threshold=" + PrefUtils
                     .getWifiSignalStrengthThreshold
-                    (context));
+                            (context));
             if (signalStrength < PrefUtils.getWifiSignalStrengthThreshold
                     (context)) {
                 NetworkUtils.disableWifiAdapter(context);
@@ -130,11 +130,11 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
                                 wifiNetwork
                                         .SSID);
                         Log.d(TAG, "Wifi Signal strength level=" + WifiManager.calculateSignalLevel
-                                (wifiNetwork.level, 5) + " Threshold=" + PrefUtils
+                                (wifiNetwork.level, Config.WIFI_SIGNAL_STRENGTHLEVELS) + " Threshold=" + PrefUtils
                                 .getWifiSignalStrengthThreshold
-                                (mContext));
+                                        (mContext));
                         int signalStrength = WifiManager.calculateSignalLevel
-                                (wifiNetwork.level, 5);
+                                (wifiNetwork.level, Config.WIFI_SIGNAL_STRENGTHLEVELS);
                         if (signalStrength >= PrefUtils.getWifiSignalStrengthThreshold
                                 (mContext)) {
                             return true;
