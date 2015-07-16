@@ -57,6 +57,10 @@
             android:name=".ui.SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
+        <activity
+            android:name=".ui.StartupCheckActivity"
+            android:label="@string/title_activity_startup_check" >
+        </activity>
     </application>
 
 </manifest>
