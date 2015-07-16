@@ -48,7 +48,21 @@ public class SettingsActivity extends PreferenceActivity {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
-        LinearLayout root = (LinearLayout)findViewById(android.R.id.list).getParent().getParent().getParent();
+
+        setUpToolbar();
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            View toolbarDropShadow = findViewById(R.id.toolbar_shadow);
+            toolbarDropShadow.setVisibility(View.VISIBLE);
+        }
+
+        setupSimplePreferencesScreen();
+
+    }
+
+    private void setUpToolbar() {
+        LinearLayout root = (LinearLayout) findViewById(android.R.id.list).getParent()
+                .getParent().getParent();
         AppBarLayout appBarLayout = (AppBarLayout) LayoutInflater.from(this).inflate(R.layout
                         .settings_toolbar,
                 root,
@@ -62,8 +76,6 @@ public class SettingsActivity extends PreferenceActivity {
                 finish();
             }
         });
-        setupSimplePreferencesScreen();
-
     }
 
     /**

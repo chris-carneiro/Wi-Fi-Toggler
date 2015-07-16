@@ -38,13 +38,8 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             new ScanResultAsyncHandler(context).execute();
         } else {
             Log.d(TAG, "already connected checking wifi strength");
-            WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-            int rssi = wifiManager.getConnectionInfo().getRssi();
-            int signalStrength = WifiManager.calculateSignalLevel
-                    (rssi, Config.WIFI_SIGNAL_STRENGTHLEVELS);
-            Log.d(TAG, "wifi Strength=" + signalStrength + " threshold=" + PrefUtils
-                    .getWifiSignalStrengthThreshold
-                            (context));
+            int signalStrength = NetworkUtils.getSignalStrength(context);
+
             if (signalStrength < PrefUtils.getWifiSignalStrengthThreshold
                     (context)) {
                 NetworkUtils.disableWifiAdapter(context);
@@ -52,6 +47,8 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
         }
 
     }
+
+
 
     /**
      * TODO add a receiver for WIFI_AP_STATE_CHANGED set in sharedPreferences the state of the
@@ -130,7 +127,8 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
                                 wifiNetwork
                                         .SSID);
                         Log.d(TAG, "Wifi Signal strength level=" + WifiManager.calculateSignalLevel
-                                (wifiNetwork.level, Config.WIFI_SIGNAL_STRENGTHLEVELS) + " Threshold=" + PrefUtils
+                                (wifiNetwork.level, Config.WIFI_SIGNAL_STRENGTHLEVELS) + " " +
+                                "Threshold=" + PrefUtils
                                 .getWifiSignalStrengthThreshold
                                         (mContext));
                         int signalStrength = WifiManager.calculateSignalLevel
@@ -165,9 +163,9 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
                 if (cursor != null) {
                     int index = cursor.getColumnIndexOrThrow(SavedWifi.SSID);
                     savedSSIDs = new ArrayList<>(cursor.getCount());
-                    String ssid = null;
+
                     while (cursor.moveToNext()) {
-                        ssid = cursor.getString(index);
+                        String ssid = cursor.getString(index);
                         savedSSIDs.add(ssid);
                     }
                     cursor.close();

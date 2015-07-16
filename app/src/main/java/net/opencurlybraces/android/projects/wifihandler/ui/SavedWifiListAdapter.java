@@ -1,13 +1,13 @@
 package net.opencurlybraces.android.projects.wifihandler.ui;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import net.opencurlybraces.android.projects.wifihandler.R;
@@ -80,11 +80,12 @@ public class SavedWifiListAdapter extends CursorAdapter {
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         return mLayoutInflater.inflate(R.layout.configured_wifi_list_row, parent, false);
     }
-    //TODO optimize using viewHolder 
+
+    //TODO optimize using viewHolder
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         Log.d(TAG, "bindView");
-        Resources res = context.getResources();
+        //        Resources res = context.getResources();
 
         int ssidColumnIndex = cursor.getColumnIndexOrThrow(SavedWifi.SSID);
         int statusColumnIndex = cursor.getColumnIndexOrThrow(SavedWifi.STATUS);
@@ -94,11 +95,26 @@ public class SavedWifiListAdapter extends CursorAdapter {
 
         TextView ssid = (TextView) view.findViewById(R.id.configured_wifi_ssid);
         ssid.setText(ssidValue);
+        ssid.setPadding(15, 0, 0, 0);
 
         TextView wifiStatus = (TextView) view.findViewById(R.id.configured_wifi_state);
         String statusValue = toStringStatus(context, status);
         wifiStatus.setText(statusValue);
+        wifiStatus.setPadding(15, 0, 0, 0);
 
+        RelativeLayout.LayoutParams lp = createLayoutParams(status);
+        ssid.setLayoutParams(lp);
+
+    }
+
+    private RelativeLayout.LayoutParams createLayoutParams(int status) {
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout
+                .LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        if (status != NetworkUtils.WifiAdapterStatus.CONNECTED) {
+            lp.addRule(RelativeLayout.CENTER_VERTICAL);
+
+        }
+        return lp;
     }
 
     private String toStringStatus(final Context context, int status) {

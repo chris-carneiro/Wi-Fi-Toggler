@@ -219,6 +219,17 @@ public class NetworkUtils {
         void onSavedWifiLoaded(List<WifiConfiguration> savedWifis);
     }
 
+
+    public static int getSignalStrength(Context context) {
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        int rssi = wifiManager.getConnectionInfo().getRssi();
+        int signalStrength = WifiManager.calculateSignalLevel
+                (rssi, Config.WIFI_SIGNAL_STRENGTHLEVELS);
+        Log.d(TAG, "wifi Strength=" + signalStrength + " threshold=" + PrefUtils
+                .getWifiSignalStrengthThreshold
+                        (context) + " rssi=" + rssi);
+        return signalStrength;
+    }
 }
 
 

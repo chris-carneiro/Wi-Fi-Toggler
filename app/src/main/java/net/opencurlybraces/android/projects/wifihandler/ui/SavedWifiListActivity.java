@@ -12,6 +12,7 @@ import android.content.Loader;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -28,7 +29,6 @@ import android.widget.TextView;
 import net.opencurlybraces.android.projects.wifihandler.Config;
 import net.opencurlybraces.android.projects.wifihandler.R;
 import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
-import net.opencurlybraces.android.projects.wifihandler.io.WifiLockedOffException;
 import net.opencurlybraces.android.projects.wifihandler.receiver.AirplaneModeStateReceiver;
 import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
 import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
@@ -39,8 +39,7 @@ import net.opencurlybraces.android.projects.wifihandler.util.StartupUtils;
 
 public class SavedWifiListActivity extends AppCompatActivity implements
         CompoundButton.OnCheckedChangeListener,
-        LoaderManager.LoaderCallbacks<Cursor>, DialogInterface.OnClickListener,
-        DialogInterface.OnCancelListener {
+        LoaderManager.LoaderCallbacks<Cursor>, DialogInterface.OnClickListener {
 
     private static final String TAG = "SavedWifiList";
 
@@ -82,7 +81,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         }
     };
 
-    private BroadcastReceiver mApSystemReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mAirplaneModeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             boolean isAirplaneModeOn = intent.getBooleanExtra(AirplaneModeStateReceiver
@@ -142,7 +141,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     private void registerAirplaneModeReceiver() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        registerReceiver(mApSystemReceiver,
+        registerReceiver(mAirplaneModeReceiver,
                 intentFilter);
     }
 
@@ -160,7 +159,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     protected void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mNotificationActionsReceiver);
-        unregisterReceiver(mApSystemReceiver);
+        unregisterReceiver(mAirplaneModeReceiver);
     }
 
     @Override
@@ -303,28 +302,13 @@ public class SavedWifiListActivity extends AppCompatActivity implements
                 Log.d(TAG, "Startup mode: FIRST_TIME");
             case StartupUtils.FIRST_TIME_FOR_VERSION:
                 Log.d(TAG, "Startup mode: FIRST_TIME_FOR_VERSION");
-                try {
-                    checkNetworkState();
-                    loadSavedWifiIntoDatabase();
-                } catch (WifiLockedOffException e) {
-                    mWifiHandlerActivationSwitch.setEnabled(false);
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Saved Wifi configurations could not be retrieved because ");
-                    AlertDialog.Builder askUserChangeSettings = new AlertDialog.Builder(this);
-                    switch (e.getReason()) {
-                        case WifiLockedOffException.AIRPLANE_MODE_ON:
-                            sb.append("airplane mode is on");
-                            break;
-                        case WifiLockedOffException.HOTSPOT_AP_ON:
-                            sb.append("Wifi is in hotspot mode");
-                            break;
-                    }
-                    askUserChangeSettings.setMessage(sb.toString());
-                    askUserChangeSettings.setPositiveButton("Go to settings", this);
-                    askUserChangeSettings.setNegativeButton("Not now", this);
-                    askUserChangeSettings.show();
 
+                if (!NetworkUtils.isWifiEnabled(this)) {
+                    askUserEnableWifi();
+                } else {
+                    loadSavedWifiIntoDatabase();
                 }
+
                 //TODO check hotspot and airplane mode state
                 break;
             case StartupUtils.NORMAL:
@@ -333,20 +317,42 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         }
     }
 
-    private void checkNetworkState() throws WifiLockedOffException {
-        if (NetworkUtils.isAirplaneModeOn(this)) {
-            throw new WifiLockedOffException(WifiLockedOffException.AIRPLANE_MODE_ON);
-        }
-        if (NetworkUtils.isHotspotOn(this)) {
-            throw new WifiLockedOffException(WifiLockedOffException.HOTSPOT_AP_ON);
-        }
-    }
+    private void askUserEnableWifi() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("The wifi need to be activated for the first launch, please go to " +
+                "settings and enable wifi. We won't bother you with this again :)" +
+                "  ");
+        AlertDialog.Builder askUserChangeSettings = new AlertDialog.Builder(this);
 
+
+        askUserChangeSettings.setMessage(sb.toString());
+        askUserChangeSettings.setPositiveButton("Go to settings", new DialogInterface
+                .OnClickListener() {
+
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent openWifiSettings = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                SavedWifiListActivity.this.startActivityForResult(openWifiSettings, 0);
+            }
+        });
+        askUserChangeSettings.setNegativeButton("Not now", this);
+        askUserChangeSettings.show();
+    }
 
     @Override
-    public void onCancel(DialogInterface dialog) {
-
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "resultCode=" + resultCode + " data=" + data);
+        if (NetworkUtils.isWifiEnabled(this)) {
+            mWifiHandlerActivationSwitch.setEnabled(true);
+            loadSavedWifiIntoDatabase();
+        } else {
+            mWifiHandlerActivationSwitch.setEnabled(false);
+            askUserEnableWifi();
+        }
     }
+
 
     @Override
     public void onClick(DialogInterface dialog, int which) {

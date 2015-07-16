@@ -28,7 +28,7 @@ public class PrefUtils {
     public static final String PREF_WARNING_NOTIFICATIONS = PREF_PREFIX + "warning_notifications";
 
     public static final String PREF_SIGNAL_STRENGTH_THRESHOLD = PREF_PREFIX +
-            "signal_quality_threshold";
+            "signal_strength_threshold";
 
     private PrefUtils() {
     }
@@ -65,6 +65,12 @@ public class PrefUtils {
         return sp.getBoolean(PREF_WARNING_NOTIFICATIONS, true);
     }
 
+    /**
+     * Gets wifi signal strength threshold the user defined in app settings
+     *²
+     * @param context
+     * @return int
+     */
     public static int getWifiSignalStrengthThreshold(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return Integer.parseInt(sp.getString(PREF_SIGNAL_STRENGTH_THRESHOLD, Config

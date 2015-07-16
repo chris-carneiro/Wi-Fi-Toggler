@@ -11,8 +11,7 @@ public class Config {
 
     public static final int NOTIFICATION_ID_AIRPLANE_MODE = 101;
 
-    public static final int WIFI_SIGNAL_STRENGTHLEVELS = 8;
+    public static final int WIFI_SIGNAL_STRENGTHLEVELS = 11;
 
-
-    public static final String DEFAULT_SIGNAL_STRENGTH_THRESHOLD = "2"; // fair
+    public static final String DEFAULT_SIGNAL_STRENGTH_THRESHOLD = "3"; // fair
 }

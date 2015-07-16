@@ -9,20 +9,21 @@
         phone starts up
     </string>
 
-    <string name="pref_title_signal_quality_threshold">Signal quality threshold before
-        toggling</string>
-    <string-array name="pref_wifi_signal_quality_list_values">
+    <string name="pref_title_signal_strength_threshold">Signal strength for auto-toggle</string>
+    <string-array name="pref_wifi_signal_strength_list_values">
+        <item>8</item>
         <item>6</item>
         <item>4</item>
         <item>2</item>
         <item>0</item>
     </string-array>
 
-    <string-array name="pref_wifi_signal_quality_list_titles">
+    <string-array name="pref_wifi_signal_strength_list_titles">
         <item>Excellent</item>
         <item>Good</item>
         <item>Fair</item>
         <item>Poor</item>
+        <item>Always</item>
     </string-array>
 
     <string name="pref_header_notifications">Notifications</string>
