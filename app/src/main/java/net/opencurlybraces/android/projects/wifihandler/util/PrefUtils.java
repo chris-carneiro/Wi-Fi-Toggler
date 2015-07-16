@@ -30,6 +30,8 @@ public class PrefUtils {
     public static final String PREF_SIGNAL_STRENGTH_THRESHOLD = PREF_PREFIX +
             "signal_strength_threshold";
 
+    public static final String PREF_SAVED_WIFI_INSERTED = PREF_PREFIX + "saved_wifi_completed";
+
     private PrefUtils() {
     }
 
@@ -66,8 +68,8 @@ public class PrefUtils {
     }
 
     /**
-     * Gets wifi signal strength threshold the user defined in app settings
-     *²
+     * Gets wifi signal strength threshold the user defined in app settings ²
+     *
      * @param context
      * @return int
      */
@@ -75,6 +77,18 @@ public class PrefUtils {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return Integer.parseInt(sp.getString(PREF_SIGNAL_STRENGTH_THRESHOLD, Config
                 .DEFAULT_SIGNAL_STRENGTH_THRESHOLD));
+    }
+
+    public static void setSavedWifiInsertComplete(final Context context, boolean completed) {
+        Log.d(TAG, "setSavedWifiInsertComplete=" + completed);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().putBoolean(PREF_SAVED_WIFI_INSERTED, completed).apply();
+    }
+
+    public static boolean isSavedWifiInsertComplete(final Context context) {
+        Log.d(TAG, "isSavedWifiInsertComplete");
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getBoolean(PREF_SAVED_WIFI_INSERTED, false);
     }
 
 }

@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
@@ -62,8 +63,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         mEmptyView = (TextView) findViewById(android.R.id.empty);
         mWifiHandlerActivationSwitch.setOnCheckedChangeListener(this);
         mBanner = (RelativeLayout) findViewById(R.id.wifi_handler_message_banner);
-        startupCheck();
-
     }
 
 
@@ -113,6 +112,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         setListAdapterAccordingToSwitchState();
         registerReceivers();
         showBannerAccordingAirplaneMode();
+        startupCheck();
 
     }
 
@@ -302,26 +302,36 @@ public class SavedWifiListActivity extends AppCompatActivity implements
                 Log.d(TAG, "Startup mode: FIRST_TIME");
             case StartupUtils.FIRST_TIME_FOR_VERSION:
                 Log.d(TAG, "Startup mode: FIRST_TIME_FOR_VERSION");
-
-                if (!NetworkUtils.isWifiEnabled(this)) {
-                    askUserEnableWifi();
-                } else {
-                    loadSavedWifiIntoDatabase();
+            case StartupUtils.NORMAL:
+                if (checkSettings()) {
+                    if (!PrefUtils.isSavedWifiInsertComplete(this)) {
+                        loadSavedWifiIntoDatabase();
+                    }
                 }
 
-                //TODO check hotspot and airplane mode state
-                break;
-            case StartupUtils.NORMAL:
                 Log.d(TAG, "Startup mode: NORMAL");
                 break;
         }
     }
 
+    private boolean checkSettings() {
+        if (!NetworkUtils.isWifiEnabled(this)) {
+            askUserEnableWifi();
+            return false;
+        }
+
+        if (!NetworkUtils.isScanAlwaysAvailable(this)) {
+            askUserEnableScanAlwaysAvailable();
+            return false;
+        }
+
+        return true;
+    }
+
     private void askUserEnableWifi() {
         StringBuilder sb = new StringBuilder();
-        sb.append("The wifi need to be activated for the first launch, please go to " +
-                "settings and enable wifi. We won't bother you with this again :)" +
-                "  ");
+        sb.append("The wifi needs to be activated for the first launch, please go to " +
+                "settings and enable wifi. We won't bother you with this again :)");
         AlertDialog.Builder askUserChangeSettings = new AlertDialog.Builder(this);
 
 
@@ -340,17 +350,28 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         askUserChangeSettings.show();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Log.d(TAG, "resultCode=" + resultCode + " data=" + data);
-        if (NetworkUtils.isWifiEnabled(this)) {
-            mWifiHandlerActivationSwitch.setEnabled(true);
-            loadSavedWifiIntoDatabase();
-        } else {
-            mWifiHandlerActivationSwitch.setEnabled(false);
-            askUserEnableWifi();
-        }
+    private void askUserEnableScanAlwaysAvailable() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Passive scan mode, which is the core feature of WifiHandler, is not active, to" +
+                " enjoy auto-toggle please activate it." +
+                " ");
+        AlertDialog.Builder askUserChangeSettings = new AlertDialog.Builder(this);
+
+
+        askUserChangeSettings.setMessage(sb.toString());
+        askUserChangeSettings.setPositiveButton("Go to settings", new DialogInterface
+                .OnClickListener() {
+
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent openWifiSettings = new Intent(WifiManager
+                        .ACTION_REQUEST_SCAN_ALWAYS_AVAILABLE);
+                SavedWifiListActivity.this.startActivityForResult(openWifiSettings, 0);
+            }
+        });
+        askUserChangeSettings.setNegativeButton("Not now", this);
+        askUserChangeSettings.show();
     }
 
 

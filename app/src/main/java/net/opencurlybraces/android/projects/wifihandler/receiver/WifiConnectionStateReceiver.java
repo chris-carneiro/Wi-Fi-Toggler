@@ -39,16 +39,16 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
     @Override
     public void onReceive(Context context, Intent intent) {
 
-
-        if (PrefUtils.isWifiHandlerActive(context)) {
-            lazyInit(context);
-            SupplicantState state = intent.getParcelableExtra(WifiManager
-                    .EXTRA_NEW_STATE);
-            updateCurrentWifiState(context, state);
-        } else {
-            Log.d(TAG, "WifiHandler inactive ignoring SupplicantStateChanged events");
+        if (PrefUtils.isSavedWifiInsertComplete(context)) {
+            if (PrefUtils.isWifiHandlerActive(context)) {
+                lazyInit(context);
+                SupplicantState state = intent.getParcelableExtra(WifiManager
+                        .EXTRA_NEW_STATE);
+                updateCurrentWifiState(context, state);
+            } else {
+                Log.d(TAG, "WifiHandler inactive ignoring SupplicantStateChanged events");
+            }
         }
-
     }
 
     private void lazyInit(Context context) {

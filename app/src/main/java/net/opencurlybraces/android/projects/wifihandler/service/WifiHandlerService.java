@@ -20,13 +20,13 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifihandler.R;
-import net.opencurlybraces.android.projects.wifihandler.ui.SavedWifiListActivity;
 import net.opencurlybraces.android.projects.wifihandler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifihandler.data.provider.WifiHandlerContract;
 import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifihandler.receiver.WifiAdapterStateReceiver;
 import net.opencurlybraces.android.projects.wifihandler.receiver.WifiConnectionStateReceiver;
 import net.opencurlybraces.android.projects.wifihandler.receiver.WifiScanResultsReceiver;
+import net.opencurlybraces.android.projects.wifihandler.ui.SavedWifiListActivity;
 import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 
@@ -365,6 +365,9 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     @Override
     public void onInsertBatchComplete(int token, Object cookie, ContentProviderResult[] results) {
         Log.d(TAG, "onInsertBatchComplete: Async Batch Insert complete, stopping service");
+
+        PrefUtils.setSavedWifiInsertComplete(this, (results != null && results.length > 0));
+
         if (!PrefUtils.isWifiHandlerActive(this)) {
             stopSelf();
         }

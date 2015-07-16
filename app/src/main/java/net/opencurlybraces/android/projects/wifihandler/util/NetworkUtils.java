@@ -146,6 +146,12 @@ public class NetworkUtils {
         return wifiManager.isWifiEnabled();
     }
 
+    public static boolean isScanAlwaysAvailable(final Context context) {
+        Log.d(TAG, "isScanAlwaysAvailable");
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        return wifiManager.isScanAlwaysAvailable();
+    }
+
     public static void disableWifiAdapter(final Context context) {
         Log.d(TAG, "disableWifiAdapter");
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
