@@ -18,6 +18,6 @@
     <dimen name="startup_check_settings_view_padding">15dp</dimen>
     <dimen name="startup_check_settings_view_margin_left_right">20dp</dimen>
     <dimen name="startup_check_settings_view_height">70dp</dimen>
-    <dimen name="startup_check_settings_textview_top_margin">5dp</dimen>
+    <dimen name="startup_check_settings_textview_top_margin">3dp</dimen>
 
 </resources>

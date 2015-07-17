@@ -302,16 +302,22 @@ public class SavedWifiListActivity extends AppCompatActivity implements
                 Log.d(TAG, "Startup mode: FIRST_TIME");
             case StartupUtils.FIRST_TIME_FOR_VERSION:
                 Log.d(TAG, "Startup mode: FIRST_TIME_FOR_VERSION");
+                launchStartupCheckActivity();
             case StartupUtils.NORMAL:
-                if (checkSettings()) {
-                    if (!PrefUtils.isSavedWifiInsertComplete(this)) {
-                        loadSavedWifiIntoDatabase();
-                    }
-                }
+//                if (checkSettings()) {
+//                    if (!PrefUtils.isSavedWifiInsertComplete(this)) {
+//                        loadSavedWifiIntoDatabase();
+//                    }
+//                }
 
                 Log.d(TAG, "Startup mode: NORMAL");
                 break;
         }
+    }
+
+    private void launchStartupCheckActivity() {
+        Intent startupCheck = new Intent(this, StartupCheckActivity.class);
+        startActivity(startupCheck);
     }
 
     private boolean checkSettings() {

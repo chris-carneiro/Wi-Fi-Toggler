@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="startup_check_title_activity">StartupCheckActivity</string>
+    <string name="startup_check_title_activity">First start settings check</string>
     <string name="startup_check_wifi_settings_title">Wifi settings</string>
-    <string name="startup_check_wifi_settings_desc">Wifi has to be enabled to get saved wifi
-        networks</string>
+    <string name="startup_check_wifi_settings_desc">Wifi has to be enabled</string>
     <string name="startup_check_airplane_settings_title">Airplane settings</string>
     <string name="startup_check_airplane_settings_desc">Airplane mode has
         to be disabled</string>
-    <string name="startup_check_scan_always_available_settings_title">Passive wifi scan settings</string>
-    <string name="startup_check_scan_always_available_settings_desc">Allows wifi scanning even when the wifi
+    <string name="startup_check_scan_always_available_settings_title">Wifi scan settings</string>
+    <string name="startup_check_scan_always_available_settings_desc">Scan even when the wifi
         is disabled</string>
     <string name="startup_check_hotspot_settings_title">Hotspot settings</string>
     <string name="startup_check_hotspot_settings_desc">Hotspot mode has to be disabled</string>

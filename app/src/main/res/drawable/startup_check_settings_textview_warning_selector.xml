@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true"
+          android:drawable="@drawable/stroke_rectangle_shape_orange_pressed_solid_50" /> <!-- pressed -->
+    <item android:state_focused="true"
+          android:drawable="@drawable/stroke_rectangle_shape_orange_pressed_solid_50" /> <!-- focused -->
+    <item android:drawable="@drawable/stroke_rectangle_shape_orange_lighter" /> <!-- default -->
+</selector>

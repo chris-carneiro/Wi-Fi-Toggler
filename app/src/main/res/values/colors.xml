@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="material_green_400">#26A69A</color>
-    <color name="material_green_600">#00897B</color>
-    <color name="material_orange_600">#FB8C00</color>
+    <color name="material_teal_50">#E0F2F1</color>
+    <color name="material_teal_400">#26A69A</color>
+    <color name="material_teal_600">#00897B</color>
+
+    <color name="material_orange_50">#FFF3E0</color>
     <color name="material_orange_400">#FFA726</color>
+    <color name="material_orange_600">#FB8C00</color>
 </resources>
