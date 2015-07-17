@@ -59,7 +59,7 @@
         </activity>
         <activity
             android:name=".ui.StartupCheckActivity"
-            android:label="@string/title_activity_startup_check" >
+            android:label="@string/startup_check_title_activity" >
         </activity>
     </application>
 

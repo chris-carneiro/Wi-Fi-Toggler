@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="title_activity_startup_check">StartupCheckActivity</string>
-    <string name="check_wifi_settings_title">Wifi settings</string>
-    <string name="check_wifi_settings_desc">Wifi must be available to get saved wifi
+    <string name="startup_check_title_activity">StartupCheckActivity</string>
+    <string name="startup_check_wifi_settings_title">Wifi settings</string>
+    <string name="startup_check_wifi_settings_desc">Wifi has to be enabled to get saved wifi
         networks</string>
-    <string name="check_airplane_settings_title">Airplane settings</string>
-    <string name="check_airplane_settings_desc">Airplane mode blocks wifi activation, it
-        must be disabled</string>
-    <string name="check_scan_always_available_settings_title">Passive wifi scan settings</string>
-    <string name="check_scan_always_available_settings_desc">Core feature, allows to scan
-        in range wifi even when the wifi is disabled</string>
-    <string name="check_hotspot_settings_title">Hotspot settings</string>
-    <string name="check_hotspot_settings_desc">Hotspot blocks wifi activation, it
-        must be disabled</string>
+    <string name="startup_check_airplane_settings_title">Airplane settings</string>
+    <string name="startup_check_airplane_settings_desc">Airplane mode has
+        to be disabled</string>
+    <string name="startup_check_scan_always_available_settings_title">Passive wifi scan settings</string>
+    <string name="startup_check_scan_always_available_settings_desc">Allows wifi scanning even when the wifi
+        is disabled</string>
+    <string name="startup_check_hotspot_settings_title">Hotspot settings</string>
+    <string name="startup_check_hotspot_settings_desc">Hotspot mode has to be disabled</string>
 
+
+    <string name="startup_check_settings_continue_button_text">Continue</string>
 </resources>
