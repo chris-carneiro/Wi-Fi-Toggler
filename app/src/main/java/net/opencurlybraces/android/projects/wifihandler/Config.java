@@ -13,5 +13,17 @@ public class Config {
 
     public static final int WIFI_SIGNAL_STRENGTHLEVELS = 11;
 
-    public static final String DEFAULT_SIGNAL_STRENGTH_THRESHOLD = "3"; // fair
+    public static final String DEFAULT_SIGNAL_STRENGTH_THRESHOLD = "4"; // fair
+
+    public static final int STARTUP_SETTINGS_CHECKS = 4;
+
+    public static final String STARTUP_CHECK_SCAN_ALWAYS_AVAILABLE_SETTINGS =
+            "STARTUP_CHECK_SCAN_ALWAYS_AVAILABLE_SETTINGS";
+
+    public static final String STARTUP_CHECK_WIFI_SETTINGS = "STARTUP_CHECK_WIFI_SETTINGS";
+    public static final String STARTUP_CHECK_AIRPLANE_SETTINGS =
+            "STARTUP_CHECK_AIRPLANE_SETTINGS";
+    public static final String STARTUP_CHECK_HOTSTOP_SETTINGS =
+            "STARTUP_CHECK_HOTSTOP_SETTINGS";
+
 }
