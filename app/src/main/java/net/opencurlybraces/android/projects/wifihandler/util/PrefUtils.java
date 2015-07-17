@@ -46,7 +46,7 @@ public class PrefUtils {
     public static boolean isWifiHandlerActive(final Context context) {
         Log.d(TAG, "isWifiHandlerActive");
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_WIFI_HANDLER_ACTIVE, false);
+        return sp.getBoolean(PREF_WIFI_HANDLER_ACTIVE, true);
     }
 
     public static void setAirplaneModeOn(final Context context, boolean on) {

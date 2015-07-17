@@ -250,13 +250,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     }
 
 
-    private void loadSavedWifiIntoDatabase() {
-        Intent handleSavedWifiInsert = new Intent(this, WifiHandlerService.class);
-        handleSavedWifiInsert.setAction(WifiHandlerService.ACTION_HANDLE_SAVED_WIFI_INSERT);
-        startService(handleSavedWifiInsert);
-    }
-
-
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String[] projection = {SavedWifi._ID, SavedWifi.SSID, SavedWifi.STATUS};
@@ -304,11 +297,13 @@ public class SavedWifiListActivity extends AppCompatActivity implements
                 Log.d(TAG, "Startup mode: FIRST_TIME_FOR_VERSION");
                 launchStartupCheckActivity();
             case StartupUtils.NORMAL:
-//                if (checkSettings()) {
-//                    if (!PrefUtils.isSavedWifiInsertComplete(this)) {
-//                        loadSavedWifiIntoDatabase();
-//                    }
-//                }
+                //TODO make hashmapSettingsStatesHolder observable
+                //                launchStartupCheckActivity();
+                //<                if (checkSettings()) {
+                //                    if (!PrefUtils.isSavedWifiInsertComplete(this)) {
+                //                        loadSavedWifiIntoDatabase();
+                //                    }
+                //                }
 
                 Log.d(TAG, "Startup mode: NORMAL");
                 break;

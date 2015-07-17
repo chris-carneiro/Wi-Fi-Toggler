@@ -18,6 +18,7 @@ import android.widget.RelativeLayout;
 
 import net.opencurlybraces.android.projects.wifihandler.Config;
 import net.opencurlybraces.android.projects.wifihandler.R;
+import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
 import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 
@@ -282,8 +283,10 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
                 startActivity(disableHotspot);
                 break;
             case R.id.startup_check_settings_continue_button:
+                loadSavedWifiIntoDatabase();
                 Intent startWifiHandler = new Intent(this, SavedWifiListActivity.class);
                 startActivity(startWifiHandler);
+
                 break;
         }
     }
@@ -372,4 +375,10 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
         }
     };
 
+
+    private void loadSavedWifiIntoDatabase() {
+        Intent handleSavedWifiInsert = new Intent(this, WifiHandlerService.class);
+        handleSavedWifiInsert.setAction(WifiHandlerService.ACTION_HANDLE_SAVED_WIFI_INSERT);
+        startService(handleSavedWifiInsert);
+    }
 }
