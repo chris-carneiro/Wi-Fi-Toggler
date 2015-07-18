@@ -107,8 +107,8 @@ public class NetworkUtils {
      * @param context
      * @return true hotspot active, false otherwise
      */
-    public static boolean isHotspotOn(final Context
-                                              context) {
+    public static boolean isHotspotEnabled(final Context
+                                                   context) {
         try {
             WifiManager wifiManager = (WifiManager) context.getSystemService(Context
                     .WIFI_SERVICE);
@@ -216,7 +216,7 @@ public class NetworkUtils {
      * @return true if enabled.
      */
 
-    public static boolean isAirplaneModeOn(Context context) {
+    public static boolean isAirplaneModeEnabled(Context context) {
         return Settings.Global.getInt(context.getContentResolver(),
                 Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
 

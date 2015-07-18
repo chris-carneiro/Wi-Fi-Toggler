@@ -53,51 +53,10 @@
             </RelativeLayout>
 
             <RelativeLayout
-                android:id="@+id/startup_check_scan_always_available_layout"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/startup_check_settings_view_height"
-                android:layout_below="@id/startup_check_airplane_settings_layout"
-                android:layout_centerHorizontal="true"
-                android:layout_marginLeft="@dimen/startup_check_settings_view_margin_left_right"
-                android:layout_marginRight="@dimen/startup_check_settings_view_margin_left_right"
-                android:layout_marginTop="@dimen/startup_check_settings_view_top_margin"
-                android:background="@drawable/stroke_rectangle_shape_teal_lighter"
-                android:padding="@dimen/startup_check_settings_view_padding"
-                >
-
-                <TextView
-                    android:id="@+id/startup_check_scan_always_available_settings_title_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/startup_check_scan_always_available_settings_title"
-                    android:textSize="@dimen/startup_check_settings_title_text_size"/>
-
-                <TextView
-                    android:id="@+id/startup_check_scan_always_available_settings_desc_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/startup_check_scan_always_available_settings_title_tv"
-                    android:layout_marginTop="@dimen/startup_check_settings_textview_top_margin"
-                    android:text="@string/startup_check_scan_always_available_settings_desc"
-                    android:textSize="@dimen/startup_check_settings_description_text_size"
-                    />
-
-                <ImageView
-                    android:id="@+id/startup_check_scan_always_available_next_ic"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignEnd="@id/startup_check_scan_always_available_settings_desc_tv"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_navigation_next"
-                    android:visibility="gone"/>
-            </RelativeLayout>
-
-            <RelativeLayout
                 android:id="@+id/startup_check_wifi_settings_layout"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/startup_check_settings_view_height"
-                android:layout_below="@id/startup_check_scan_always_available_layout"
+                android:layout_below="@id/startup_check_airplane_settings_layout"
                 android:layout_centerHorizontal="true"
                 android:layout_marginLeft="@dimen/startup_check_settings_view_margin_left_right"
                 android:layout_marginRight="@dimen/startup_check_settings_view_margin_left_right"
@@ -134,10 +93,52 @@
             </RelativeLayout>
 
             <RelativeLayout
-                android:id="@+id/startup_check_hotspot_settings_layout"
+                android:id="@+id/startup_check_scan_always_available_layout"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/startup_check_settings_view_height"
                 android:layout_below="@id/startup_check_wifi_settings_layout"
+                android:layout_centerHorizontal="true"
+                android:layout_marginLeft="@dimen/startup_check_settings_view_margin_left_right"
+                android:layout_marginRight="@dimen/startup_check_settings_view_margin_left_right"
+                android:layout_marginTop="@dimen/startup_check_settings_view_top_margin"
+                android:background="@drawable/stroke_rectangle_shape_teal_lighter"
+                android:padding="@dimen/startup_check_settings_view_padding"
+                >
+
+                <TextView
+                    android:id="@+id/startup_check_scan_always_available_settings_title_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/startup_check_scan_always_available_settings_title"
+                    android:textSize="@dimen/startup_check_settings_title_text_size"/>
+
+                <TextView
+                    android:id="@+id/startup_check_scan_always_available_settings_desc_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/startup_check_scan_always_available_settings_title_tv"
+                    android:layout_marginTop="@dimen/startup_check_settings_textview_top_margin"
+                    android:text="@string/startup_check_scan_always_available_settings_desc"
+                    android:textSize="@dimen/startup_check_settings_description_text_size"
+                    />
+
+                <ImageView
+                    android:id="@+id/startup_check_scan_always_available_next_ic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignEnd="@id/startup_check_scan_always_available_settings_desc_tv"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_navigation_next"
+                    android:visibility="gone"/>
+            </RelativeLayout>
+
+
+            <RelativeLayout
+                android:id="@+id/startup_check_hotspot_settings_layout"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/startup_check_settings_view_height"
+                android:layout_below="@id/startup_check_scan_always_available_layout"
                 android:layout_centerHorizontal="true"
                 android:layout_marginLeft="@dimen/startup_check_settings_view_margin_left_right"
                 android:layout_marginRight="@dimen/startup_check_settings_view_margin_left_right"

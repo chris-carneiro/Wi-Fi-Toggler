@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true"
-          android:drawable="@drawable/solid_rectangle_shape_teal_lighter" /> <!-- pressed -->
-    <item android:state_focused="true"
-          android:drawable="@drawable/solid_rectangle_shape_teal_lighter" /> <!-- focused -->
-    <item android:drawable="@drawable/solid_rectangle_shape_teal" /> <!-- default -->
+    <!-- disabled -->
+    <item android:drawable="@drawable/solid_rectangle_shape_gray_disabled"
+          android:state_enabled="false"/>
+    <!-- pressed -->
+    <item android:drawable="@drawable/solid_rectangle_shape_teal_lighter"
+          android:state_pressed="true"/>
+
+    <!-- focused -->
+    <item android:drawable="@drawable/solid_rectangle_shape_teal_lighter"
+          android:state_focused="true"/>
+    <!-- default -->
+    <item android:drawable="@drawable/solid_rectangle_shape_teal"/>
+
+
 </selector>

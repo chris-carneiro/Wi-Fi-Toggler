@@ -35,6 +35,9 @@ public class PrefUtils {
     public static final String PREF_SCAN_ALWAYS_AVAILABLE_ENABLED = PREF_PREFIX +
             "scan_always_available";
 
+    public static final String PREF_ALL_SETTINGS_CORRECT_AT_FIRST_LAUNCH = PREF_PREFIX +
+            "settings_correct_at_first_launch";
+
     private PrefUtils() {
     }
 
@@ -68,6 +71,19 @@ public class PrefUtils {
     public static boolean areWarningNotificationsEnabled(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getBoolean(PREF_WARNING_NOTIFICATIONS, true);
+    }
+
+
+    public static void markSettingsCorrectAtFirstLaunch(final Context context) {
+        Log.d(TAG, "setSettingsCorrectAtFirstLaunch=");
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().putBoolean(PREF_ALL_SETTINGS_CORRECT_AT_FIRST_LAUNCH, true).apply();
+    }
+
+    public static boolean wereSettingsCorrectAtFirstLaunch(final Context context) {
+        Log.d(TAG, "wereSettingsCorrectAtFirstLaunch=");
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getBoolean(PREF_ALL_SETTINGS_CORRECT_AT_FIRST_LAUNCH, false);
     }
 
     /**

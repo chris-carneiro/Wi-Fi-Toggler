@@ -166,11 +166,12 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
             displayCheckWifiSettingsLayout();
 
             cacheSettingsState(Config.STARTUP_CHECK_WIFI_SETTINGS, false);
-            return;
+
+        } else {
+            displayWifiSettingsCorrectLayout();
+            cacheSettingsState(Config.STARTUP_CHECK_WIFI_SETTINGS, true);
         }
 
-        displayWifiSettingsCorrectLayout();
-        cacheSettingsState(Config.STARTUP_CHECK_WIFI_SETTINGS, true);
         setContinueButtonListenerAccordingToSettings();
     }
 
@@ -194,14 +195,14 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
     private void setAirplaneLayoutAccordingToSettings() {
         Log.d(TAG, "setAirplaneLayoutAccordingToSettings");
 
-        if (NetworkUtils.isAirplaneModeOn(this)) {
+        if (NetworkUtils.isAirplaneModeEnabled(this)) {
             displayCheckAirplaneSettingsLayout();
             cacheSettingsState(Config.STARTUP_CHECK_AIRPLANE_SETTINGS, false);
-            return;
-        }
 
-        displayAirplaneSettingsCorrectLayout();
-        cacheSettingsState(Config.STARTUP_CHECK_AIRPLANE_SETTINGS, true);
+        } else {
+            displayAirplaneSettingsCorrectLayout();
+            cacheSettingsState(Config.STARTUP_CHECK_AIRPLANE_SETTINGS, true);
+        }
 
         setContinueButtonListenerAccordingToSettings();
     }
@@ -224,15 +225,15 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
 
     private void setHotspotLayoutAccordingToSettings() {
         Log.d(TAG, "setHotspotLayoutAccordingToSettings");
-        if (NetworkUtils.isHotspotOn(this)) {
+        if (NetworkUtils.isHotspotEnabled(this)) {
             displayCheckHotspotSettingsLayout();
 
             cacheSettingsState(Config.STARTUP_CHECK_HOTSTOP_SETTINGS, false);
-            return;
+        } else {
+            displayHotspotSettingsCorrectLayout();
+            cacheSettingsState(Config.STARTUP_CHECK_HOTSTOP_SETTINGS, true);
         }
 
-        displayHotspotSettingsCorrectLayout();
-        cacheSettingsState(Config.STARTUP_CHECK_HOTSTOP_SETTINGS, true);
         setContinueButtonListenerAccordingToSettings();
     }
 
@@ -255,16 +256,16 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
     private void setScanLayoutAccordingToSettings() {
         Log.d(TAG, "setScanLayoutAccordingToSettings");
 
-        if (!NetworkUtils.isScanAlwaysAvailable(this)) {
+        if (NetworkUtils.isScanAlwaysAvailable(this)) {
 
+            displayScanSettingsCorrectLayout();
+            cacheSettingsState(Config.STARTUP_CHECK_SCAN_ALWAYS_AVAILABLE_SETTINGS, true);
+        } else {
             displayCheckScanSettingsLayout();
             cacheSettingsState(Config.STARTUP_CHECK_SCAN_ALWAYS_AVAILABLE_SETTINGS,
                     false);
-            return;
         }
 
-        displayScanSettingsCorrectLayout();
-        cacheSettingsState(Config.STARTUP_CHECK_SCAN_ALWAYS_AVAILABLE_SETTINGS, true);
         setContinueButtonListenerAccordingToSettings();
     }
 
@@ -287,7 +288,6 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
                         resultCode == RESULT_OK);
 
                 PrefUtils.setScanAlwaysAvailableBeenEnabled(this, resultCode == RESULT_OK);
-
                 setContinueButtonListenerAccordingToSettings();
                 break;
         }
@@ -340,6 +340,7 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
                 break;
             case R.id.startup_check_settings_continue_button:
                 loadSavedWifiIntoDatabase();
+                PrefUtils.markSettingsCorrectAtFirstLaunch(this);
                 finish(); //Calls onActivityResult of SavedWIfiListActivity
                 break;
         }
