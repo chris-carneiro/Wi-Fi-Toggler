@@ -22,7 +22,7 @@ import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerServi
 import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class StartupCheckActivity extends AppCompatActivity implements View.OnClickListener {
@@ -39,8 +39,13 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
     RelativeLayout mHotspotCheckLayout = null;
     Button mContinueButton = null;
 
-    private HashMap<String, Boolean> mSettingsStateCorrect = new HashMap<>(Config
+    private ConcurrentHashMap<String, Boolean> mSettingsStateCache = new ConcurrentHashMap<>(Config
             .STARTUP_SETTINGS_CHECKS);
+    private ImageView wifiNextIcon;
+    private ImageView airplaneNextIcon;
+    private ImageView hotspotNextIcon;
+    private ImageView mScanNextIcon;
+    private static final int REQUEST_CODE_SCAN_ALWAYS_AVAILABLE = 1;
 
 
     @Override
@@ -57,6 +62,14 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
                 .startup_check_hotspot_settings_layout);
         mContinueButton = (Button) findViewById(R.id.startup_check_settings_continue_button);
 
+        wifiNextIcon = (ImageView) mWifiCheckLayout.findViewById(R.id
+                .startup_check_wifi_settings_next_ic);
+        airplaneNextIcon = (ImageView) mAirplaneCheckLayout.findViewById(R.id
+                .startup_check_airplane_settings_next_ic);
+        hotspotNextIcon = (ImageView) mHotspotCheckLayout.findViewById(R.id
+                .startup_check_hotspot_settings_next_ic);
+        mScanNextIcon = (ImageView) mScanCheckLayout.findViewById(R.id
+                .startup_check_scan_always_available_next_ic);
     }
 
 
@@ -66,11 +79,11 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
 
         setLayoutAccordingToSettings();
         registerReceivers();
-        setContinueButtonListenerAccordingToSettings();
+
     }
 
     private void setContinueButtonListenerAccordingToSettings() {
-        if (mSettingsStateCorrect.containsValue(false)) {
+        if (mSettingsStateCache.containsValue(false)) {
             mContinueButton.setOnClickListener(null);
             mContinueButton.setEnabled(false);
         } else {
@@ -84,6 +97,7 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
         setWifiLayoutAccordingToSettings();
         setAirplaneLayoutAccordingToSettings();
         setHotspotLayoutAccordingToSettings();
+        setContinueButtonListenerAccordingToSettings();
     }
 
     private void registerReceivers() {
@@ -95,6 +109,10 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
     @Override
     protected void onPause() {
         super.onPause();
+        unregisterReceivers();
+    }
+
+    private void unregisterReceivers() {
         unregisterReceiver(mAirplaneModeReceiver);
         unregisterReceiver(mWifiStateReceiver);
         unregisterReceiver(mHotspotStateReceiver);
@@ -141,83 +159,112 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void setWifiLayoutAccordingToSettings() {
-        final ImageView nextIcon = (ImageView) mWifiCheckLayout.findViewById(R.id
-                .startup_check_wifi_settings_next_ic);
+        Log.d(TAG, "setWifiLayoutAccordingToSettings");
+
         if (!NetworkUtils.isWifiEnabled(this)) {
-            mWifiCheckLayout.setBackgroundResource(R.drawable
-                    .startup_check_settings_textview_warning_selector);
-            nextIcon.setVisibility(View.VISIBLE);
-            mWifiCheckLayout.setOnClickListener(this);
-            mSettingsStateCorrect.put(Config.STARTUP_CHECK_WIFI_SETTINGS, false);
+
+            displayCheckWifiSettingsLayout();
+
+            cacheSettingsState(Config.STARTUP_CHECK_WIFI_SETTINGS, false);
             return;
         }
+
+        displayWifiSettingsCorrectLayout();
+        cacheSettingsState(Config.STARTUP_CHECK_WIFI_SETTINGS, true);
+        setContinueButtonListenerAccordingToSettings();
+    }
+
+    private void displayWifiSettingsCorrectLayout() {
+        Log.d(TAG, "displayWifiSettingsCorrectLayout");
+
         mWifiCheckLayout.setBackgroundResource(R.drawable
                 .stroke_rectangle_shape_teal_lighter);
-        nextIcon.setVisibility(View.GONE);
+        wifiNextIcon.setVisibility(View.GONE);
         mWifiCheckLayout.setOnClickListener(null);
-        mSettingsStateCorrect.put(Config.STARTUP_CHECK_WIFI_SETTINGS, true);
+    }
 
-        setContinueButtonListenerAccordingToSettings();
+    private void displayCheckWifiSettingsLayout() {
+        Log.d(TAG, "displayCheckWifiSettingsLayout");
+        mWifiCheckLayout.setBackgroundResource(R.drawable
+                .startup_check_settings_textview_warning_selector);
+        wifiNextIcon.setVisibility(View.VISIBLE);
+        mWifiCheckLayout.setOnClickListener(this);
     }
 
     private void setAirplaneLayoutAccordingToSettings() {
-        final ImageView nextIcon = (ImageView) mAirplaneCheckLayout.findViewById(R.id
-                .startup_check_airplane_settings_next_ic);
+        Log.d(TAG, "setAirplaneLayoutAccordingToSettings");
+
         if (NetworkUtils.isAirplaneModeOn(this)) {
-            mAirplaneCheckLayout.setBackgroundResource(R.drawable
-                    .startup_check_settings_textview_warning_selector);
-            nextIcon.setVisibility(View.VISIBLE);
-            mAirplaneCheckLayout.setOnClickListener(this);
-            mSettingsStateCorrect.put(Config.STARTUP_CHECK_AIRPLANE_SETTINGS, false);
+            displayCheckAirplaneSettingsLayout();
+            cacheSettingsState(Config.STARTUP_CHECK_AIRPLANE_SETTINGS, false);
             return;
         }
-        mAirplaneCheckLayout.setBackgroundResource(R.drawable
-                .stroke_rectangle_shape_teal_lighter);
-        nextIcon.setVisibility(View.GONE);
-        mAirplaneCheckLayout.setOnClickListener(null);
-        mSettingsStateCorrect.put(Config.STARTUP_CHECK_AIRPLANE_SETTINGS, true);
+
+        displayAirplaneSettingsCorrectLayout();
+        cacheSettingsState(Config.STARTUP_CHECK_AIRPLANE_SETTINGS, true);
 
         setContinueButtonListenerAccordingToSettings();
+    }
+
+    private void displayAirplaneSettingsCorrectLayout() {
+        Log.d(TAG, "displayAirplaneSettingsCorrectLayout");
+        mAirplaneCheckLayout.setBackgroundResource(R.drawable
+                .stroke_rectangle_shape_teal_lighter);
+        airplaneNextIcon.setVisibility(View.GONE);
+        mAirplaneCheckLayout.setOnClickListener(null);
+    }
+
+    private void displayCheckAirplaneSettingsLayout() {
+        Log.d(TAG, "displayCheckAirplaneSettingsLayout");
+        mAirplaneCheckLayout.setBackgroundResource(R.drawable
+                .startup_check_settings_textview_warning_selector);
+        airplaneNextIcon.setVisibility(View.VISIBLE);
+        mAirplaneCheckLayout.setOnClickListener(this);
     }
 
     private void setHotspotLayoutAccordingToSettings() {
-        final ImageView nextIcon = (ImageView) mHotspotCheckLayout.findViewById(R.id
-                .startup_check_hotspot_settings_next_ic);
+        Log.d(TAG, "setHotspotLayoutAccordingToSettings");
         if (NetworkUtils.isHotspotOn(this)) {
-            mHotspotCheckLayout.setBackgroundResource(R.drawable
-                    .startup_check_settings_textview_warning_selector);
-            nextIcon.setVisibility(View.VISIBLE);
-            mHotspotCheckLayout.setOnClickListener(this);
-            mSettingsStateCorrect.put(Config.STARTUP_CHECK_HOTSTOP_SETTINGS, false);
+            displayCheckHotspotSettingsLayout();
+
+            cacheSettingsState(Config.STARTUP_CHECK_HOTSTOP_SETTINGS, false);
             return;
         }
-        mHotspotCheckLayout.setBackgroundResource(R.drawable
-                .stroke_rectangle_shape_teal_lighter);
-        nextIcon.setVisibility(View.GONE);
-        mHotspotCheckLayout.setOnClickListener(null);
-        mSettingsStateCorrect.put(Config.STARTUP_CHECK_HOTSTOP_SETTINGS, true);
 
+        displayHotspotSettingsCorrectLayout();
+        cacheSettingsState(Config.STARTUP_CHECK_HOTSTOP_SETTINGS, true);
         setContinueButtonListenerAccordingToSettings();
     }
 
+    private void displayHotspotSettingsCorrectLayout() {
+        Log.d(TAG, "displayHotspotSettingsCorrectLayout");
+        mHotspotCheckLayout.setBackgroundResource(R.drawable
+                .stroke_rectangle_shape_teal_lighter);
+        hotspotNextIcon.setVisibility(View.GONE);
+        mHotspotCheckLayout.setOnClickListener(null);
+    }
+
+    private void displayCheckHotspotSettingsLayout() {
+        Log.d(TAG, "displayCheckHotspotSettingsLayout");
+        mHotspotCheckLayout.setBackgroundResource(R.drawable
+                .startup_check_settings_textview_warning_selector);
+        hotspotNextIcon.setVisibility(View.VISIBLE);
+        mHotspotCheckLayout.setOnClickListener(this);
+    }
+
     private void setScanLayoutAccordingToSettings() {
-        final ImageView nextIcon = (ImageView) mScanCheckLayout.findViewById(R.id
-                .startup_check_scan_always_available_next_ic);
+        Log.d(TAG, "setScanLayoutAccordingToSettings");
+
         if (!NetworkUtils.isScanAlwaysAvailable(this)) {
-            mScanCheckLayout.setBackgroundResource(R.drawable
-                    .startup_check_settings_textview_warning_selector);
-            nextIcon.setVisibility(View.VISIBLE);
-            mScanCheckLayout.setOnClickListener(this);
-            mSettingsStateCorrect.put(Config.STARTUP_CHECK_SCAN_ALWAYS_AVAILABLE_SETTINGS,
+
+            displayCheckScanSettingsLayout();
+            cacheSettingsState(Config.STARTUP_CHECK_SCAN_ALWAYS_AVAILABLE_SETTINGS,
                     false);
             return;
         }
-        mScanCheckLayout.setBackgroundResource(R.drawable
-                .stroke_rectangle_shape_teal_lighter);
-        nextIcon.setVisibility(View.GONE);
-        mScanCheckLayout.setOnClickListener(null);
-        mSettingsStateCorrect.put(Config.STARTUP_CHECK_SCAN_ALWAYS_AVAILABLE_SETTINGS, true);
 
+        displayScanSettingsCorrectLayout();
+        cacheSettingsState(Config.STARTUP_CHECK_SCAN_ALWAYS_AVAILABLE_SETTINGS, true);
         setContinueButtonListenerAccordingToSettings();
     }
 
@@ -227,48 +274,55 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
         super.onActivityResult(requestCode, resultCode, data);
 
         switch (requestCode) {
-            case 1:
+            case REQUEST_CODE_SCAN_ALWAYS_AVAILABLE:
                 Log.d(TAG, "resultCode" + resultCode);
-                final ImageView nextIcon = (ImageView) mScanCheckLayout.findViewById(R.id
-                        .startup_check_scan_always_available_next_ic);
+
                 if (resultCode == RESULT_OK) {
-                    mScanCheckLayout.setBackgroundResource(R.drawable
-                            .stroke_rectangle_shape_teal_lighter);
-                    nextIcon.setVisibility(View.GONE);
-                    mScanCheckLayout.setOnClickListener(null);
-                    mSettingsStateCorrect.put(Config
-                            .STARTUP_CHECK_SCAN_ALWAYS_AVAILABLE_SETTINGS, true);
-
-
+                    displayScanSettingsCorrectLayout();
                 } else {
-                    mScanCheckLayout.setBackgroundResource(R.drawable
-                            .startup_check_settings_textview_warning_selector);
-                    nextIcon.setVisibility(View.VISIBLE);
-                    mScanCheckLayout.setOnClickListener(this);
-                    mSettingsStateCorrect.put(Config
-                            .STARTUP_CHECK_SCAN_ALWAYS_AVAILABLE_SETTINGS, false);
+                    displayCheckScanSettingsLayout();
                 }
+
+                cacheSettingsState(Config.STARTUP_CHECK_SCAN_ALWAYS_AVAILABLE_SETTINGS,
+                        resultCode == RESULT_OK);
+
                 PrefUtils.setScanAlwaysAvailableBeenEnabled(this, resultCode == RESULT_OK);
+
                 setContinueButtonListenerAccordingToSettings();
                 break;
         }
     }
 
-    @Override
-    public void onActivityReenter(int resultCode, Intent data) {
-        super.onActivityReenter(resultCode, data);
-        Log.d(TAG, "onActivityReenter");
+    private void cacheSettingsState(String key, boolean correct) {
+        Log.d(TAG, "cacheSettingsState");
+        mSettingsStateCache.put(key, correct);
+    }
 
+    private void displayCheckScanSettingsLayout() {
+        Log.d(TAG, "displayCheckScanSettingsLayout");
+
+        mScanCheckLayout.setBackgroundResource(R.drawable
+                .startup_check_settings_textview_warning_selector);
+        mScanNextIcon.setVisibility(View.VISIBLE);
+        mScanCheckLayout.setOnClickListener(this);
+    }
+
+    private void displayScanSettingsCorrectLayout() {
+        Log.d(TAG, "displayScanSettingsCorrectLayout");
+
+        mScanCheckLayout.setBackgroundResource(R.drawable
+                .stroke_rectangle_shape_teal_lighter);
+        mScanNextIcon.setVisibility(View.GONE);
+        mScanCheckLayout.setOnClickListener(null);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.startup_check_scan_always_available_layout:
-                Log.d(TAG, "check your scan settings");
                 Intent enableScanAvailable = new Intent(WifiManager
                         .ACTION_REQUEST_SCAN_ALWAYS_AVAILABLE);
-                startActivityForResult(enableScanAvailable, 1);
+                startActivityForResult(enableScanAvailable, REQUEST_CODE_SCAN_ALWAYS_AVAILABLE);
                 break;
             case R.id.startup_check_wifi_settings_layout:
                 Intent enableWifi = new Intent(Settings.ACTION_WIFI_SETTINGS);
@@ -279,14 +333,14 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
                 startActivity(disableAirplane);
                 break;
             case R.id.startup_check_hotspot_settings_layout:
-                Intent disableHotspot = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
-                startActivity(disableHotspot);
+                Intent tetherSettings = new Intent();
+                tetherSettings.setClassName("com.android.settings", "com.android.settings" +
+                        ".TetherSettings");
+                startActivity(tetherSettings);
                 break;
             case R.id.startup_check_settings_continue_button:
                 loadSavedWifiIntoDatabase();
-                Intent startWifiHandler = new Intent(this, SavedWifiListActivity.class);
-                startActivity(startWifiHandler);
-
+                finish(); //Calls onActivityResult of SavedWIfiListActivity
                 break;
         }
     }
@@ -294,29 +348,6 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
     private BroadcastReceiver mAirplaneModeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            //            boolean isAirplaneModeOn = intent.getBooleanExtra
-            // (AirplaneModeStateReceiver
-            //                    .EXTRAS_AIRPLANE_MODE_STATE, false);
-            //
-            //            final ImageView nextIcon = (ImageView) mAirplaneCheckLayout
-            // .findViewById(R.id
-            //                    .startup_check_airplane_settings_next_ic);
-            //
-            //            if (isAirplaneModeOn) {
-            //                if (!NetworkUtils.isScanAlwaysAvailable(context)) {
-            //                    mAirplaneCheckLayout.setBackgroundResource(R.drawable
-            //                            .startup_check_settings_textview_warning_selector);
-            //                    nextIcon.setVisibility(View.VISIBLE);
-            //                    mAirplaneCheckLayout.setOnClickListener(StartupCheckActivity
-            // .this);
-            //                }
-            //            } else {
-            //                mAirplaneCheckLayout.setBackgroundResource(R.drawable
-            //                        .stroke_rectangle_shape_teal_lighter);
-            //                nextIcon.setVisibility(View.GONE);
-            //                mAirplaneCheckLayout.setOnClickListener(null);
-            //
-            //            }
             setAirplaneLayoutAccordingToSettings();
         }
     };
@@ -324,29 +355,6 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
     private BroadcastReceiver mWifiStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            //            final ImageView nextIcon = (ImageView) mWifiCheckLayout.findViewById(R.id
-            //                    .startup_check_wifi_settings_next_ic);
-
-            //            if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(intent.getAction())) {
-            //                int wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
-            //
-            //                if (WifiManager.WIFI_STATE_DISABLED == wifiState) {
-            //
-            //                    if (!NetworkUtils.isWifiEnabled(context)) {
-            //                        mWifiCheckLayout.setBackgroundResource(R.drawable
-            //                                .startup_check_settings_textview_warning_selector);
-            //                        nextIcon.setVisibility(View.VISIBLE);
-            //                        mWifiCheckLayout.setOnClickListener(StartupCheckActivity
-            // .this);
-            //
-            //                    }
-            //                } else if (WifiManager.WIFI_STATE_ENABLED == wifiState) {
-            //                    mWifiCheckLayout.setBackgroundResource(R.drawable
-            //                            .stroke_rectangle_shape_teal_lighter);
-            //                    nextIcon.setVisibility(View.GONE);
-            //                    mWifiCheckLayout.setOnClickListener(null);
-            //                }
-            //            }
             setWifiLayoutAccordingToSettings();
         }
     };
@@ -355,22 +363,6 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
     private BroadcastReceiver mHotspotStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
-            //            final ImageView nextIcon = (ImageView) mHotspotCheckLayout.findViewById
-            // (R.id
-            //                    .startup_check_airplane_settings_next_ic);
-            //            if (NetworkUtils.isHotspotOn(context)) {
-            //                mHotspotCheckLayout.setBackgroundResource(R.drawable
-            //                        .startup_check_settings_textview_warning_selector);
-            //                nextIcon.setVisibility(View.VISIBLE);
-            //                mHotspotCheckLayout.setOnClickListener(StartupCheckActivity.this);
-            //
-            //            } else {
-            //                mHotspotCheckLayout.setBackgroundResource(R.drawable
-            //                        .stroke_rectangle_shape_teal_lighter);
-            //                nextIcon.setVisibility(View.GONE);
-            //                mHotspotCheckLayout.setOnClickListener(null);
-            //            }
             setHotspotLayoutAccordingToSettings();
         }
     };

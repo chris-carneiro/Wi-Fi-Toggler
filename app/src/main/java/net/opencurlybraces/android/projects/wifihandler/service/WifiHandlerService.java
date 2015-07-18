@@ -367,10 +367,12 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
         Log.d(TAG, "onInsertBatchComplete: Async Batch Insert complete, stopping service");
 
         PrefUtils.setSavedWifiInsertComplete(this, (results != null && results.length > 0));
+        Intent handleSavedWifiInsert = new Intent(this, WifiHandlerService.class);
 
-        if (!PrefUtils.isWifiHandlerActive(this)) {
-            stopSelf();
-        }
+//        handleSavedWifiInsert.setAction(WifiHandlerService.ACTION_HANDLE_SAVED_WIFI_INSERT);
+        handleSavedWifiInsert.setAction(WifiHandlerService.ACTION_HANDLE_ACTIVATE_WIFI_HANDLER);
+        startService(handleSavedWifiInsert);
+
     }
 
     @Override

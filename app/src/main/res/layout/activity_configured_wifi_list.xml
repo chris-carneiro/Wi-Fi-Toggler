@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginStart="@dimen/action_bar_title_left_margin"
-            android:text="@string/off_wifi_handler_switch_label_value"
+            android:text="@string/on_wifi_handler_switch_label_value"
             android:textColor="@color/primary_material_light"
             android:textSize="@dimen/switch_banner_label_value_text_size"
             />
@@ -38,8 +38,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/wifi_handler_switch_banner"
-        android:gravity="center"
         android:background="@android:color/holo_orange_dark"
+        android:gravity="center"
         android:padding="@dimen/normal_padding">
 
         <TextView
@@ -70,11 +70,11 @@
             android:id="@android:id/empty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="@dimen/normal_padding"
-            android:layout_margin="@dimen/normal_padding"
             android:layout_centerInParent="true"
-            android:textAlignment="center"
-            android:text="@string/wifi_list_info_when_wifi_handler_off"/>
+            android:layout_margin="@dimen/normal_padding"
+            android:padding="@dimen/normal_padding"
+            android:text="@string/wifi_list_info_when_wifi_handler_off"
+            android:textAlignment="center"/>
     </RelativeLayout>
 
 </RelativeLayout>
