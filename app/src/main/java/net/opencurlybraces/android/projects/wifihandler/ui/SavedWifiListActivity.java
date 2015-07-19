@@ -293,6 +293,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
             case StartupUtils.FIRST_TIME_FOR_VERSION:
                 Log.d(TAG, "Startup mode: FIRST_TIME_FOR_VERSION");
                 launchStartupCheckActivity();
+                break;
             case StartupUtils.NORMAL:
 
                 //TODO handle this case better...
