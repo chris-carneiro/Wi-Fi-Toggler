@@ -75,6 +75,9 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     public static final String ACTION_HANDLE_INSERT_NEW_CONNECTED_WIFI = SERVICE_ACTION_PREFIX +
             "ACTION_HANDLE_INSERT_NEW_CONNECTED_WIFI";
 
+    public static final String ACTION_FINISH_STARTUP_CHECK_ACTIVITY = SERVICE_ACTION_PREFIX
+            + "ACTION_FINISH_STARTUP_CHECK_ACTIVITY";
+
     private WifiManager mWifiManager;
     private WifiScanResultsReceiver mWifiScanResultsReceiver = null;
     private WifiAdapterStateReceiver mWifiAdapterStateReceiver = null;
@@ -216,6 +219,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
     private void handleSavedWifiInsert() {
         Log.d(TAG, "handleSavedWifiInsert");
+        //TODO call synchrone method
         NetworkUtils.getSavedWifiAsync(mWifiManager, this);
 
     }
@@ -319,6 +323,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
     }
 
+    //TODO move to Utils
     private void buildForegroundNotification() {
         Resources res = getResources();
 
@@ -367,11 +372,12 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
         Log.d(TAG, "onInsertBatchComplete: Async Batch Insert complete, stopping service");
 
         PrefUtils.setSavedWifiInsertComplete(this, (results != null && results.length > 0));
-        Intent handleSavedWifiInsert = new Intent(this, WifiHandlerService.class);
 
-//        handleSavedWifiInsert.setAction(WifiHandlerService.ACTION_HANDLE_SAVED_WIFI_INSERT);
+        Intent handleSavedWifiInsert = new Intent(this, WifiHandlerService.class);
         handleSavedWifiInsert.setAction(WifiHandlerService.ACTION_HANDLE_ACTIVATE_WIFI_HANDLER);
         startService(handleSavedWifiInsert);
+
+        sendLocalBroadcastAction(ACTION_FINISH_STARTUP_CHECK_ACTIVITY);
 
     }
 
@@ -386,6 +392,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
         Log.d(TAG, "onUpdateComplete: Async Update complete");
     }
 
+    //TODO remove
     @Override
     public void onSavedWifiLoaded(List<WifiConfiguration> savedWifis) {
         Log.d(TAG, "onSavedWifiLoaded savedWifis count" + (savedWifis != null ? savedWifis.size()

@@ -45,7 +45,7 @@ public class NetworkUtils {
     }
 
     private static final String TAG = "NetworkUtils";
-
+    //TODO refactor
     /**
      * Helper method to request from the system, user's configured Wifis. Should be executed on a
      * worker thread. <BR/> As wifi must be enabled to get the configured networks, the wifi adapter

@@ -33,7 +33,6 @@ import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.StartupUtils;
 
-//TODO create settings layout, start wifi handler at boot, activate notification ?
 
 public class SavedWifiListActivity extends AppCompatActivity implements
         CompoundButton.OnCheckedChangeListener,
@@ -60,6 +59,9 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         mEmptyView = (TextView) findViewById(android.R.id.empty);
         mWifiHandlerActivationSwitch.setOnCheckedChangeListener(this);
         mBanner = (RelativeLayout) findViewById(R.id.wifi_handler_message_banner);
+
+        initCursorLoader();
+        mSavedWifiCursorAdapter = initAdapter();
     }
 
 
@@ -76,6 +78,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
             }
         }
     };
+
 
     private BroadcastReceiver mAirplaneModeReceiver = new BroadcastReceiver() {
         @Override
@@ -100,16 +103,14 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
 
-        //TODO check for hotspot and airplane mode, redirect user to settings page if active
         super.onResume();
         Log.d(TAG, "onResume");
 
-        initCursorLoader();
-        mSavedWifiCursorAdapter = initAdapter();
+        startupCheck();
         setListAdapterAccordingToSwitchState();
         registerReceivers();
         showBannerAccordingAirplaneMode();
-        startupCheck();
+
 
     }
 
@@ -147,7 +148,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE);
         intentFilter.addAction(WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE);
-
         LocalBroadcastManager.getInstance(this).registerReceiver(mNotificationActionsReceiver,
                 intentFilter);
     }
@@ -272,10 +272,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
 
     private CursorAdapter initAdapter() {
         Log.d(TAG, "initAdapter");
-        // Must include the _id column for the adapter to work
-        String[] from = new String[]{SavedWifi.SSID, SavedWifi.STATUS};
-        // Fields on the UI to which we map
-        int[] to = new int[]{R.id.configured_wifi_ssid, R.id.configured_wifi_state};
 
         if (mSavedWifiCursorAdapter == null) {
             mSavedWifiCursorAdapter = new SavedWifiListAdapter(this, null, 0);
@@ -309,8 +305,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
             mWifiHandlerActivationSwitch.setChecked(false);
 
             launchStartupCheckActivity();
-        } else {
-            mWifiHandlerActivationSwitch.setChecked(true);
         }
     }
 

@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -32,6 +33,8 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
     public static final String HOTSPOT_STATE_CHANGE_ACTION = "android.net.wifi" +
             ".WIFI_AP_STATE_CHANGED";
 
+    private static final String TETHER_SETTINGS_ACTION = "com.android.settings.TetherSettings";
+    private static final String TETHER_SETTINGS_CLASSNAME = "com.android.settings";
 
     RelativeLayout mScanCheckLayout = null;
     RelativeLayout mWifiCheckLayout = null;
@@ -104,6 +107,7 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
         registerAirplaneReceiver();
         registerWifiStateReceiver();
         registerHotspotStateReceiver();
+        registerFinishActivityReceiver();
     }
 
     @Override
@@ -116,6 +120,7 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
         unregisterReceiver(mAirplaneModeReceiver);
         unregisterReceiver(mWifiStateReceiver);
         unregisterReceiver(mHotspotStateReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mFinishStartupCheckReceiver);
     }
 
     private void registerAirplaneReceiver() {
@@ -134,6 +139,13 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(HOTSPOT_STATE_CHANGE_ACTION);
         registerReceiver(mHotspotStateReceiver, intentFilter);
+    }
+
+    private void registerFinishActivityReceiver() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(WifiHandlerService.ACTION_FINISH_STARTUP_CHECK_ACTIVITY);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mFinishStartupCheckReceiver,
+                intentFilter);
     }
 
     @Override
@@ -334,14 +346,13 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
                 break;
             case R.id.startup_check_hotspot_settings_layout:
                 Intent tetherSettings = new Intent();
-                tetherSettings.setClassName("com.android.settings", "com.android.settings" +
-                        ".TetherSettings");
+                tetherSettings.setClassName(TETHER_SETTINGS_CLASSNAME, TETHER_SETTINGS_ACTION);
                 startActivity(tetherSettings);
                 break;
             case R.id.startup_check_settings_continue_button:
                 loadSavedWifiIntoDatabase();
                 PrefUtils.markSettingsCorrectAtFirstLaunch(this);
-                finish(); //Calls onActivityResult of SavedWIfiListActivity
+                //                finish(); //Calls onActivityResult of SavedWIfiListActivity
                 break;
         }
     }
@@ -368,6 +379,17 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
         }
     };
 
+
+    private BroadcastReceiver mFinishStartupCheckReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Intent=" + intent.getAction());
+            if (WifiHandlerService.ACTION_FINISH_STARTUP_CHECK_ACTIVITY.equals(intent
+                    .getAction())) {
+                StartupCheckActivity.this.finish();
+            }
+        }
+    };
 
     private void loadSavedWifiIntoDatabase() {
         Intent handleSavedWifiInsert = new Intent(this, WifiHandlerService.class);

@@ -14,7 +14,7 @@ import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
  * Created by chris on 15/06/15.
  */
 public class WifiAdapterStateReceiver extends BroadcastReceiver {
-    private static final String TAG = "WifiStateReceiver";
+    private static final String TAG = "WifiAdapterState";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -28,10 +28,6 @@ public class WifiAdapterStateReceiver extends BroadcastReceiver {
                     Log.d(TAG, "WIFI_STATE_DISABLED Event received");
                     Intent updateSavedWifi = new Intent(context, WifiHandlerService
                             .class);
-////                    updateSavedWifi.putExtra(WifiConnectionStateReceiver
-////                                    .EXTRA_SAVED_WIFI_NEW_STATE, NetworkUtils
-////                                    .WifiAdapterStatus.DISABLED
-//                    );
                     updateSavedWifi.setAction(WifiHandlerService
                             .ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT);
 
