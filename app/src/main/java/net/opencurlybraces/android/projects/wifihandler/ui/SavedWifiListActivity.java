@@ -297,16 +297,20 @@ public class SavedWifiListActivity extends AppCompatActivity implements
             case StartupUtils.NORMAL:
 
                 //TODO handle this case better...
-                if (!PrefUtils.wereSettingsCorrectAtFirstLaunch(this)) {
-                    mWifiHandlerActivationSwitch.setChecked(false);
-
-                    launchStartupCheckActivity();
-                } else {
-                    mWifiHandlerActivationSwitch.setChecked(true);
-                }
+                handleNormalStartup();
                 //TODO make hashmapSettingsStatesHolder observable
                 Log.d(TAG, "Startup mode: NORMAL");
                 break;
+        }
+    }
+
+    private void handleNormalStartup() {
+        if (!PrefUtils.wereSettingsCorrectAtFirstLaunch(this)) {
+            mWifiHandlerActivationSwitch.setChecked(false);
+
+            launchStartupCheckActivity();
+        } else {
+            mWifiHandlerActivationSwitch.setChecked(true);
         }
     }
 
