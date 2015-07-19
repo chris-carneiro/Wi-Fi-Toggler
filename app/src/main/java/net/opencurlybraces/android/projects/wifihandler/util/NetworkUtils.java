@@ -11,9 +11,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -45,60 +43,6 @@ public class NetworkUtils {
     }
 
     private static final String TAG = "NetworkUtils";
-    //TODO refactor
-    /**
-     * Helper method to request from the system, user's configured Wifis. Should be executed on a
-     * worker thread. <BR/> As wifi must be enabled to get the configured networks, the wifi adapter
-     * is enabled (Uses {@link android.net.wifi.WifiManager.WifiLock}) and disabled right away in
-     * order to always get user's configured Wifis (if any).
-     *
-     * @param wifiManager
-     * @param callback
-     */
-    public static void getSavedWifiAsync(@NonNull final WifiManager
-                                                 wifiManager,
-                                         @NonNull final
-                                         SavedWifiConfigurationListener
-                                                 callback) {
-
-        Log.d(TAG, "getSavedWifiAsync");
-        new AsyncTask<Void, Void, List<WifiConfiguration>>() {
-
-            @Override
-            protected List<WifiConfiguration> doInBackground(Void... params) {
-                List<WifiConfiguration> configuredWifis = null;
-
-                if (!wifiManager.isWifiEnabled()) {
-                    if (wifiManager.setWifiEnabled(true)) {
-                        WifiManager.WifiLock wifiLock = wifiManager.createWifiLock(WifiManager
-                                .WIFI_MODE_SCAN_ONLY, null);
-                        wifiLock.acquire();
-                        int attempts = 0;
-
-                        do {
-                            Log.d("NetworkUtils", "getNetworks");
-                            configuredWifis = wifiManager.getConfiguredNetworks();
-                            attempts++;
-                        } while (configuredWifis == null && attempts < 100);
-
-                        wifiManager.setWifiEnabled(false);
-                        wifiLock.release();
-                    }
-
-                } else {
-                    configuredWifis = wifiManager.getConfiguredNetworks();
-                }
-
-                return configuredWifis;
-            }
-
-            @Override
-            protected void onPostExecute(List<WifiConfiguration> savedWifis) {
-                callback.onSavedWifiLoaded(savedWifis);
-            }
-        }.execute();
-    }
-
 
     /**
      * Check whether wifi hotspot on or off This is a workaround and should be used with caution as
@@ -220,10 +164,6 @@ public class NetworkUtils {
         return Settings.Global.getInt(context.getContentResolver(),
                 Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
 
-    }
-
-    public interface SavedWifiConfigurationListener {
-        void onSavedWifiLoaded(List<WifiConfiguration> savedWifis);
     }
 
 
