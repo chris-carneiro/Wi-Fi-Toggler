@@ -5,7 +5,7 @@
                 android:padding="@dimen/normal_padding">
 
     <TextView
-        android:id="@+id/configured_wifi_ssid"
+        android:id="@+id/saved_wifi_ssid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/wifi_list_row_margin_left"
@@ -13,11 +13,11 @@
         />
 
     <TextView
-        android:id="@+id/configured_wifi_state"
+        android:id="@+id/saved_wifi_state"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@id/configured_wifi_ssid"
-        android:layout_below="@id/configured_wifi_ssid"
+        android:layout_alignStart="@id/saved_wifi_ssid"
+        android:layout_below="@id/saved_wifi_ssid"
         android:textColor="@android:color/darker_gray"
         />
 

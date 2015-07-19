@@ -22,5 +22,8 @@
     mode :)</string>
     <string name="airplane_mode_message_banner">Auto toggle unavailable, disable airplane
         mode</string>
-
+    <string name="tag_key_ssid">tag_key_ssid</string>
+    <string name="tag_key_status">tag_key_status</string>
+    <string name="tag_key_ssid_index">tag_key_ssid_index</string>
+    <string name="tag_key_status_index">tag_key_status_index</string>
 </resources>

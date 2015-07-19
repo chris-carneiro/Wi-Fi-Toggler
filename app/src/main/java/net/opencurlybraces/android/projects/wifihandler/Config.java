@@ -8,6 +8,7 @@ public class Config {
     private Config() {
     }
 
+    public static final boolean DEBUG_MODE = true;
 
     public static final int NOTIFICATION_ID_AIRPLANE_MODE = 101;
 
