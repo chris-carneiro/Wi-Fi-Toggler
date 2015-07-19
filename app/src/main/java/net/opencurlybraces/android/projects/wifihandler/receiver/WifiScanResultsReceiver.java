@@ -48,12 +48,6 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
 
     }
 
-
-
-    /**
-     * TODO add a receiver for WIFI_AP_STATE_CHANGED set in sharedPreferences the state of the
-     * hotspot ap(active or not), at app first launch if active: ask user to disable hotspot.
-     */
     private static class ScanResultAsyncHandler extends AsyncTask<Void, Void, Boolean> {
         private final Context mContext;
 

@@ -38,7 +38,7 @@ import java.util.List;
  * to a view controller. <BR/> Created by chris on 01/06/15.
  */
 public class WifiHandlerService extends Service implements DataAsyncQueryHandler
-        .AsyncQueryListener, NetworkUtils.SavedWifiConfigurationListener {
+        .AsyncQueryListener {
 
     private static final String TAG = "WifiHandlerService";
 
@@ -219,8 +219,15 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
     private void handleSavedWifiInsert() {
         Log.d(TAG, "handleSavedWifiInsert");
-        //TODO call synchrone method
-        NetworkUtils.getSavedWifiAsync(mWifiManager, this);
+        List<WifiConfiguration> savedWifis = NetworkUtils.getSavedWifiSync(this);
+        try {
+            List<ContentProviderOperation> batch = SavedWifi.buildBatch(savedWifis);
+
+            insertSavedWifiBatchAsync((ArrayList<ContentProviderOperation>) batch);
+        } catch (IllegalArgumentException e) {
+            Log.d(TAG, "Nothing to build");
+            //TODO handle
+        }
 
     }
 
@@ -390,20 +397,5 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     @Override
     public void onUpdateComplete(int token, Object cookie, int result) {
         Log.d(TAG, "onUpdateComplete: Async Update complete");
-    }
-
-    //TODO remove
-    @Override
-    public void onSavedWifiLoaded(List<WifiConfiguration> savedWifis) {
-        Log.d(TAG, "onSavedWifiLoaded savedWifis count" + (savedWifis != null ? savedWifis.size()
-                : null));
-        try {
-            List<ContentProviderOperation> batch = SavedWifi.buildBatch(savedWifis);
-
-            insertSavedWifiBatchAsync((ArrayList<ContentProviderOperation>) batch);
-        } catch (IllegalArgumentException e) {
-            Log.d(TAG, "Nothing to build");
-            //TODO handle
-        }
     }
 }
