@@ -19,6 +19,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import net.opencurlybraces.android.projects.wifihandler.Config;
 import net.opencurlybraces.android.projects.wifihandler.R;
 import net.opencurlybraces.android.projects.wifihandler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifihandler.data.provider.WifiHandlerContract;
@@ -85,7 +86,6 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
 
 
-    private static final int NOTIFICATION_ID = 100;
     private static final int TOKEN_INSERT = 2;
     private static final int TOKEN_UPDATE = 3;
     private static final int TOKEN_INSERT_BATCH = 5;
@@ -132,6 +132,8 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
         unregisterReceiver(mWifiScanResultsReceiver);
         unregisterReceiver(mWifiAdapterStateReceiver);
         unregisterReceiver(mWifiConnectionStateReceiver);
+
+        NetworkUtils.dismissNotification(this, Config.NOTIFICATION_ID_AIRPLANE_MODE);
     }
 
     @Override
@@ -324,7 +326,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
         notifBuilder.addAction(0, res.getString(R.string.enable_action_title)
                 , createActivateWifiHandlerIntent());
         Notification notification = notifBuilder.build();
-        notifManager.notify(NOTIFICATION_ID, notification);
+        notifManager.notify(Config.NOTIFICATION_ID_WIFI_HANDLER_STATE, notification);
 
         stopForeground(false);
 
@@ -354,7 +356,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                 , createPauseWifiHandlerIntent());
 
         Notification notification = notifBuilder.build();
-        startForeground(NOTIFICATION_ID, notification);
+        startForeground(Config.NOTIFICATION_ID_WIFI_HANDLER_STATE, notification);
 
     }
 

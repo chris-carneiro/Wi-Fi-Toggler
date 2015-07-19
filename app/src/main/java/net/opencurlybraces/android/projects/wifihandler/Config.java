@@ -11,6 +11,7 @@ public class Config {
     public static final boolean DEBUG_MODE = true;
 
     public static final int NOTIFICATION_ID_AIRPLANE_MODE = 101;
+    public static final int NOTIFICATION_ID_WIFI_HANDLER_STATE = 100;
 
     public static final int WIFI_SIGNAL_STRENGTHLEVELS = 11;
 

@@ -4,7 +4,6 @@ import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.CursorLoader;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
@@ -37,7 +36,7 @@ import net.opencurlybraces.android.projects.wifihandler.util.StartupUtils;
 
 public class SavedWifiListActivity extends AppCompatActivity implements
         CompoundButton.OnCheckedChangeListener,
-        LoaderManager.LoaderCallbacks<Cursor>, DialogInterface.OnClickListener {
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = "SavedWifiList";
 
@@ -55,7 +54,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                     .detectDiskReads()
                     .detectDiskWrites()
-                    .detectNetwork()   // or .detectAll() for all detectable problems
+                    .detectAll()   // or .detectAll() for all detectable problems
                     .penaltyLog()
                     .build());
             StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
@@ -79,42 +78,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         mSavedWifiCursorAdapter = initAdapter();
     }
 
-
-    private BroadcastReceiver mNotificationActionsReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "Intent=" + intent.getAction());
-            if (WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE.equals(intent
-                    .getAction())) {
-                mWifiHandlerActivationSwitch.setChecked(true);
-            } else if (WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE.equals(intent
-                    .getAction())) {
-                mWifiHandlerActivationSwitch.setChecked(false);
-            }
-        }
-    };
-
-
-    private BroadcastReceiver mAirplaneModeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            boolean isAirplaneModeOn = intent.getBooleanExtra(AirplaneModeStateReceiver
-                    .EXTRAS_AIRPLANE_MODE_STATE, false);
-
-            if (isAirplaneModeOn) {
-                if (PrefUtils.areWarningNotificationsEnabled(context)) {
-                    NetworkUtils.buildAirplaneNotification(context);
-                }
-                mBanner.setVisibility(View.VISIBLE);
-            } else {
-                mWifiHandlerActivationSwitch.setEnabled(true);
-                mBanner.setVisibility(View.GONE);
-                NetworkUtils.dismissNotification(context, Config
-                        .NOTIFICATION_ID_AIRPLANE_MODE);
-            }
-        }
-    };
-
     @Override
     protected void onResume() {
 
@@ -124,52 +87,16 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         startupCheck();
         setListAdapterAccordingToSwitchState();
         registerReceivers();
-        showBannerAccordingAirplaneMode();
-
-
-    }
-
-    private void setListAdapterAccordingToSwitchState() {
-        if (PrefUtils.isWifiHandlerActive(this)) {
-            mWifiHandlerActivationSwitch.setChecked(true);
-            mWifiHandlerWifiList.setAdapter(mSavedWifiCursorAdapter);
-        } else {
-            mWifiHandlerActivationSwitch.setChecked(false);
-        }
-    }
-
-    private void registerReceivers() {
-        registerNotificationReceiver();
-        registerAirplaneModeReceiver();
-    }
-
-    private void showBannerAccordingAirplaneMode() {
-        if (NetworkUtils.isAirplaneModeEnabled(this)) {
-            mBanner.setVisibility(View.VISIBLE);
-        } else {
-            mBanner.setVisibility(View.GONE);
-        }
-    }
-
-    private void registerAirplaneModeReceiver() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        registerReceiver(mAirplaneModeReceiver,
-                intentFilter);
-    }
-
-
-    private void registerNotificationReceiver() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE);
-        intentFilter.addAction(WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mNotificationActionsReceiver,
-                intentFilter);
+        handleAirplaneModeBannerDisplay();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        unregisterReceivers();
+    }
+
+    private void unregisterReceivers() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mNotificationActionsReceiver);
         unregisterReceiver(mAirplaneModeReceiver);
     }
@@ -194,20 +121,16 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            handleDisplaySettings();
+            displaySettingsActivity();
             return true;
         }
 
         return false;
     }
 
-    private void handleDisplaySettings() {
-        Intent preferencesIntent = new Intent(this, SettingsActivity.class);
-        startActivity(preferencesIntent);
-    }
-
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        Log.d(TAG, "onCheckedChanged");
         switch (buttonView.getId()) {
             case R.id.wifi_handler_activation_switch:
                 handleSwitchLabelValue(isChecked);
@@ -225,42 +148,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         boolean isChecked = PrefUtils.isWifiHandlerActive(this);
         handleSavedWifiListLoading(isChecked);
     }
-
-
-    private void handleNotification(boolean isChecked) {
-        if (isChecked) {
-            Intent startForegroundNotificationIntent = new Intent(this, WifiHandlerService.class);
-            startForegroundNotificationIntent.setAction(WifiHandlerService
-                    .ACTION_HANDLE_ACTIVATE_WIFI_HANDLER);
-            startService(startForegroundNotificationIntent);
-        } else {
-            Intent dismissableNotificationIntent = new Intent(this, WifiHandlerService.class);
-            dismissableNotificationIntent.setAction(WifiHandlerService
-                    .ACTION_HANDLE_PAUSE_WIFI_HANDLER);
-            startService(dismissableNotificationIntent);
-        }
-
-    }
-
-    private void handleSwitchLabelValue(boolean isChecked) {
-        if (isChecked) {
-            String on = getString(R.string.on_wifi_handler_switch_label_value);
-            mWifiHandlerSwitchLabel.setText(on);
-        } else {
-            String off = getString(R.string.off_wifi_handler_switch_label_value);
-            mWifiHandlerSwitchLabel.setText(off);
-        }
-    }
-
-
-    private void handleSavedWifiListLoading(boolean isChecked) {
-        if (isChecked) {
-            mWifiHandlerWifiList.setAdapter(mSavedWifiCursorAdapter);
-        } else {
-            mWifiHandlerWifiList.setAdapter(null);
-        }
-    }
-
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -294,7 +181,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         return mSavedWifiCursorAdapter;
     }
 
-
     private void startupCheck() {
         int startupMode = StartupUtils.appStartMode(this);
 
@@ -316,68 +202,137 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     }
 
     private void handleNormalStartup() {
+        Log.d(TAG, "handleNormalStartup");
         if (!PrefUtils.wereSettingsCorrectAtFirstLaunch(this)) {
             mWifiHandlerActivationSwitch.setChecked(false);
-
             launchStartupCheckActivity();
         }
     }
 
     private void launchStartupCheckActivity() {
+        Log.d(TAG, "launchStartupCheckActivity");
         Intent startupCheck = new Intent(this, StartupCheckActivity.class);
         startActivity(startupCheck);
     }
 
-    //    private void askUserEnableWifi() {
-    //        StringBuilder sb = new StringBuilder();
-    //        sb.append("The wifi needs to be activated for the first launch, please go to " +
-    //                "settings and enable wifi. We won't bother you with this again :)");
-    //        AlertDialog.Builder askUserChangeSettings = new AlertDialog.Builder(this);
-    //
-    //
-    //        askUserChangeSettings.setMessage(sb.toString());
-    //        askUserChangeSettings.setPositiveButton("Go to settings", new DialogInterface
-    //                .OnClickListener() {
-    //
-    //
-    //            @Override
-    //            public void onClick(DialogInterface dialog, int which) {
-    //                Intent openWifiSettings = new Intent(Settings.ACTION_WIFI_SETTINGS);
-    //                SavedWifiListActivity.this.startActivityForResult(openWifiSettings, 0);
-    //            }
-    //        });
-    //        askUserChangeSettings.setNegativeButton("Not now", this);
-    //        askUserChangeSettings.show();
-    //    }
-    //
-    //    private void askUserEnableScanAlwaysAvailable() {
-    //        StringBuilder sb = new StringBuilder();
-    //        sb.append("Passive scan mode, which is the core feature of WifiHandler, is not
-    // active, to" +
-    //                " enjoy auto-toggle please activate it." +
-    //                " ");
-    //        AlertDialog.Builder askUserChangeSettings = new AlertDialog.Builder(this);
-    //
-    //
-    //        askUserChangeSettings.setMessage(sb.toString());
-    //        askUserChangeSettings.setPositiveButton("Go to settings", new DialogInterface
-    //                .OnClickListener() {
-    //
-    //
-    //            @Override
-    //            public void onClick(DialogInterface dialog, int which) {
-    //                Intent openWifiSettings = new Intent(WifiManager
-    //                        .ACTION_REQUEST_SCAN_ALWAYS_AVAILABLE);
-    //                SavedWifiListActivity.this.startActivityForResult(openWifiSettings, 0);
-    //            }
-    //        });
-    //        askUserChangeSettings.setNegativeButton("Not now", this);
-    //        askUserChangeSettings.show();
-    //    }
+    private void handleNotification(boolean isChecked) {
+        Log.d(TAG, "handleNotification=" + isChecked);
+        if (isChecked) {
+            buildWifiHandlerStateNotification(WifiHandlerService
+                    .ACTION_HANDLE_ACTIVATE_WIFI_HANDLER);
+        } else {
+            buildWifiHandlerStateNotification(WifiHandlerService
+                    .ACTION_HANDLE_PAUSE_WIFI_HANDLER);
+        }
 
-
-    @Override
-    public void onClick(DialogInterface dialog, int which) {
-        dialog.cancel();
     }
+
+    private void buildWifiHandlerStateNotification(String actionHandleActivateWifiHandler) {
+        Log.d(TAG, "buildWifiHandlerStateNotification");
+        Intent startForegroundNotificationIntent = new Intent(this, WifiHandlerService.class);
+        startForegroundNotificationIntent.setAction(actionHandleActivateWifiHandler);
+        startService(startForegroundNotificationIntent);
+    }
+
+    private void handleSwitchLabelValue(boolean isChecked) {
+        Log.d(TAG, "handleSwitchLabelValue=" + isChecked);
+        if (isChecked) {
+            String on = getString(R.string.on_wifi_handler_switch_label_value);
+            mWifiHandlerSwitchLabel.setText(on);
+        } else {
+            String off = getString(R.string.off_wifi_handler_switch_label_value);
+            mWifiHandlerSwitchLabel.setText(off);
+        }
+    }
+
+
+    private void handleSavedWifiListLoading(boolean isChecked) {
+        Log.d(TAG, "handleSavedWifiListLoading=" + isChecked);
+        if (isChecked) {
+            mWifiHandlerWifiList.setAdapter(mSavedWifiCursorAdapter);
+        } else {
+            mWifiHandlerWifiList.setAdapter(null);
+        }
+    }
+
+    private void displaySettingsActivity() {
+        Intent preferencesIntent = new Intent(this, SettingsActivity.class);
+        startActivity(preferencesIntent);
+    }
+
+    private void setListAdapterAccordingToSwitchState() {
+        Log.d(TAG, "setListAdapterAccordingToSwitchState");
+        if (PrefUtils.isWifiHandlerActive(this)) {
+            mWifiHandlerActivationSwitch.setChecked(true);
+            mWifiHandlerWifiList.setAdapter(mSavedWifiCursorAdapter);
+        } else {
+            mWifiHandlerActivationSwitch.setChecked(false);
+        }
+    }
+
+    private void registerReceivers() {
+        Log.d(TAG, "registerReceivers");
+        registerNotificationReceiver();
+        registerAirplaneModeReceiver();
+    }
+
+    private void handleAirplaneModeBannerDisplay() {
+        Log.d(TAG, "handleAirplaneModeBannerDisplay");
+        if (NetworkUtils.isAirplaneModeEnabled(this)) {
+            mBanner.setVisibility(View.VISIBLE);
+        } else {
+            mBanner.setVisibility(View.GONE);
+        }
+    }
+
+    private void registerAirplaneModeReceiver() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        registerReceiver(mAirplaneModeReceiver,
+                intentFilter);
+    }
+
+
+    private void registerNotificationReceiver() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE);
+        intentFilter.addAction(WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mNotificationActionsReceiver,
+                intentFilter);
+    }
+
+    private BroadcastReceiver mNotificationActionsReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "mNotificationActionsReceiver Intent action=" + intent.getAction());
+            if (WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE.equals(intent
+                    .getAction())) {
+                mWifiHandlerActivationSwitch.setChecked(true);
+            } else if (WifiHandlerService.ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE.equals(intent
+                    .getAction())) {
+                mWifiHandlerActivationSwitch.setChecked(false);
+            }
+        }
+    };
+
+
+    private BroadcastReceiver mAirplaneModeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean isAirplaneModeOn = intent.getBooleanExtra(AirplaneModeStateReceiver
+                    .EXTRAS_AIRPLANE_MODE_STATE, false);
+            Log.d(TAG, "mAirplaneModeReceiver isAirplaneModeOn=" + isAirplaneModeOn);
+            if (isAirplaneModeOn) {
+                if (PrefUtils.areWarningNotificationsEnabled(context)) {
+                    NetworkUtils.buildAirplaneNotification(context);
+                }
+                mBanner.setVisibility(View.VISIBLE);
+            } else {
+                mWifiHandlerActivationSwitch.setEnabled(true);
+                mBanner.setVisibility(View.GONE);
+                NetworkUtils.dismissNotification(context, Config
+                        .NOTIFICATION_ID_AIRPLANE_MODE);
+            }
+        }
+    };
 }
