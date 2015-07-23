@@ -10,7 +10,6 @@ import android.content.Loader;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -51,38 +50,21 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (Config.DEBUG_MODE) {
-            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
-                    .detectDiskReads()
-                    .detectDiskWrites()
-                    .detectAll()   // or .detectAll() for all detectable problems
-                    .penaltyLog()
-                    .build());
-            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
-                    .detectLeakedSqlLiteObjects()
-                    .detectLeakedClosableObjects()
-                    .penaltyLog()
-                    .penaltyDeath()
-                    .build());
+            StartupUtils.startStrictMode();
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_configured_wifi_list);
 
-        mWifiHandlerSwitchLabel = (TextView) findViewById(R.id.wifi_handler_switch_label);
-        mWifiHandlerActivationSwitch = (Switch) findViewById(R.id.wifi_handler_activation_switch);
-        mWifiHandlerWifiList = (ListView) findViewById(android.R.id.list);
-        mEmptyView = (TextView) findViewById(android.R.id.empty);
-        mWifiHandlerActivationSwitch.setOnCheckedChangeListener(this);
-        mBanner = (RelativeLayout) findViewById(R.id.wifi_handler_message_banner);
-
+        bindViews();
         initCursorLoader();
-        mSavedWifiCursorAdapter = initAdapter();
+        mSavedWifiCursorAdapter = initCursorAdapter();
     }
+
 
     @Override
     protected void onResume() {
-
-        super.onResume();
         Log.d(TAG, "onResume");
+        super.onResume();
 
         startupCheck();
         setListAdapterAccordingToSwitchState();
@@ -96,10 +78,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         unregisterReceivers();
     }
 
-    private void unregisterReceivers() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mNotificationActionsReceiver);
-        unregisterReceiver(mAirplaneModeReceiver);
-    }
 
     @Override
     protected void onDestroy() {
@@ -172,8 +150,17 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         getLoaderManager().initLoader(0, null, this);
     }
 
-    private CursorAdapter initAdapter() {
-        Log.d(TAG, "initAdapter");
+    private void bindViews() {
+        mWifiHandlerSwitchLabel = (TextView) findViewById(R.id.wifi_handler_switch_label);
+        mWifiHandlerActivationSwitch = (Switch) findViewById(R.id.wifi_handler_activation_switch);
+        mWifiHandlerWifiList = (ListView) findViewById(android.R.id.list);
+        mEmptyView = (TextView) findViewById(android.R.id.empty);
+        mWifiHandlerActivationSwitch.setOnCheckedChangeListener(this);
+        mBanner = (RelativeLayout) findViewById(R.id.wifi_handler_message_banner);
+    }
+
+    private CursorAdapter initCursorAdapter() {
+        Log.d(TAG, "initCursorAdapter");
 
         if (mSavedWifiCursorAdapter == null) {
             mSavedWifiCursorAdapter = new SavedWifiListAdapter(this, null, 0);
@@ -186,19 +173,19 @@ public class SavedWifiListActivity extends AppCompatActivity implements
 
         switch (startupMode) {
             case StartupUtils.FIRST_TIME:
-                Log.d(TAG, "Startup mode: FIRST_TIME");
             case StartupUtils.FIRST_TIME_FOR_VERSION:
-                Log.d(TAG, "Startup mode: FIRST_TIME_FOR_VERSION");
                 launchStartupCheckActivity();
                 break;
             case StartupUtils.NORMAL:
-
-                //TODO handle this case better...
                 handleNormalStartup();
-                //TODO make hashmapSettingsStatesHolder observable
-                Log.d(TAG, "Startup mode: NORMAL");
+                handleNotification(mWifiHandlerActivationSwitch.isChecked());
                 break;
         }
+    }
+
+    private void unregisterReceivers() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mNotificationActionsReceiver);
+        unregisterReceiver(mAirplaneModeReceiver);
     }
 
     private void handleNormalStartup() {
@@ -244,7 +231,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
             mWifiHandlerSwitchLabel.setText(off);
         }
     }
-
 
     private void handleSavedWifiListLoading(boolean isChecked) {
         Log.d(TAG, "handleSavedWifiListLoading=" + isChecked);

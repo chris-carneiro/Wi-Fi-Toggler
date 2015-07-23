@@ -6,7 +6,6 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
-import android.os.StrictMode;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -24,6 +23,7 @@ import net.opencurlybraces.android.projects.wifihandler.Config;
 import net.opencurlybraces.android.projects.wifihandler.R;
 import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
+import net.opencurlybraces.android.projects.wifihandler.util.StartupUtils;
 
 import java.util.List;
 
@@ -49,18 +49,7 @@ public class SettingsActivity extends PreferenceActivity {
     @Override
     public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
         if (Config.DEBUG_MODE) {
-            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
-                    .detectDiskReads()
-                    .detectDiskWrites()
-                    .detectAll()   // or .detectAll() for all detectable problems
-                    .penaltyLog()
-                    .build());
-            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
-                    .detectLeakedSqlLiteObjects()
-                    .detectLeakedClosableObjects()
-                    .penaltyLog()
-                    .penaltyDeath()
-                    .build());
+            StartupUtils.startStrictMode();
         }
         super.onCreate(savedInstanceState, persistentState);
     }
@@ -68,7 +57,6 @@ public class SettingsActivity extends PreferenceActivity {
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-
 
         setUpToolbar();
 
@@ -78,7 +66,6 @@ public class SettingsActivity extends PreferenceActivity {
         }
 
         setupSimplePreferencesScreen();
-
     }
 
     private void setUpToolbar() {
@@ -186,11 +173,6 @@ public class SettingsActivity extends PreferenceActivity {
                         }
                     }
 
-                    if (PrefUtils.PREF_RUN_AT_STARTUP.equals(preference.getKey())) {
-
-                    }
-
-
                     return true;
                 }
             };
@@ -204,7 +186,7 @@ public class SettingsActivity extends PreferenceActivity {
             new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object value) {
-                    Log.d(TAG, "onPreferenceChange=" + preference.getKey() + " value=");
+                    Log.d(TAG, "onPreferenceChange=" + preference.getKey() + " value=" + value);
 
                     String stringValue = value.toString();
 

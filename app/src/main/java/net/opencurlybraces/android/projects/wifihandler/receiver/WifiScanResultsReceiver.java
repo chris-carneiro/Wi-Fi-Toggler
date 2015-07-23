@@ -31,15 +31,12 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        Log.d(TAG, "Wifi Connected=" + NetworkUtils.isWifiConnected(context));
         if (!NetworkUtils.isWifiConnected(context)) {
-
-            Log.d(TAG, "SCAN_RESULTS received");
             new ScanResultAsyncHandler(context).execute();
         } else {
-            Log.d(TAG, "already connected checking wifi strength");
-            int signalStrength = NetworkUtils.getSignalStrength(context);
 
+            int signalStrength = NetworkUtils.getSignalStrength(context);
+            Log.d(TAG, "already connected");
             if (signalStrength < PrefUtils.getWifiSignalStrengthThreshold
                     (context)) {
                 NetworkUtils.disableWifiAdapter(context);
@@ -65,8 +62,9 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             if (availableWifis == null) {
                 return false;
             }
-            boolean enableWifiAdapter = savedWifiInRange(availableWifis, ssiDsFromDB);
+            boolean enableWifiAdapter = areThereSavedWifiInRange(availableWifis, ssiDsFromDB);
 
+            handleWifiActivation(enableWifiAdapter);
             removeUserUnwantedSavedWifi(ssiDsFromDB);
             return enableWifiAdapter;
         }
@@ -74,14 +72,16 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
         @Override
         protected void onPostExecute(Boolean enableWifi) {
             Log.d(TAG, "enableWifi=" + enableWifi);
+        }
+
+        private void handleWifiActivation(Boolean enableWifi) {
+            Log.d(TAG, "handleWifiActivation");
             if (enableWifi) {
                 NetworkUtils.enableWifiAdapter(mContext);
-            } else {
-                if (NetworkUtils.isWifiEnabled(mContext)) {
-
-                    NetworkUtils.disableWifiAdapter(mContext);
-                }
             }
+            //            else {
+            //                NetworkUtils.disableWifiAdapter(mContext);
+            //            }
         }
 
         /**
@@ -95,20 +95,24 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             if (savedWifis == null) {
                 return;
             }
-            List<String> userSsids = extractSsidListFromSavedWifi(savedWifis);
-            //TODO add robustness
+            List<String> savedSSIDs = extractSSIDListFromSavedWifi(savedWifis);
 
             for (String ssidDb : ssiDsFromDB) {
-                if (!userSsids.contains(ssidDb)) {
-                    mContext.getContentResolver().delete(SavedWifi.CONTENT_URI, SavedWifi.SSID +
-                            "=?", new String[]{ssidDb});
+                if (!savedSSIDs.contains(ssidDb)) {
+                    deleteSSIDFromDb(ssidDb);
                 }
             }
         }
 
-        private boolean savedWifiInRange(List<ScanResult> availableWifiNetworks, List<String>
-                savedSSIDsFromDb) {
-            Log.d(TAG, "savedWifiInRange availableWifiNetworks=" + (availableWifiNetworks !=
+        private void deleteSSIDFromDb(String ssidDb) {
+            mContext.getContentResolver().delete(SavedWifi.CONTENT_URI, SavedWifi.SSID +
+                    "=?", new String[]{ssidDb});
+        }
+
+        private boolean areThereSavedWifiInRange(List<ScanResult> availableWifiNetworks,
+                                                 List<String>
+                                                         savedSSIDsFromDb) {
+            Log.d(TAG, "areThereSavedWifiInRange availableWifiNetworks=" + (availableWifiNetworks !=
                     null) +
                     " savedSSIDsFromDb=" + (savedSSIDsFromDb != null));
             if (savedSSIDsFromDb == null || availableWifiNetworks == null) {
@@ -117,16 +121,12 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             for (ScanResult wifiNetwork : availableWifiNetworks) {
                 for (String savedWifi : savedSSIDsFromDb) {
                     if (savedWifi.equals(wifiNetwork.SSID)) {
-                        Log.d(TAG, "Signal Strength=" + wifiNetwork.level + " mSSID=" +
-                                wifiNetwork
-                                        .SSID);
-                        Log.d(TAG, "Wifi Signal strength level=" + WifiManager.calculateSignalLevel
-                                (wifiNetwork.level, Config.WIFI_SIGNAL_STRENGTHLEVELS) + " " +
-                                "Threshold=" + PrefUtils
-                                .getWifiSignalStrengthThreshold
-                                        (mContext));
                         int signalStrength = WifiManager.calculateSignalLevel
-                                (wifiNetwork.level, Config.WIFI_SIGNAL_STRENGTHLEVELS);
+                                (wifiNetwork.level, Config.WIFI_SIGNAL_STRENGTH_LEVELS);
+                        Log.d(TAG, "signalStrength=" + signalStrength + " preferenceThreshold=" +
+                                PrefUtils
+                                        .getWifiSignalStrengthThreshold
+                                                (mContext));
                         if (signalStrength >= PrefUtils.getWifiSignalStrengthThreshold
                                 (mContext)) {
                             return true;
@@ -137,7 +137,7 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             return false;
         }
 
-        private List<String> extractSsidListFromSavedWifi(List<WifiConfiguration> savedWifis) {
+        private List<String> extractSSIDListFromSavedWifi(List<WifiConfiguration> savedWifis) {
             if (savedWifis == null || savedWifis.size() == 0) return null;
 
             List<String> ssids = new ArrayList<>(savedWifis.size());

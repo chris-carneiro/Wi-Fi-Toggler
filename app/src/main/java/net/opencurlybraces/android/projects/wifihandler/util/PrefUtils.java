@@ -51,17 +51,7 @@ public class PrefUtils {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getBoolean(PREF_WIFI_HANDLER_ACTIVE, true);
     }
-
-    public static void setAirplaneModeOn(final Context context, boolean on) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_AIRPLANE_MODE_ON, on).apply();
-    }
-
-    public static boolean isAirplaneModeOn(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_AIRPLANE_MODE_ON, false);
-    }
-
+    
     public static boolean isRunAtStartupEnabled(final Context context) {
         Log.d(TAG, "isRunAtStartupEnabled");
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);

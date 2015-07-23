@@ -27,27 +27,13 @@ public class SavedWifiListAdapter extends CursorAdapter {
 
         mLayoutInflater = LayoutInflater.from(context);
     }
-    
+
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         View view = mLayoutInflater.inflate(R.layout.configured_wifi_list_row, parent, false);
         return bindViewTags(cursor, view);
     }
 
-    private View bindViewTags(final Cursor cursor, final View view) {
-        TextView ssid = (TextView) view.findViewById(R.id.saved_wifi_ssid);
-        TextView status = (TextView) view.findViewById(R.id.saved_wifi_state);
-        int ssidIndex = cursor.getColumnIndexOrThrow(SavedWifi.SSID);
-        int statusIndex = cursor.getColumnIndexOrThrow(SavedWifi.STATUS);
-
-        view.setTag(R.string.tag_key_ssid, ssid);
-        view.setTag(R.string.tag_key_status, status);
-        view.setTag(R.string.tag_key_ssid_index, ssidIndex);
-        view.setTag(R.string.tag_key_status_index, statusIndex);
-        return view;
-    }
-
-    //TODO optimize using viewHolder
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         Log.d(TAG, "bindView");
@@ -77,7 +63,6 @@ public class SavedWifiListAdapter extends CursorAdapter {
                 .LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         if (status != NetworkUtils.WifiAdapterStatus.CONNECTED) {
             lp.addRule(RelativeLayout.CENTER_VERTICAL);
-
         }
         return lp;
     }
@@ -92,4 +77,16 @@ public class SavedWifiListAdapter extends CursorAdapter {
         return wifiStatus;
     }
 
+    private View bindViewTags(final Cursor cursor, final View view) {
+        TextView ssid = (TextView) view.findViewById(R.id.saved_wifi_ssid);
+        TextView status = (TextView) view.findViewById(R.id.saved_wifi_state);
+        int ssidIndex = cursor.getColumnIndexOrThrow(SavedWifi.SSID);
+        int statusIndex = cursor.getColumnIndexOrThrow(SavedWifi.STATUS);
+
+        view.setTag(R.string.tag_key_ssid, ssid);
+        view.setTag(R.string.tag_key_status, status);
+        view.setTag(R.string.tag_key_ssid_index, ssidIndex);
+        view.setTag(R.string.tag_key_status_index, statusIndex);
+        return view;
+    }
 }

@@ -27,8 +27,6 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
 
     public static final String EXTRA_CURRENT_SSID = "net.opencurlybraces.android" +
             ".projects.wifihandler.receiver.current_ssid";
-    //    public static final String EXTRA_SAVED_WIFI_NEW_STATE = "net.opencurlybraces.android" +
-    //            ".projects.wifihandler.receiver.saved_wifi_state";
 
     private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
     private static final String[] PROJECTION_SSID = new String[]{SavedWifi._ID, SavedWifi

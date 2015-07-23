@@ -78,9 +78,9 @@ public class NetworkUtils {
      * @return
      */
     public static boolean isWifiConnected(final Context context) {
-        Log.d(TAG, "isWifiConnected");
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        Log.d(TAG, "isWifiConnected=" + (wifiInfo.getIpAddress() != 0));
         return wifiInfo.getIpAddress() != 0;
     }
 
@@ -171,7 +171,7 @@ public class NetworkUtils {
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         int rssi = wifiManager.getConnectionInfo().getRssi();
         int signalStrength = WifiManager.calculateSignalLevel
-                (rssi, Config.WIFI_SIGNAL_STRENGTHLEVELS);
+                (rssi, Config.WIFI_SIGNAL_STRENGTH_LEVELS);
         Log.d(TAG, "wifi Strength=" + signalStrength + " threshold=" + PrefUtils
                 .getWifiSignalStrengthThreshold
                         (context) + " rssi=" + rssi);

@@ -23,6 +23,7 @@ import net.opencurlybraces.android.projects.wifihandler.R;
 import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
 import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
+import net.opencurlybraces.android.projects.wifihandler.util.StartupUtils;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -55,22 +56,106 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (Config.DEBUG_MODE) {
-            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
-                    .detectDiskReads()
-                    .detectDiskWrites()
-                    .detectAll()   // or .detectAll() for all detectable problems
-                    .penaltyLog()
-                    .build());
-            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
-                    .detectLeakedSqlLiteObjects()
-                    .detectLeakedClosableObjects()
-                    .penaltyLog()
-                    .penaltyDeath()
-                    .build());
+            StartupUtils.startStrictMode();
         }
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_startup_check);
+
+        bindViews();
+    }
+
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        setLayoutAccordingToSettings();
+        registerReceivers();
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceivers();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_startup_check, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case REQUEST_CODE_SCAN_ALWAYS_AVAILABLE:
+                Log.d(TAG, "resultCode" + resultCode);
+
+                if (resultCode == RESULT_OK) {
+                    displayScanSettingsCorrectLayout();
+                } else {
+                    displayCheckScanSettingsLayout();
+                }
+
+                cacheSettingsState(Config.STARTUP_CHECK_SCAN_ALWAYS_AVAILABLE_SETTINGS,
+                        resultCode == RESULT_OK);
+
+                PrefUtils.setScanAlwaysAvailableBeenEnabled(this, resultCode == RESULT_OK);
+                setContinueButtonListenerAccordingToSettings();
+                break;
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.startup_check_scan_always_available_layout:
+                Intent enableScanAvailable = new Intent(WifiManager
+                        .ACTION_REQUEST_SCAN_ALWAYS_AVAILABLE);
+                startActivityForResult(enableScanAvailable, REQUEST_CODE_SCAN_ALWAYS_AVAILABLE);
+                break;
+            case R.id.startup_check_wifi_settings_layout:
+                Intent enableWifi = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                startActivity(enableWifi);
+                break;
+            case R.id.startup_check_airplane_settings_layout:
+                Intent disableAirplane = new Intent(Settings.ACTION_AIRPLANE_MODE_SETTINGS);
+                startActivity(disableAirplane);
+                break;
+            case R.id.startup_check_hotspot_settings_layout:
+                Intent tetherSettings = new Intent();
+                tetherSettings.setClassName(TETHER_SETTINGS_CLASSNAME, TETHER_SETTINGS_ACTION);
+                startActivity(tetherSettings);
+                break;
+            case R.id.startup_check_settings_continue_button:
+                loadSavedWifiIntoDatabase();
+                PrefUtils.markSettingsCorrectAtFirstLaunch(this);
+                break;
+        }
+    }
+
+    private void bindViews() {
         mScanCheckLayout = (RelativeLayout) findViewById(R.id
                 .startup_check_scan_always_available_layout);
         mWifiCheckLayout = (RelativeLayout) findViewById(R.id
@@ -91,16 +176,6 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
                 .startup_check_scan_always_available_next_ic);
     }
 
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        setLayoutAccordingToSettings();
-        registerReceivers();
-
-    }
-
     private void setContinueButtonListenerAccordingToSettings() {
         if (mSettingsStateCache.containsValue(false)) {
             mContinueButton.setOnClickListener(null);
@@ -117,19 +192,6 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
         setAirplaneLayoutAccordingToSettings();
         setHotspotLayoutAccordingToSettings();
         setContinueButtonListenerAccordingToSettings();
-    }
-
-    private void registerReceivers() {
-        registerAirplaneReceiver();
-        registerWifiStateReceiver();
-        registerHotspotStateReceiver();
-        registerFinishActivityReceiver();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        unregisterReceivers();
     }
 
     private void unregisterReceivers() {
@@ -164,26 +226,11 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
                 intentFilter);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_startup_check, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    private void registerReceivers() {
+        registerAirplaneReceiver();
+        registerWifiStateReceiver();
+        registerHotspotStateReceiver();
+        registerFinishActivityReceiver();
     }
 
     private void setWifiLayoutAccordingToSettings() {
@@ -297,82 +344,6 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
         setContinueButtonListenerAccordingToSettings();
     }
 
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        switch (requestCode) {
-            case REQUEST_CODE_SCAN_ALWAYS_AVAILABLE:
-                Log.d(TAG, "resultCode" + resultCode);
-
-                if (resultCode == RESULT_OK) {
-                    displayScanSettingsCorrectLayout();
-                } else {
-                    displayCheckScanSettingsLayout();
-                }
-
-                cacheSettingsState(Config.STARTUP_CHECK_SCAN_ALWAYS_AVAILABLE_SETTINGS,
-                        resultCode == RESULT_OK);
-
-                PrefUtils.setScanAlwaysAvailableBeenEnabled(this, resultCode == RESULT_OK);
-                setContinueButtonListenerAccordingToSettings();
-                break;
-        }
-    }
-
-    private void cacheSettingsState(String key, boolean correct) {
-        Log.d(TAG, "cacheSettingsState");
-        mSettingsStateCache.put(key, correct);
-    }
-
-    private void displayCheckScanSettingsLayout() {
-        Log.d(TAG, "displayCheckScanSettingsLayout");
-
-        mScanCheckLayout.setBackgroundResource(R.drawable
-                .startup_check_settings_textview_warning_selector);
-        mScanNextIcon.setVisibility(View.VISIBLE);
-        mScanCheckLayout.setOnClickListener(this);
-    }
-
-    private void displayScanSettingsCorrectLayout() {
-        Log.d(TAG, "displayScanSettingsCorrectLayout");
-
-        mScanCheckLayout.setBackgroundResource(R.drawable
-                .stroke_rectangle_shape_teal_lighter);
-        mScanNextIcon.setVisibility(View.GONE);
-        mScanCheckLayout.setOnClickListener(null);
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.startup_check_scan_always_available_layout:
-                Intent enableScanAvailable = new Intent(WifiManager
-                        .ACTION_REQUEST_SCAN_ALWAYS_AVAILABLE);
-                startActivityForResult(enableScanAvailable, REQUEST_CODE_SCAN_ALWAYS_AVAILABLE);
-                break;
-            case R.id.startup_check_wifi_settings_layout:
-                Intent enableWifi = new Intent(Settings.ACTION_WIFI_SETTINGS);
-                startActivity(enableWifi);
-                break;
-            case R.id.startup_check_airplane_settings_layout:
-                Intent disableAirplane = new Intent(Settings.ACTION_AIRPLANE_MODE_SETTINGS);
-                startActivity(disableAirplane);
-                break;
-            case R.id.startup_check_hotspot_settings_layout:
-                Intent tetherSettings = new Intent();
-                tetherSettings.setClassName(TETHER_SETTINGS_CLASSNAME, TETHER_SETTINGS_ACTION);
-                startActivity(tetherSettings);
-                break;
-            case R.id.startup_check_settings_continue_button:
-                loadSavedWifiIntoDatabase();
-                PrefUtils.markSettingsCorrectAtFirstLaunch(this);
-                //                finish(); //Calls onActivityResult of SavedWIfiListActivity
-                break;
-        }
-    }
-
     private BroadcastReceiver mAirplaneModeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -406,6 +377,29 @@ public class StartupCheckActivity extends AppCompatActivity implements View.OnCl
             }
         }
     };
+
+    private void cacheSettingsState(String key, boolean correct) {
+        Log.d(TAG, "cacheSettingsState");
+        mSettingsStateCache.put(key, correct);
+    }
+
+    private void displayCheckScanSettingsLayout() {
+        Log.d(TAG, "displayCheckScanSettingsLayout");
+
+        mScanCheckLayout.setBackgroundResource(R.drawable
+                .startup_check_settings_textview_warning_selector);
+        mScanNextIcon.setVisibility(View.VISIBLE);
+        mScanCheckLayout.setOnClickListener(this);
+    }
+
+    private void displayScanSettingsCorrectLayout() {
+        Log.d(TAG, "displayScanSettingsCorrectLayout");
+
+        mScanCheckLayout.setBackgroundResource(R.drawable
+                .stroke_rectangle_shape_teal_lighter);
+        mScanNextIcon.setVisibility(View.GONE);
+        mScanCheckLayout.setOnClickListener(null);
+    }
 
     private void loadSavedWifiIntoDatabase() {
         Intent handleSavedWifiInsert = new Intent(this, WifiHandlerService.class);

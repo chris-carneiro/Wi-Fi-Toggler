@@ -33,11 +33,6 @@ public class WifiAdapterStateReceiver extends BroadcastReceiver {
 
                     context.startService(updateSavedWifi);
                 }
-            } else if (WifiManager.WIFI_STATE_ENABLED == wifiState) {
-                if (!PrefUtils.isWifiHandlerActive(context)) {
-                    //TODO send notification ask user if he wants to activate auto toggle
-                    //TODO preference always activate auto toggle on wifi adapter enabling ?
-                }
             }
         }
     }
