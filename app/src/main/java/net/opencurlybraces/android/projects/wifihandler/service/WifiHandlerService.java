@@ -1,9 +1,11 @@
 package net.opencurlybraces.android.projects.wifihandler.service;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentValues;
@@ -18,12 +20,17 @@ import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import net.opencurlybraces.android.projects.wifihandler.Config;
 import net.opencurlybraces.android.projects.wifihandler.R;
+import net.opencurlybraces.android.projects.wifihandler.WifiHandler;
 import net.opencurlybraces.android.projects.wifihandler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifihandler.data.provider.WifiHandlerContract;
 import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
+import net.opencurlybraces.android.projects.wifihandler.receiver.AirplaneModeStateReceiver;
+import net.opencurlybraces.android.projects.wifihandler.receiver.HotspotModeStateReceiver;
+import net.opencurlybraces.android.projects.wifihandler.receiver.ScanAlwaysAvailableReceiver;
 import net.opencurlybraces.android.projects.wifihandler.receiver.WifiAdapterStateReceiver;
 import net.opencurlybraces.android.projects.wifihandler.receiver.WifiConnectionStateReceiver;
 import net.opencurlybraces.android.projects.wifihandler.receiver.WifiScanResultsReceiver;
@@ -79,11 +86,19 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     public static final String ACTION_FINISH_STARTUP_CHECK_ACTIVITY = SERVICE_ACTION_PREFIX
             + "ACTION_FINISH_STARTUP_CHECK_ACTIVITY";
 
+
+    public static final String ACTION_STARTUP_SETTINGS_PRECHECK = SERVICE_ACTION_PREFIX + ""
+            + "ACTION_STARTUP_SETTINGS_PRECHECK";
+
+
     private WifiManager mWifiManager;
     private WifiScanResultsReceiver mWifiScanResultsReceiver = null;
     private WifiAdapterStateReceiver mWifiAdapterStateReceiver = null;
     private WifiConnectionStateReceiver mWifiConnectionStateReceiver = null;
     private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
+    private ScanAlwaysAvailableReceiver mScanAlwaysAvailableReceiver = null;
+    private AirplaneModeStateReceiver mAirplaneModeStateReceiver = null;
+    private HotspotModeStateReceiver mHotspotModeStateReceiver = null;
 
 
     private static final int TOKEN_INSERT = 2;
@@ -97,11 +112,38 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
         super.onCreate();
 
         lazyInit();
+        registerReceivers();
 
-        registerScanResultReceiver();
-        registerWifiStateReceiver();
-        registerWifiSupplicantStateReceiver();
+        PendingIntent checkPassiveScanSetting = getScheduledCheckIntent();
 
+        scheduleSettingsCheck(checkPassiveScanSetting, Config
+                .CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL);
+    }
+
+    private PendingIntent getScheduledCheckIntent() {
+        Intent intent = new Intent(ScanAlwaysAvailableReceiver
+                .CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_ACTION);
+        return PendingIntent.getBroadcast(this, 0, intent, 0);
+    }
+
+    private void registerReceivers() {
+        registerReceiver(mWifiScanResultsReceiver, WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        registerReceiver(mWifiAdapterStateReceiver, WifiManager.WIFI_STATE_CHANGED_ACTION);
+        registerReceiver(mWifiConnectionStateReceiver, WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+        registerReceiver(mScanAlwaysAvailableReceiver, ScanAlwaysAvailableReceiver
+                .CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_ACTION);
+        registerReceiver(mAirplaneModeStateReceiver, Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        registerReceiver(mHotspotModeStateReceiver, HotspotModeStateReceiver
+                .HOTSPOT_STATE_CHANGED_ACTION);
+    }
+
+    private void scheduleSettingsCheck(final PendingIntent intent,
+                                       long intervalMillis) {
+        Log.d(TAG, "scheduleSettingsCheck");
+        AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        alarm.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(), intervalMillis,
+                intent);
     }
 
     private void lazyInit() {
@@ -124,16 +166,37 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
         if (mWifiScanResultsReceiver == null) {
             mWifiScanResultsReceiver = new WifiScanResultsReceiver();
         }
+
+        if (mScanAlwaysAvailableReceiver == null) {
+            mScanAlwaysAvailableReceiver = new ScanAlwaysAvailableReceiver();
+        }
+
+        if (mHotspotModeStateReceiver == null) {
+            mHotspotModeStateReceiver = new HotspotModeStateReceiver();
+        }
+
+        if (mAirplaneModeStateReceiver == null) {
+            mAirplaneModeStateReceiver = new AirplaneModeStateReceiver();
+        }
     }
 
     @Override
     public void onDestroy() {
         Log.d(TAG, "OnDestroy");
+        if (Config.DEBUG_MODE)
+            Toast.makeText(this, "service destroyed", Toast.LENGTH_LONG).show();
+
+        unregisterReceivers();
+        NetworkUtils.dismissNotification(this, Config.NOTIFICATION_ID_AIRPLANE_MODE);
+    }
+
+    private void unregisterReceivers() {
         unregisterReceiver(mWifiScanResultsReceiver);
         unregisterReceiver(mWifiAdapterStateReceiver);
         unregisterReceiver(mWifiConnectionStateReceiver);
-
-        NetworkUtils.dismissNotification(this, Config.NOTIFICATION_ID_AIRPLANE_MODE);
+        unregisterReceiver(mScanAlwaysAvailableReceiver);
+        unregisterReceiver(mAirplaneModeStateReceiver);
+        unregisterReceiver(mHotspotModeStateReceiver);
     }
 
     @Override
@@ -144,7 +207,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "Intent=" + (intent != null ? intent.getAction() : null));
-        if (intent == null) return START_REDELIVER_INTENT;
+        if (intent == null) return START_STICKY;
 
         switch (intent.getAction()) {
             case ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE:
@@ -181,11 +244,15 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                 //TODO maybe here notify the user the new ssid is now auto toggle
                 insertNewConnectedWifi(intent);
                 break;
+            case ACTION_STARTUP_SETTINGS_PRECHECK:
+                settingsPreCheck();
+                break;
         }
 
-        return START_REDELIVER_INTENT;
+        return START_STICKY;
 
     }
+
 
     private void insertNewConnectedWifi(Intent intent) {
         String ssidToInsert = intent.getStringExtra(WifiConnectionStateReceiver
@@ -240,53 +307,26 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
     }
 
-    private void registerScanResultReceiver() {
-        Log.d(TAG, "registerScanResultReceiver");
-        IntentFilter wifiScanFilter = new IntentFilter();
-        wifiScanFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-
-        registerReceiver(mWifiScanResultsReceiver, wifiScanFilter);
+    private void registerReceiver(BroadcastReceiver receiver, final String action) {
+        Log.d(TAG, "registerReceiver action=" + action);
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(action);
+        registerReceiver(receiver, intentFilter);
     }
 
+    private void settingsPreCheck() {
+        WifiHandler.setSetting(Config.SCAN_ALWAYS_AVAILABLE_SETTINGS, NetworkUtils
+                .isScanAlwaysAvailable(this));
 
-    private void registerWifiStateReceiver() {
-        Log.d(TAG, "registerWifiStateReceiver");
-        IntentFilter wifiStateFilter = new IntentFilter();
-        wifiStateFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        WifiHandler.setSetting(Config.AIRPLANE_SETTINGS, !NetworkUtils
+                .isAirplaneModeEnabled(this));
 
-        registerReceiver(mWifiAdapterStateReceiver, wifiStateFilter);
+        WifiHandler.setSetting(Config.HOTSPOT_SETTINGS, !NetworkUtils
+                .isHotspotEnabled(this));
+
+        WifiHandler.setSetting(Config.STARTUP_CHECK_WIFI_SETTINGS, NetworkUtils
+                .isWifiEnabled(this));
     }
-
-    private void registerWifiSupplicantStateReceiver() {
-        Log.d(TAG, "registerWifiSupplicantStateReceiver");
-        IntentFilter wifiSupplicantFilter = new IntentFilter();
-        wifiSupplicantFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
-        registerReceiver(mWifiConnectionStateReceiver, wifiSupplicantFilter);
-    }
-
-    //    private void registerManifestReceiver(Class<? extends BroadcastReceiver> receiverClass) {
-    //        PackageManager pm = getPackageManager();
-    //        ComponentName compName =
-    //                new ComponentName(getApplicationContext(),
-    //                        receiverClass);
-    //        pm.setComponentEnabledSetting(
-    //                compName,
-    //                PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
-    //                PackageManager.DONT_KILL_APP);
-    //    }
-    //
-    //    private void unregisterManifestReceiver(Class<? extends BroadcastReceiver>
-    // receiverClass) {
-    //        PackageManager pm = getPackageManager();
-    //        ComponentName compName =
-    //                new ComponentName(getApplicationContext(),
-    //                        receiverClass);
-    //        pm.setComponentEnabledSetting(
-    //                compName,
-    //                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-    //                PackageManager.DONT_KILL_APP);
-    //    }
-
 
     private void sendLocalBroadcastAction(String action) {
         Intent switchIntent = new Intent();
@@ -332,7 +372,6 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
     }
 
-    //TODO move to Utils
     private void buildForegroundNotification() {
         Resources res = getResources();
 

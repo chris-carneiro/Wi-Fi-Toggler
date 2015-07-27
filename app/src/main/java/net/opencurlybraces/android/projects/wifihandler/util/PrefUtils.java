@@ -19,10 +19,6 @@ public class PrefUtils {
 
     private static final String PREF_WIFI_HANDLER_ACTIVE = PREF_PREFIX + "wifi_handler_active";
 
-    private static final String PREF_WIFI_CONNECTED = PREF_PREFIX + "wifi_connected";
-
-    private static final String PREF_AIRPLANE_MODE_ON = PREF_PREFIX + "airplane_mode_on";
-
     public static final String PREF_RUN_AT_STARTUP = PREF_PREFIX + "run_at_startup";
 
     public static final String PREF_WARNING_NOTIFICATIONS = PREF_PREFIX + "warning_notifications";
@@ -104,12 +100,6 @@ public class PrefUtils {
         Log.d(TAG, "hasScanAlwaysAvailableBeenEnableed");
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getBoolean(PREF_SCAN_ALWAYS_AVAILABLE_ENABLED, false);
-    }
-
-    public static void setScanAlwaysAvailableBeenEnabled(final Context context, boolean enabled) {
-        Log.d(TAG, "setScanAlwaysAvailableBeenEnabled=" + enabled);
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putBoolean(PREF_SCAN_ALWAYS_AVAILABLE_ENABLED, enabled).apply();
     }
 
 }

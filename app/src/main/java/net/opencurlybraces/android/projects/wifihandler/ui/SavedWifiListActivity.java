@@ -25,17 +25,18 @@ import android.widget.TextView;
 
 import net.opencurlybraces.android.projects.wifihandler.Config;
 import net.opencurlybraces.android.projects.wifihandler.R;
+import net.opencurlybraces.android.projects.wifihandler.WifiHandler;
 import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
-import net.opencurlybraces.android.projects.wifihandler.receiver.AirplaneModeStateReceiver;
 import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
-import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.StartupUtils;
 
+import java.util.Observable;
+import java.util.Observer;
 
 public class SavedWifiListActivity extends AppCompatActivity implements
         CompoundButton.OnCheckedChangeListener,
-        LoaderManager.LoaderCallbacks<Cursor> {
+        LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener, Observer {
 
     private static final String TAG = "SavedWifiList";
 
@@ -58,8 +59,20 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         bindViews();
         initCursorLoader();
         mSavedWifiCursorAdapter = initCursorAdapter();
+
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        WifiHandler.registerSettingObserver(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        WifiHandler.unRegisterSettingObserver(this);
+    }
 
     @Override
     protected void onResume() {
@@ -69,7 +82,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         startupCheck();
         setListAdapterAccordingToSwitchState();
         registerReceivers();
-        handleAirplaneModeBannerDisplay();
+        handleBannerDisplay();
     }
 
     @Override
@@ -157,6 +170,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         mEmptyView = (TextView) findViewById(android.R.id.empty);
         mWifiHandlerActivationSwitch.setOnCheckedChangeListener(this);
         mBanner = (RelativeLayout) findViewById(R.id.wifi_handler_message_banner);
+        mBanner.setOnClickListener(this);
     }
 
     private CursorAdapter initCursorAdapter() {
@@ -178,14 +192,13 @@ public class SavedWifiListActivity extends AppCompatActivity implements
                 break;
             case StartupUtils.NORMAL:
                 handleNormalStartup();
-                handleNotification(mWifiHandlerActivationSwitch.isChecked());
                 break;
         }
+        handleNotification(mWifiHandlerActivationSwitch.isChecked());
     }
 
     private void unregisterReceivers() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mNotificationActionsReceiver);
-        unregisterReceiver(mAirplaneModeReceiver);
     }
 
     private void handleNormalStartup() {
@@ -198,8 +211,14 @@ public class SavedWifiListActivity extends AppCompatActivity implements
 
     private void launchStartupCheckActivity() {
         Log.d(TAG, "launchStartupCheckActivity");
-        Intent startupCheck = new Intent(this, StartupCheckActivity.class);
+        Intent startupCheck = new Intent(this, StartupSettingsCheckActivity.class);
         startActivity(startupCheck);
+    }
+
+    private void launchSystemSettingsCheckActivity() {
+        Log.d(TAG, "launchSystemSettingsCheckActivity");
+        Intent settingsCheck = new Intent(this, SystemSettingsCheckActivity.class);
+        startActivity(settingsCheck);
     }
 
     private void handleNotification(boolean isChecked) {
@@ -211,7 +230,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
             buildWifiHandlerStateNotification(WifiHandlerService
                     .ACTION_HANDLE_PAUSE_WIFI_HANDLER);
         }
-
     }
 
     private void buildWifiHandlerStateNotification(String actionHandleActivateWifiHandler) {
@@ -259,25 +277,16 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     private void registerReceivers() {
         Log.d(TAG, "registerReceivers");
         registerNotificationReceiver();
-        registerAirplaneModeReceiver();
     }
 
-    private void handleAirplaneModeBannerDisplay() {
-        Log.d(TAG, "handleAirplaneModeBannerDisplay");
-        if (NetworkUtils.isAirplaneModeEnabled(this)) {
+    private void handleBannerDisplay() {
+        Log.d(TAG, "handleBannerDisplay");
+        if (WifiHandler.hasWrongSettingsForAutoToggle()) {
             mBanner.setVisibility(View.VISIBLE);
         } else {
             mBanner.setVisibility(View.GONE);
         }
     }
-
-    private void registerAirplaneModeReceiver() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        registerReceiver(mAirplaneModeReceiver,
-                intentFilter);
-    }
-
 
     private void registerNotificationReceiver() {
         IntentFilter intentFilter = new IntentFilter();
@@ -301,24 +310,19 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         }
     };
 
-
-    private BroadcastReceiver mAirplaneModeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            boolean isAirplaneModeOn = intent.getBooleanExtra(AirplaneModeStateReceiver
-                    .EXTRAS_AIRPLANE_MODE_STATE, false);
-            Log.d(TAG, "mAirplaneModeReceiver isAirplaneModeOn=" + isAirplaneModeOn);
-            if (isAirplaneModeOn) {
-                if (PrefUtils.areWarningNotificationsEnabled(context)) {
-                    NetworkUtils.buildAirplaneNotification(context);
-                }
-                mBanner.setVisibility(View.VISIBLE);
-            } else {
-                mWifiHandlerActivationSwitch.setEnabled(true);
-                mBanner.setVisibility(View.GONE);
-                NetworkUtils.dismissNotification(context, Config
-                        .NOTIFICATION_ID_AIRPLANE_MODE);
-            }
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.wifi_handler_message_banner:
+                launchSystemSettingsCheckActivity();
+                break;
         }
-    };
+    }
+
+    @Override
+    public void update(Observable observable, Object data) {
+        handleBannerDisplay();
+    }
+
+
 }

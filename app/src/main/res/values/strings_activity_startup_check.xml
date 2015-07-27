@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="startup_check_title_activity">First start settings check</string>
+    <string name="startup_check_title_activity">Prepare your settings</string>
+    <string name="check_system_settings_title_activity">Check your settings</string>
     <string name="startup_check_wifi_settings_title">Wifi settings</string>
     <string name="startup_check_wifi_settings_desc">Wifi has to be enabled</string>
     <string name="startup_check_airplane_settings_title">Airplane settings</string>

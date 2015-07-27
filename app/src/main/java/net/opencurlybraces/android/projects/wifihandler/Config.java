@@ -1,5 +1,7 @@
 package net.opencurlybraces.android.projects.wifihandler;
 
+import android.app.AlarmManager;
+
 /**
  * Created by chris on 03/07/15.
  */
@@ -17,15 +19,24 @@ public class Config {
 
     public static final String DEFAULT_SIGNAL_STRENGTH_THRESHOLD = "4"; // fair
 
-    public static final int STARTUP_SETTINGS_CHECKS = 4;
+    public static final int SYSTEM_SETTINGS_CHECKS = 4;
 
-    public static final String STARTUP_CHECK_SCAN_ALWAYS_AVAILABLE_SETTINGS =
-            "STARTUP_CHECK_SCAN_ALWAYS_AVAILABLE_SETTINGS";
-
+    public static final String SCAN_ALWAYS_AVAILABLE_SETTINGS =
+            "SCAN_ALWAYS_AVAILABLE_SETTINGS";
     public static final String STARTUP_CHECK_WIFI_SETTINGS = "STARTUP_CHECK_WIFI_SETTINGS";
-    public static final String STARTUP_CHECK_AIRPLANE_SETTINGS =
-            "STARTUP_CHECK_AIRPLANE_SETTINGS";
-    public static final String STARTUP_CHECK_HOTSTOP_SETTINGS =
-            "STARTUP_CHECK_HOTSTOP_SETTINGS";
+    public static final String AIRPLANE_SETTINGS =
+            "AIRPLANE_SETTINGS";
+    public static final String HOTSPOT_SETTINGS =
+            "HOTSPOT_SETTINGS";
 
+
+    /**
+     * Every half day
+     */
+//    public static final long CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL = AlarmManager
+//            .INTERVAL_HALF_DAY;
+
+        public static final long CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL = 1000 * 60;
+
+    //    public static final long BLITZ_CHECK_SCAN_ALWAYS_AVAILABLE_INTERVAL = 1000;
 }

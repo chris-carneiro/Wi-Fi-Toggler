@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
+import net.opencurlybraces.android.projects.wifihandler.Config;
+import net.opencurlybraces.android.projects.wifihandler.WifiHandler;
 import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
 import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
@@ -23,7 +25,7 @@ public class WifiAdapterStateReceiver extends BroadcastReceiver {
             int wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
 
             if (WifiManager.WIFI_STATE_DISABLED == wifiState) {
-
+                
                 if (PrefUtils.isWifiHandlerActive(context)) {
                     Log.d(TAG, "WIFI_STATE_DISABLED Event received");
                     Intent updateSavedWifi = new Intent(context, WifiHandlerService
@@ -33,6 +35,10 @@ public class WifiAdapterStateReceiver extends BroadcastReceiver {
 
                     context.startService(updateSavedWifi);
                 }
+
+                WifiHandler.setSetting(Config.STARTUP_CHECK_WIFI_SETTINGS, false);
+            } else {
+                WifiHandler.setSetting(Config.STARTUP_CHECK_WIFI_SETTINGS, true);
             }
         }
     }

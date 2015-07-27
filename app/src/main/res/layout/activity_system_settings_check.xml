@@ -61,6 +61,7 @@
                 android:layout_marginLeft="@dimen/startup_check_settings_view_margin_left_right"
                 android:layout_marginRight="@dimen/startup_check_settings_view_margin_left_right"
                 android:layout_marginTop="@dimen/startup_check_settings_view_top_margin"
+                android:visibility="gone"
                 android:background="@drawable/stroke_rectangle_shape_teal_lighter"
                 android:padding="@dimen/startup_check_settings_view_padding">
 
@@ -180,12 +181,12 @@
     </ScrollView>
 
     <Button
-        android:id="@+id/startup_check_settings_continue_button"
+        android:id="@+id/system_settings_check_continue_button"
         android:layout_width="match_parent"
         android:layout_height="@dimen/startup_check_settings_view_height"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        android:background="@drawable/startup_check_settings_continue_button_selector"
+        android:background="@drawable/system_settings_check_continue_button_selector"
         android:gravity="center"
         android:text="@string/startup_check_settings_continue_button_text"
         android:textColor="@android:color/white"

@@ -20,8 +20,8 @@
     <string name="airplane_mode_notification_ticker">To enjoy wifi auto toggle feature, disable
         airplane
     mode :)</string>
-    <string name="airplane_mode_message_banner">Auto toggle unavailable, disable airplane
-        mode</string>
+    <string name="airplane_mode_message_banner">Auto toggle unavailable, click here to
+        check your settings</string>
     <string name="tag_key_ssid">tag_key_ssid</string>
     <string name="tag_key_status">tag_key_status</string>
     <string name="tag_key_ssid_index">tag_key_ssid_index</string>
