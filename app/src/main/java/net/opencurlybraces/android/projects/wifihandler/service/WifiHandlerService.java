@@ -91,7 +91,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
             + "ACTION_STARTUP_SETTINGS_PRECHECK";
 
 
-    private WifiManager mWifiManager;
+
     private WifiScanResultsReceiver mWifiScanResultsReceiver = null;
     private WifiAdapterStateReceiver mWifiAdapterStateReceiver = null;
     private WifiConnectionStateReceiver mWifiConnectionStateReceiver = null;
@@ -147,11 +147,6 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     }
 
     private void lazyInit() {
-        if (mWifiManager == null) {
-            mWifiManager = (WifiManager) getSystemService(Context
-                    .WIFI_SERVICE);
-        }
-
         if (mDataAsyncQueryHandler == null) {
             mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(), this);
         }

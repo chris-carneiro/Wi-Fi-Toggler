@@ -10,7 +10,7 @@ public class Config {
     private Config() {
     }
 
-    public static final boolean DEBUG_MODE = true;
+    public static final boolean DEBUG_MODE = false;
 
     public static final int NOTIFICATION_ID_AIRPLANE_MODE = 101;
     public static final int NOTIFICATION_ID_WIFI_HANDLER_STATE = 100;
@@ -33,10 +33,12 @@ public class Config {
     /**
      * Every half day
      */
-//    public static final long CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL = AlarmManager
-//            .INTERVAL_HALF_DAY;
-
-        public static final long CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL = 1000 * 60;
+    public static final long CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL = (DEBUG_MODE ? 1000 *
+            60 :
+            AlarmManager
+                    .INTERVAL_HALF_DAY);
+    public static final long INTERVAL_CHECK_ONE_SECOND = 1000;
+    //    public static final long CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL = 1000 * 60;
 
     //    public static final long BLITZ_CHECK_SCAN_ALWAYS_AVAILABLE_INTERVAL = 1000;
 }

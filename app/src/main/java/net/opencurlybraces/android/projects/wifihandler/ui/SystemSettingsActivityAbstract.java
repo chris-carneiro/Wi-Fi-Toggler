@@ -3,6 +3,8 @@ package net.opencurlybraces.android.projects.wifihandler.ui;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -16,8 +18,10 @@ import android.widget.RelativeLayout;
 import net.opencurlybraces.android.projects.wifihandler.Config;
 import net.opencurlybraces.android.projects.wifihandler.R;
 import net.opencurlybraces.android.projects.wifihandler.WifiHandler;
+import net.opencurlybraces.android.projects.wifihandler.receiver.ScanAlwaysAvailableReceiver;
 import net.opencurlybraces.android.projects.wifihandler.util.StartupUtils;
 
+import java.lang.ref.WeakReference;
 import java.util.Observer;
 
 /**
@@ -27,6 +31,8 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
         .OnClickListener, Observer {
 
     private static final String TAG = "SystemSettingsAbstract";
+
+    protected static final int TICK_WHAT = 2;
 
     protected RelativeLayout mScanCheckLayout = null;
     protected RelativeLayout mAirplaneCheckLayout = null;
@@ -43,6 +49,9 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
     private static final int REQUEST_CODE_SCAN_ALWAYS_AVAILABLE = 1;
     private static final String TETHER_SETTINGS_ACTION = "com.android.settings.TetherSettings";
     private static final String TETHER_SETTINGS_CLASSNAME = "com.android.settings";
+
+    protected final CheckPassiveScanHandler mCheckPassiveHandler = new CheckPassiveScanHandler
+            (this);
 
     protected abstract void onContinueClicked();
 
@@ -70,12 +79,14 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
     protected void onStart() {
         super.onStart();
         WifiHandler.registerSettingObserver(this);
+        startRepeatingCheck();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         WifiHandler.unRegisterSettingObserver(this);
+        stopRepeatingCheck();
     }
 
     @Override
@@ -157,6 +168,7 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
                 break;
             case R.id.system_settings_check_continue_button:
                 onContinueClicked();
+                stopRepeatingCheck();
                 break;
         }
 
@@ -246,5 +258,33 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
         mWifiNextIcon = (ImageView) mWifiCheckLayout.findViewById(R.id
                 .startup_check_wifi_settings_next_ic);
 
+    }
+
+    /**
+     * Simulates a system broadcast to check accurately the scan always available setting
+     */
+    protected abstract void startRepeatingCheck();
+
+    protected void stopRepeatingCheck() {
+        mCheckPassiveHandler.removeMessages(TICK_WHAT);
+    }
+
+    protected static class CheckPassiveScanHandler extends Handler {
+        private final WeakReference<SystemSettingsActivityAbstract> mHost;
+
+        CheckPassiveScanHandler(SystemSettingsActivityAbstract host) {
+            mHost = new WeakReference<>(host);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            SystemSettingsActivityAbstract host = mHost.get();
+            if (host != null) {
+                host.sendBroadcast(new Intent(ScanAlwaysAvailableReceiver
+                        .CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_ACTION));
+                sendMessageDelayed(Message.obtain(this, TICK_WHAT), Config
+                        .INTERVAL_CHECK_ONE_SECOND);
+            }
+        }
     }
 }

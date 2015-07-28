@@ -4,14 +4,18 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 
+import net.opencurlybraces.android.projects.wifihandler.Config;
 import net.opencurlybraces.android.projects.wifihandler.WifiHandler;
 import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 
+import java.lang.ref.WeakReference;
 import java.util.Observable;
 
 
@@ -22,6 +26,12 @@ public class StartupSettingsCheckActivity extends SystemSettingsActivityAbstract
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void startRepeatingCheck() {
+        mCheckPassiveHandler.sendMessageDelayed(Message.obtain(mCheckPassiveHandler, TICK_WHAT),
+                Config.INTERVAL_CHECK_ONE_SECOND);
     }
 
     @Override
@@ -93,4 +103,6 @@ public class StartupSettingsCheckActivity extends SystemSettingsActivityAbstract
         Log.d(TAG, "update");
         setLayoutAccordingToSettings();
     }
+
+
 }

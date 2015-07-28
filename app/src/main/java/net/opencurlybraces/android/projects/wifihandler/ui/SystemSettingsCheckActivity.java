@@ -1,8 +1,10 @@
 package net.opencurlybraces.android.projects.wifihandler.ui;
 
 import android.os.Bundle;
+import android.os.Message;
 import android.util.Log;
 
+import net.opencurlybraces.android.projects.wifihandler.Config;
 import net.opencurlybraces.android.projects.wifihandler.WifiHandler;
 
 import java.util.Observable;
@@ -23,6 +25,12 @@ public class SystemSettingsCheckActivity extends SystemSettingsActivityAbstract 
     protected void onResume() {
         super.onResume();
         setLayoutAccordingToSettings();
+    }
+
+    @Override
+    protected void startRepeatingCheck() {
+        mCheckPassiveHandler.sendMessageDelayed(Message.obtain(mCheckPassiveHandler, TICK_WHAT),
+                Config.INTERVAL_CHECK_ONE_SECOND);
     }
 
     @Override
