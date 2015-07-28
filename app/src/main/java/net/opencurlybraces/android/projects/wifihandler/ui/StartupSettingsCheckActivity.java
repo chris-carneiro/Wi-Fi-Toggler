@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -15,7 +14,6 @@ import net.opencurlybraces.android.projects.wifihandler.WifiHandler;
 import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 
-import java.lang.ref.WeakReference;
 import java.util.Observable;
 
 
@@ -31,7 +29,7 @@ public class StartupSettingsCheckActivity extends SystemSettingsActivityAbstract
     @Override
     protected void startRepeatingCheck() {
         mCheckPassiveHandler.sendMessageDelayed(Message.obtain(mCheckPassiveHandler, TICK_WHAT),
-                Config.INTERVAL_CHECK_ONE_SECOND);
+                Config.INTERVAL_CHECK_HALF_SECOND);
     }
 
     @Override

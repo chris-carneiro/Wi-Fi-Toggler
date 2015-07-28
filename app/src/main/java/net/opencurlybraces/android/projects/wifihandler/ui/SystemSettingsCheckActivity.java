@@ -30,7 +30,7 @@ public class SystemSettingsCheckActivity extends SystemSettingsActivityAbstract 
     @Override
     protected void startRepeatingCheck() {
         mCheckPassiveHandler.sendMessageDelayed(Message.obtain(mCheckPassiveHandler, TICK_WHAT),
-                Config.INTERVAL_CHECK_ONE_SECOND);
+                Config.INTERVAL_CHECK_HALF_SECOND);
     }
 
     @Override

@@ -8,6 +8,7 @@ import android.util.Log;
 import net.opencurlybraces.android.projects.wifihandler.Config;
 import net.opencurlybraces.android.projects.wifihandler.WifiHandler;
 import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
+import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 
 /**
  * There's no broadcast event to which we could register regarding the <i>scan always available </i>
@@ -25,10 +26,17 @@ public class ScanAlwaysAvailableReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "Check always scan available request received");
+        boolean warningNotificationsEnabled = PrefUtils.areWarningNotificationsEnabled(context);
+
         if (NetworkUtils.isScanAlwaysAvailable(context)) {
             Log.d(TAG, "Scan always available correct");
             WifiHandler.setSetting(Config.SCAN_ALWAYS_AVAILABLE_SETTINGS, true);
         } else {
+            if (warningNotificationsEnabled) {
+                if (PrefUtils.isWifiHandlerActive(context)) {
+                    NetworkUtils.buildWarningNotification(context);
+                }
+            }
             Log.d(TAG, "Scan always available ko");
             WifiHandler.setSetting(Config.SCAN_ALWAYS_AVAILABLE_SETTINGS, false);
         }

@@ -54,7 +54,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
             StartupUtils.startStrictMode();
         }
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_configured_wifi_list);
+        setContentView(R.layout.activity_saved_wifi_list);
 
         bindViews();
         initCursorLoader();

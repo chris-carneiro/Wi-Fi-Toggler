@@ -30,12 +30,12 @@ public class AirplaneModeStateReceiver extends BroadcastReceiver {
             setAirplaneSettingsCorrect(false);
             if (warningNotificationsEnabled) {
                 if (PrefUtils.isWifiHandlerActive(context)) {
-                    NetworkUtils.buildAirplaneNotification(context);
+                    NetworkUtils.buildWarningNotification(context);
                 }
             }
         } else {
             setAirplaneSettingsCorrect(true);
-            NetworkUtils.dismissNotification(context, Config.NOTIFICATION_ID_AIRPLANE_MODE);
+            NetworkUtils.dismissNotification(context, Config.NOTIFICATION_ID_WARNING);
         }
     }
 

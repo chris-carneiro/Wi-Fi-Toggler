@@ -179,7 +179,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
         buildDismissableNotification();
         mCheckPassiveScanHandler.removeMessages(CHECK_SCAN_ALWAYS_AVAILABLE);
         unregisterReceivers();
-        NetworkUtils.dismissNotification(this, Config.NOTIFICATION_ID_AIRPLANE_MODE);
+        NetworkUtils.dismissNotification(this, Config.NOTIFICATION_ID_WARNING);
 
     }
 

@@ -169,7 +169,7 @@ public class SettingsActivity extends PreferenceActivity {
                     if (PrefUtils.PREF_WARNING_NOTIFICATIONS.equals(preference.getKey())) {
                         if (!(Boolean) value) {
                             NetworkUtils.dismissNotification(preference.getContext(), Config
-                                    .NOTIFICATION_ID_AIRPLANE_MODE);
+                                    .NOTIFICATION_ID_WARNING);
                         }
                     }
 

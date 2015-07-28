@@ -2,7 +2,7 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context=".ConfiguredWifiListActivity">
+                tools:context=".SavedWifiListActivity">
 
     <RelativeLayout
         android:id="@+id/wifi_handler_switch_banner"
@@ -38,7 +38,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/wifi_handler_switch_banner"
-        android:background="@android:color/holo_orange_dark"
+        android:background="@drawable/system_settings_warning_banner_selector"
         android:gravity="center"
         android:padding="@dimen/normal_padding">
 
@@ -47,7 +47,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:text="@string/airplane_mode_message_banner"
+            android:text="@string/system_settings_warning_message_banner"
             android:textColor="@color/primary_material_light"
             android:textSize="@dimen/message_banner_text_size"
             />

@@ -18,6 +18,7 @@ import android.util.Log;
 import net.opencurlybraces.android.projects.wifihandler.Config;
 import net.opencurlybraces.android.projects.wifihandler.R;
 import net.opencurlybraces.android.projects.wifihandler.ui.SavedWifiListActivity;
+import net.opencurlybraces.android.projects.wifihandler.ui.SystemSettingsCheckActivity;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -120,11 +121,11 @@ public class NetworkUtils {
         return wifiManager.getScanResults();
     }
 
-    public static void buildAirplaneNotification(final Context context) {
+    public static void buildWarningNotification(final Context context) {
         NotificationManager notifManager = (NotificationManager) context.getSystemService(Context
                 .NOTIFICATION_SERVICE);
         Resources res = context.getResources();
-        Intent notificationIntent = new Intent(context, SavedWifiListActivity.class);
+        Intent notificationIntent = new Intent(context, SystemSettingsCheckActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
@@ -132,15 +133,15 @@ public class NetworkUtils {
                 notificationIntent, 0);
 
         NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(context)
-                .setContentTitle(res.getString(R.string.airplane_mode_notification_context_title))
+                .setContentTitle(res.getString(R.string.system_settings_warning_notification_context_title))
                 .setContentText(res.getString(R.string
-                        .airplane_mode_notification_ticker))
-                .setTicker(res.getString(R.string.airplane_mode_notification_ticker))
+                        .system_settings_warning_notification_ticker))
+                .setTicker(res.getString(R.string.system_settings_warning_notification_ticker))
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentIntent(intent);
 
         Notification notification = notifBuilder.build();
-        notifManager.notify(Config.NOTIFICATION_ID_AIRPLANE_MODE, notification);
+        notifManager.notify(Config.NOTIFICATION_ID_WARNING, notification);
     }
 
 

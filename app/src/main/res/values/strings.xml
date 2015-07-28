@@ -16,11 +16,11 @@
     <string name="disable_notification_ticker_content">Wifi Handler is disabled</string>
     <string name="enable_notification_ticker_content">Wifi Handler is enabled</string>
     <string name="connected_saved_wifi_status">Connected</string>
-    <string name="airplane_mode_notification_context_title">Airplane Mode Detected</string>
-    <string name="airplane_mode_notification_ticker">To enjoy wifi auto toggle feature, disable
-        airplane
-    mode :)</string>
-    <string name="airplane_mode_message_banner">Auto toggle unavailable, click here to
+    <string name="system_settings_warning_notification_context_title">Conflicting System
+        Settings</string>
+    <string name="system_settings_warning_notification_ticker">Auto toggle unavailable, click and
+        check your settings</string>
+    <string name="system_settings_warning_message_banner">Auto toggle unavailable, click and
         check your settings</string>
     <string name="tag_key_ssid">tag_key_ssid</string>
     <string name="tag_key_status">tag_key_status</string>

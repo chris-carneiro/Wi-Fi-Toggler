@@ -12,7 +12,7 @@ public class Config {
 
     public static final boolean DEBUG_MODE = false;
 
-    public static final int NOTIFICATION_ID_AIRPLANE_MODE = 101;
+    public static final int NOTIFICATION_ID_WARNING = 101;
     public static final int NOTIFICATION_ID_WIFI_HANDLER_STATE = 100;
 
     public static final int WIFI_SIGNAL_STRENGTH_LEVELS = 11;
@@ -37,8 +37,6 @@ public class Config {
             60 :
             AlarmManager
                     .INTERVAL_HOUR);
-    public static final long INTERVAL_CHECK_ONE_SECOND = 1000;
-    //    public static final long CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL = 1000 * 60;
 
-    //    public static final long BLITZ_CHECK_SCAN_ALWAYS_AVAILABLE_INTERVAL = 1000;
+    public static final long INTERVAL_CHECK_HALF_SECOND = 500;
 }

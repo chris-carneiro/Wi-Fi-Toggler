@@ -30,7 +30,7 @@ public class SavedWifiListAdapter extends CursorAdapter {
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View view = mLayoutInflater.inflate(R.layout.configured_wifi_list_row, parent, false);
+        View view = mLayoutInflater.inflate(R.layout.saved_wifi_list_row, parent, false);
         return bindViewTags(cursor, view);
     }
 
