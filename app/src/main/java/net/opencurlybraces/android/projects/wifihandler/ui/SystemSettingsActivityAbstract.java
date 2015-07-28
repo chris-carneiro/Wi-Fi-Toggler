@@ -3,8 +3,6 @@ package net.opencurlybraces.android.projects.wifihandler.ui;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -18,10 +16,9 @@ import android.widget.RelativeLayout;
 import net.opencurlybraces.android.projects.wifihandler.Config;
 import net.opencurlybraces.android.projects.wifihandler.R;
 import net.opencurlybraces.android.projects.wifihandler.WifiHandler;
-import net.opencurlybraces.android.projects.wifihandler.receiver.ScanAlwaysAvailableReceiver;
+import net.opencurlybraces.android.projects.wifihandler.util.CheckPassiveScanHandler;
 import net.opencurlybraces.android.projects.wifihandler.util.StartupUtils;
 
-import java.lang.ref.WeakReference;
 import java.util.Observer;
 
 /**
@@ -51,7 +48,7 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
     private static final String TETHER_SETTINGS_CLASSNAME = "com.android.settings";
 
     protected final CheckPassiveScanHandler mCheckPassiveHandler = new CheckPassiveScanHandler
-            (this);
+            (this, 2, Config.INTERVAL_CHECK_ONE_SECOND);
 
     protected abstract void onContinueClicked();
 
@@ -267,24 +264,5 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
 
     protected void stopRepeatingCheck() {
         mCheckPassiveHandler.removeMessages(TICK_WHAT);
-    }
-
-    protected static class CheckPassiveScanHandler extends Handler {
-        private final WeakReference<SystemSettingsActivityAbstract> mHost;
-
-        CheckPassiveScanHandler(SystemSettingsActivityAbstract host) {
-            mHost = new WeakReference<>(host);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            SystemSettingsActivityAbstract host = mHost.get();
-            if (host != null) {
-                host.sendBroadcast(new Intent(ScanAlwaysAvailableReceiver
-                        .CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_ACTION));
-                sendMessageDelayed(Message.obtain(this, TICK_WHAT), Config
-                        .INTERVAL_CHECK_ONE_SECOND);
-            }
-        }
     }
 }

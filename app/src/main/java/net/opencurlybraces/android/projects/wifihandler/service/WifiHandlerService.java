@@ -1,6 +1,5 @@
 package net.opencurlybraces.android.projects.wifihandler.service;
 
-import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -17,6 +16,7 @@ import android.database.Cursor;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -35,6 +35,7 @@ import net.opencurlybraces.android.projects.wifihandler.receiver.WifiAdapterStat
 import net.opencurlybraces.android.projects.wifihandler.receiver.WifiConnectionStateReceiver;
 import net.opencurlybraces.android.projects.wifihandler.receiver.WifiScanResultsReceiver;
 import net.opencurlybraces.android.projects.wifihandler.ui.SavedWifiListActivity;
+import net.opencurlybraces.android.projects.wifihandler.util.CheckPassiveScanHandler;
 import net.opencurlybraces.android.projects.wifihandler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 
@@ -104,7 +105,8 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     private static final int TOKEN_INSERT = 2;
     private static final int TOKEN_UPDATE = 3;
     private static final int TOKEN_INSERT_BATCH = 5;
-
+    private CheckPassiveScanHandler mCheckPassiveScanHandler;
+    private final int CHECK_SCAN_ALWAYS_AVAILABLE = 3;
 
     @Override
     public void onCreate() {
@@ -113,18 +115,9 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
         lazyInit();
         registerReceivers();
-
-        PendingIntent checkPassiveScanSetting = getScheduledCheckIntent();
-
-        scheduleSettingsCheck(checkPassiveScanSetting, Config
-                .CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL);
+        schedulePassiveScanCheck();
     }
 
-    private PendingIntent getScheduledCheckIntent() {
-        Intent intent = new Intent(ScanAlwaysAvailableReceiver
-                .CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_ACTION);
-        return PendingIntent.getBroadcast(this, 0, intent, 0);
-    }
 
     private void registerReceivers() {
         registerReceiver(mWifiScanResultsReceiver, WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
@@ -137,16 +130,17 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                 .HOTSPOT_STATE_CHANGED_ACTION);
     }
 
-    private void scheduleSettingsCheck(final PendingIntent intent,
-                                       long intervalMillis) {
-        Log.d(TAG, "scheduleSettingsCheck");
-        AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
-        alarm.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(), intervalMillis,
-                intent);
+    private void schedulePassiveScanCheck() {
+        mCheckPassiveScanHandler.sendMessageDelayed(Message.obtain(mCheckPassiveScanHandler, CHECK_SCAN_ALWAYS_AVAILABLE),
+                Config.CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL);
     }
 
     private void lazyInit() {
+        if (mCheckPassiveScanHandler == null) {
+            mCheckPassiveScanHandler = new CheckPassiveScanHandler(this, CHECK_SCAN_ALWAYS_AVAILABLE, Config
+                    .CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL);
+        }
+
         if (mDataAsyncQueryHandler == null) {
             mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(), this);
         }
@@ -181,8 +175,12 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
         if (Config.DEBUG_MODE)
             Toast.makeText(this, "service destroyed", Toast.LENGTH_LONG).show();
 
+        pauseWifiHandler();
+        buildDismissableNotification();
+        mCheckPassiveScanHandler.removeMessages(CHECK_SCAN_ALWAYS_AVAILABLE);
         unregisterReceivers();
         NetworkUtils.dismissNotification(this, Config.NOTIFICATION_ID_AIRPLANE_MODE);
+
     }
 
     private void unregisterReceivers() {
@@ -212,14 +210,10 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                         (ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE);
                 break;
             case ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE:
-                pauseWifiHandler();
-                buildDismissableNotification();
                 sendLocalBroadcastAction(ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE);
                 stopSelf();
                 break;
             case ACTION_HANDLE_PAUSE_WIFI_HANDLER:
-                pauseWifiHandler();
-                buildDismissableNotification();
                 stopSelf();
                 break;
             case ACTION_HANDLE_ACTIVATE_WIFI_HANDLER:

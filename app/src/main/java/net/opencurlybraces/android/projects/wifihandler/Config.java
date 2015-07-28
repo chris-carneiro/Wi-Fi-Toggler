@@ -31,12 +31,12 @@ public class Config {
 
 
     /**
-     * Every half day
+     * Every hour
      */
     public static final long CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL = (DEBUG_MODE ? 1000 *
             60 :
             AlarmManager
-                    .INTERVAL_HALF_DAY);
+                    .INTERVAL_HOUR);
     public static final long INTERVAL_CHECK_ONE_SECOND = 1000;
     //    public static final long CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL = 1000 * 60;
 
