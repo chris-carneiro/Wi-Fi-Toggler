@@ -9,6 +9,9 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
 
+import net.opencurlybraces.android.projects.wifihandler.Config;
+import net.opencurlybraces.android.projects.wifihandler.WifiHandler;
+
 /**
  * Created by chris on 09/06/15.
  */
@@ -104,5 +107,20 @@ public class StartupUtils {
                 .build());
     }
 
+
+    public static void doSystemSettingsPreCheck(Context context) {
+        Log.d(TAG, " doSystemSettingsPreCheck");
+        WifiHandler.setSetting(Config.SCAN_ALWAYS_AVAILABLE_SETTINGS, NetworkUtils
+                .isScanAlwaysAvailable(context));
+
+        WifiHandler.setSetting(Config.AIRPLANE_SETTINGS, !NetworkUtils
+                .isAirplaneModeEnabled(context));
+
+        WifiHandler.setSetting(Config.HOTSPOT_SETTINGS, !NetworkUtils
+                .isHotspotEnabled(context));
+
+        WifiHandler.setSetting(Config.STARTUP_CHECK_WIFI_SETTINGS, NetworkUtils
+                .isWifiEnabled(context));
+    }
 
 }

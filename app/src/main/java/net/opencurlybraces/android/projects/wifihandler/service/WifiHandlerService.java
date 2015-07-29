@@ -112,7 +112,8 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     public void onCreate() {
         Log.d(TAG, "OnCreate");
         super.onCreate();
-
+        if (Config.DEBUG_MODE)
+            Toast.makeText(this, "service created", Toast.LENGTH_LONG).show();
         lazyInit();
         registerReceivers();
         schedulePassiveScanCheck();
@@ -200,7 +201,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "Intent=" + (intent != null ? intent.getAction() : null));
-        if (intent == null) return START_STICKY;
+        if (intent == null) return START_NOT_STICKY;
 
         switch (intent.getAction()) {
             case ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE:
@@ -238,7 +239,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                 break;
         }
 
-        return START_STICKY;
+        return START_NOT_STICKY;
 
     }
 
@@ -349,7 +350,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                 .setContentText(res.getString(R.string
                         .paused_wifi_handler_notification_context_title))
                 .setTicker(res.getString(R.string.disable_notification_ticker_content))
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(R.drawable.wifi_handler_notif)
                 .setContentIntent(intent);
 
         notifBuilder.addAction(0, res.getString(R.string.enable_action_title)
@@ -376,7 +377,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                 .setContentText(res.getString(R.string
                         .active_wifi_handler_notification_context_title))
                 .setTicker(res.getString(R.string.enable_notification_ticker_content))
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(R.drawable.wifi_handler_notif)
                 .setContentIntent(intent);
 
 

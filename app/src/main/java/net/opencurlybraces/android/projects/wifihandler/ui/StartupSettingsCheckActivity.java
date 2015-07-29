@@ -70,6 +70,7 @@ public class StartupSettingsCheckActivity extends SystemSettingsActivityAbstract
         setScanLayoutAccordingToSettings();
         setWifiLayoutAccordingToSettings();
         setHotspotLayoutAccordingToSettings();
+        checkContinueButtonListener();
     }
 
     private void registerFinishActivityReceiver() {
@@ -95,12 +96,5 @@ public class StartupSettingsCheckActivity extends SystemSettingsActivityAbstract
         handleSavedWifiInsert.setAction(WifiHandlerService.ACTION_HANDLE_SAVED_WIFI_INSERT);
         startService(handleSavedWifiInsert);
     }
-
-    @Override
-    public void update(Observable observable, Object data) {
-        Log.d(TAG, "update");
-        setLayoutAccordingToSettings();
-    }
-
 
 }

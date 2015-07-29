@@ -31,6 +31,7 @@ public class HotspotModeStateReceiver extends BroadcastReceiver {
             WifiHandler.setSetting(Config.HOTSPOT_SETTINGS, false);
         } else {
             WifiHandler.setSetting(Config.HOTSPOT_SETTINGS, true);
+            NetworkUtils.dismissNotification(context, Config.NOTIFICATION_ID_WARNING);
         }
     }
 }

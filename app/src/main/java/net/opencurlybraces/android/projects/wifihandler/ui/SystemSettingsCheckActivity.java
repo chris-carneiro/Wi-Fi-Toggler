@@ -54,11 +54,8 @@ public class SystemSettingsCheckActivity extends SystemSettingsActivityAbstract 
         setHotspotLayoutAccordingToSettings();
         setScanLayoutAccordingToSettings();
         setAirplaneLayoutAccordingToSettings();
+        checkContinueButtonListener();
+
     }
 
-    @Override
-    public void update(Observable observable, Object data) {
-        Log.d(TAG, "update");
-        setLayoutAccordingToSettings();
-    }
 }

@@ -80,6 +80,8 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         super.onResume();
 
         startupCheck();
+        //        handleNormalStartup();
+        handleNotification(mWifiHandlerActivationSwitch.isChecked());
         setListAdapterAccordingToSwitchState();
         registerReceivers();
         handleBannerDisplay();
@@ -188,24 +190,46 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         switch (startupMode) {
             case StartupUtils.FIRST_TIME:
             case StartupUtils.FIRST_TIME_FOR_VERSION:
-                launchStartupCheckActivity();
+                handleFirstLaunch();
                 break;
             case StartupUtils.NORMAL:
                 handleNormalStartup();
                 break;
         }
-        handleNotification(mWifiHandlerActivationSwitch.isChecked());
+        //        handleNotification(mWifiHandlerActivationSwitch.isChecked());
+    }
+
+
+    private void handleFirstLaunch() {
+        Log.d(TAG, "handleFirstLaunch");
+        if (WifiHandler.hasWrongSettingsForFirstLaunch()) {
+            launchStartupCheckActivity();
+        } else {
+            PrefUtils.markSettingsCorrectAtFirstLaunch(this);
+            loadSavedWifiIntoDatabase();
+        }
     }
 
     private void unregisterReceivers() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mNotificationActionsReceiver);
     }
 
+    private void loadSavedWifiIntoDatabase() {
+        Intent insertSavedWifi = new Intent(this, WifiHandlerService.class);
+        insertSavedWifi.setAction(WifiHandlerService.ACTION_HANDLE_SAVED_WIFI_INSERT);
+        startService(insertSavedWifi);
+    }
+
     private void handleNormalStartup() {
         Log.d(TAG, "handleNormalStartup");
-        if (!PrefUtils.wereSettingsCorrectAtFirstLaunch(this)) {
-            mWifiHandlerActivationSwitch.setChecked(false);
+        if (!PrefUtils.wereSettingsCorrectAtFirstLaunch(this) && WifiHandler
+                .hasWrongSettingsForFirstLaunch()) {
+            //            mWifiHandlerActivationSwitch.setChecked(false);
             launchStartupCheckActivity();
+        } else {
+            if (!PrefUtils.isSavedWifiInsertComplete(this)) {
+                loadSavedWifiIntoDatabase();
+            }
         }
     }
 

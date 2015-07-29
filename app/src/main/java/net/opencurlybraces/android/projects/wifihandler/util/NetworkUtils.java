@@ -137,7 +137,7 @@ public class NetworkUtils {
                 .setContentText(res.getString(R.string
                         .system_settings_warning_notification_ticker))
                 .setTicker(res.getString(R.string.system_settings_warning_notification_ticker))
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(R.drawable.wifi_handler_notif)
                 .setContentIntent(intent);
 
         Notification notification = notifBuilder.build();

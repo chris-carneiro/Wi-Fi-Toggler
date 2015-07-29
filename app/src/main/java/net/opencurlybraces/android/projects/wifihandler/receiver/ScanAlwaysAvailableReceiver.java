@@ -39,6 +39,7 @@ public class ScanAlwaysAvailableReceiver extends BroadcastReceiver {
             }
             Log.d(TAG, "Scan always available ko");
             WifiHandler.setSetting(Config.SCAN_ALWAYS_AVAILABLE_SETTINGS, false);
+            NetworkUtils.dismissNotification(context, Config.NOTIFICATION_ID_WARNING);
         }
     }
 }

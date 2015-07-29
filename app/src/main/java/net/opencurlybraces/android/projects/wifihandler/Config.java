@@ -10,7 +10,7 @@ public class Config {
     private Config() {
     }
 
-    public static final boolean DEBUG_MODE = false;
+    public static final boolean DEBUG_MODE = true;
 
     public static final int NOTIFICATION_ID_WARNING = 101;
     public static final int NOTIFICATION_ID_WIFI_HANDLER_STATE = 100;

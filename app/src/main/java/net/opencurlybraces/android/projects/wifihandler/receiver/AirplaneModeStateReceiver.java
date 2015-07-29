@@ -24,7 +24,7 @@ public class AirplaneModeStateReceiver extends BroadcastReceiver {
         boolean warningNotificationsEnabled = PrefUtils.areWarningNotificationsEnabled(context);
 
 
-        boolean isAirplaneModeOn = intent.getBooleanExtra(EXTRAS_AIRPLANE_MODE_STATE, false);
+        boolean isAirplaneModeOn = NetworkUtils.isAirplaneModeEnabled(context);
 
         if (isAirplaneModeOn) {
             setAirplaneSettingsCorrect(false);

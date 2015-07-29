@@ -16,9 +16,11 @@ import android.widget.RelativeLayout;
 import net.opencurlybraces.android.projects.wifihandler.Config;
 import net.opencurlybraces.android.projects.wifihandler.R;
 import net.opencurlybraces.android.projects.wifihandler.WifiHandler;
+import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
 import net.opencurlybraces.android.projects.wifihandler.util.CheckPassiveScanHandler;
 import net.opencurlybraces.android.projects.wifihandler.util.StartupUtils;
 
+import java.util.Observable;
 import java.util.Observer;
 
 /**
@@ -75,13 +77,16 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(TAG, "onStart");
         WifiHandler.registerSettingObserver(this);
         startRepeatingCheck();
+//        doSystemSettingsPreCheck();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        Log.d(TAG, "onStart");
         WifiHandler.unRegisterSettingObserver(this);
         stopRepeatingCheck();
     }
@@ -196,7 +201,7 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
             displayCheckSettingsLayout(mScanCheckLayout, mScanNextIcon);
         }
 
-        checkContinueButtonListener();
+//        checkContinueButtonListener();
     }
 
     protected void setAirplaneLayoutAccordingToSettings() {
@@ -208,7 +213,7 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
             displaySettingsCorrectLayout(mAirplaneCheckLayout, mAirplaneNextIcon);
         }
 
-        checkContinueButtonListener();
+//        checkContinueButtonListener();
     }
 
     protected void setHotspotLayoutAccordingToSettings() {
@@ -219,7 +224,7 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
             displaySettingsCorrectLayout(mHotspotCheckLayout, mHotspotNextIcon);
         }
 
-        checkContinueButtonListener();
+//        checkContinueButtonListener();
     }
 
     protected void setWifiLayoutAccordingToSettings() {
@@ -231,7 +236,7 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
             displaySettingsCorrectLayout(mWifiCheckLayout, mWifiNextIcon);
         }
 
-        checkContinueButtonListener();
+//        checkContinueButtonListener();
     }
 
     private void bindViews() {
@@ -257,6 +262,12 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
 
     }
 
+    private void doSystemSettingsPreCheck() {
+        Intent checkSettings = new Intent(this, WifiHandlerService.class);
+        checkSettings.setAction(WifiHandlerService.ACTION_STARTUP_SETTINGS_PRECHECK);
+        startService(checkSettings);
+    }
+
     /**
      * Simulates a system broadcast to check accurately the scan always available setting
      */
@@ -264,5 +275,10 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
 
     protected void stopRepeatingCheck() {
         mCheckPassiveHandler.removeMessages(TICK_WHAT);
+    }
+
+    @Override
+    public void update(Observable observable, Object data) {
+        setLayoutAccordingToSettings();
     }
 }
