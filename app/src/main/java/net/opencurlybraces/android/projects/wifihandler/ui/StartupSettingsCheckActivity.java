@@ -14,8 +14,6 @@ import net.opencurlybraces.android.projects.wifihandler.WifiHandler;
 import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
 import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
 
-import java.util.Observable;
-
 
 public class StartupSettingsCheckActivity extends SystemSettingsActivityAbstract {
 
@@ -37,6 +35,7 @@ public class StartupSettingsCheckActivity extends SystemSettingsActivityAbstract
         if (WifiHandler.hasWrongSettingsForFirstLaunch()) {
             mContinueButton.setOnClickListener(null);
             mContinueButton.setEnabled(false);
+
         } else {
             mContinueButton.setOnClickListener(this);
             mContinueButton.setEnabled(true);

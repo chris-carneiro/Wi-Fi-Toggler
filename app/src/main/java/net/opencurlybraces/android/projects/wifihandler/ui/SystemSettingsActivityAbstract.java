@@ -243,6 +243,7 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
                 .startup_check_wifi_settings_layout);
 
         mContinueButton = (Button) findViewById(R.id.system_settings_check_continue_button);
+        mContinueButton.setTextColor(getResources().getColor(android.R.color.white));
 
         mAirplaneNextIcon = (ImageView) mAirplaneCheckLayout.findViewById(R.id
                 .startup_check_airplane_settings_next_ic);
