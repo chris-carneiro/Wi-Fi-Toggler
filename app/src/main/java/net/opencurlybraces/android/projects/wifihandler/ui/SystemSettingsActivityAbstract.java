@@ -16,7 +16,6 @@ import android.widget.RelativeLayout;
 import net.opencurlybraces.android.projects.wifihandler.Config;
 import net.opencurlybraces.android.projects.wifihandler.R;
 import net.opencurlybraces.android.projects.wifihandler.WifiHandler;
-import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
 import net.opencurlybraces.android.projects.wifihandler.util.CheckPassiveScanHandler;
 import net.opencurlybraces.android.projects.wifihandler.util.StartupUtils;
 
@@ -66,7 +65,6 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
         if (Config.DEBUG_MODE) {
             StartupUtils.startStrictMode();
         }
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_system_settings_check);
 
@@ -97,6 +95,10 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
         setLayoutAccordingToSettings();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -252,7 +254,6 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
                 .startup_check_wifi_settings_next_ic);
 
     }
-
 
 
     /**

@@ -47,6 +47,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
+            android:ellipsize="marquee"
             android:text="@string/system_settings_warning_message_banner"
             android:textColor="@color/primary_material_light"
             android:textSize="@dimen/message_banner_text_size"

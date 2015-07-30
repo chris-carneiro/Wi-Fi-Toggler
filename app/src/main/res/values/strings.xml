@@ -20,7 +20,7 @@
         Settings</string>
     <string name="system_settings_warning_notification_ticker">Auto toggle unavailable, click and
         check your settings</string>
-    <string name="system_settings_warning_message_banner">Auto toggle unavailable, click and
+    <string name="system_settings_warning_message_banner">Auto toggle unavailable, click here to
         check your settings</string>
     <string name="tag_key_ssid">tag_key_ssid</string>
     <string name="tag_key_status">tag_key_status</string>

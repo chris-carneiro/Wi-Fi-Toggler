@@ -12,6 +12,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -45,6 +46,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     private ListView mWifiHandlerWifiList = null;
     private TextView mEmptyView = null;
     private RelativeLayout mBanner = null;
+    private TextView mBannerContent = null;
     private CursorAdapter mSavedWifiCursorAdapter = null;
 
 
@@ -80,7 +82,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         super.onResume();
 
         startupCheck();
-        //        handleNormalStartup();
         handleNotification(mWifiHandlerActivationSwitch.isChecked());
         setListAdapterAccordingToSwitchState();
         registerReceivers();
@@ -172,6 +173,10 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         mWifiHandlerWifiList = (ListView) findViewById(android.R.id.list);
         mEmptyView = (TextView) findViewById(android.R.id.empty);
         mWifiHandlerActivationSwitch.setOnCheckedChangeListener(this);
+        mBannerContent = (TextView) findViewById(R.id.wifi_handler_message_banner_content);
+        mBannerContent.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+        mBannerContent.setSingleLine(true);
+        mBannerContent.setSelected(true);
         mBanner = (RelativeLayout) findViewById(R.id.wifi_handler_message_banner);
         mBanner.setOnClickListener(this);
     }
@@ -347,7 +352,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         handleBannerDisplay();
     }
 
-// TODO move to util class
+    // TODO move to util class
     private void doSystemSettingsCheck() {
         Intent checkSettings = new Intent(this, WifiHandlerService.class);
         checkSettings.setAction(WifiHandlerService.ACTION_STARTUP_SETTINGS_PRECHECK);

@@ -30,6 +30,7 @@
                     android:id="@+id/startup_check_airplane_settings_title_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:scrollHorizontally="true"
                     android:text="@string/startup_check_airplane_settings_title"
                     android:textSize="@dimen/startup_check_settings_title_text_size"/>
 
@@ -39,6 +40,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/startup_check_airplane_settings_title_tv"
                     android:layout_marginTop="@dimen/startup_check_settings_textview_top_margin"
+                    android:scrollHorizontally="true"
                     android:text="@string/startup_check_airplane_settings_desc"
                     android:textSize="@dimen/startup_check_settings_description_text_size"/>
 
@@ -71,6 +73,7 @@
                     android:id="@+id/startup_check_wifi_settings_title_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:scrollHorizontally="true"
                     android:text="@string/startup_check_wifi_settings_title"
                     android:textSize="@dimen/startup_check_settings_title_text_size"/>
 
@@ -80,6 +83,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/startup_check_wifi_settings_title_tv"
                     android:layout_marginTop="@dimen/startup_check_settings_textview_top_margin"
+                    android:scrollHorizontally="true"
                     android:text="@string/startup_check_wifi_settings_desc"
                     android:textSize="@dimen/startup_check_settings_description_text_size"/>
 
@@ -112,6 +116,7 @@
                     android:id="@+id/startup_check_scan_always_available_settings_title_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:scrollHorizontally="true"
                     android:text="@string/startup_check_scan_always_available_settings_title"
                     android:textSize="@dimen/startup_check_settings_title_text_size"/>
 
@@ -121,6 +126,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/startup_check_scan_always_available_settings_title_tv"
                     android:layout_marginTop="@dimen/startup_check_settings_textview_top_margin"
+                    android:scrollHorizontally="true"
                     android:text="@string/startup_check_scan_always_available_settings_desc"
                     android:textSize="@dimen/startup_check_settings_description_text_size"
                     />
@@ -153,6 +159,7 @@
                     android:id="@+id/startup_check_hotspot_settings_title_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:scrollHorizontally="true"
                     android:text="@string/startup_check_hotspot_settings_title"
                     android:textSize="@dimen/startup_check_settings_title_text_size"/>
 
@@ -160,6 +167,7 @@
                     android:id="@+id/startup_check_hotspot_settings_desc_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:scrollHorizontally="true"
                     android:layout_below="@id/startup_check_hotspot_settings_title_tv"
                     android:layout_marginTop="@dimen/startup_check_settings_textview_top_margin"
                     android:text="@string/startup_check_hotspot_settings_desc"

@@ -387,6 +387,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                         .active_wifi_handler_notification_context_title))
                 .setTicker(res.getString(R.string.enable_notification_ticker_content))
                 .setSmallIcon(R.drawable.wifi_handler_notif)
+                .setColor(getResources().getColor(R.color.material_teal_400))
                 .setContentIntent(intent);
 
 

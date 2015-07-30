@@ -138,7 +138,9 @@ public class NetworkUtils {
                         .system_settings_warning_notification_ticker))
                 .setTicker(res.getString(R.string.system_settings_warning_notification_ticker))
                 .setSmallIcon(R.drawable.wifi_handler_notif)
-                .setContentIntent(intent);
+                .setColor(context.getResources().getColor(R.color.material_orange_400))
+                .setContentIntent(intent)
+                ;
 
         Notification notification = notifBuilder.build();
         notifManager.notify(Config.NOTIFICATION_ID_WARNING, notification);
