@@ -91,6 +91,7 @@ public class StartupSettingsCheckActivity extends SystemSettingsActivityAbstract
         }
     };
 
+    // TODO move to util class
     private void loadSavedWifiIntoDatabase() {
         Intent handleSavedWifiInsert = new Intent(this, WifiHandlerService.class);
         handleSavedWifiInsert.setAction(WifiHandlerService.ACTION_HANDLE_SAVED_WIFI_INSERT);

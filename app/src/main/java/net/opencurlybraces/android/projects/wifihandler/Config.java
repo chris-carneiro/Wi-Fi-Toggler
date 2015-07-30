@@ -10,7 +10,7 @@ public class Config {
     private Config() {
     }
 
-    public static final boolean DEBUG_MODE = true;
+    public static final boolean DEBUG_MODE = false;
 
     public static final int NOTIFICATION_ID_WARNING = 101;
     public static final int NOTIFICATION_ID_WIFI_HANDLER_STATE = 100;
@@ -29,6 +29,7 @@ public class Config {
     public static final String HOTSPOT_SETTINGS =
             "HOTSPOT_SETTINGS";
 
+    public static final String UNKNOWN_SSID = "<unknown ssid>";
 
     /**
      * Every hour
@@ -36,7 +37,7 @@ public class Config {
     public static final long CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL = (DEBUG_MODE ? 1000 *
             60 :
             AlarmManager
-                    .INTERVAL_HOUR);
+                    .INTERVAL_HALF_DAY);
 
     public static final long INTERVAL_CHECK_HALF_SECOND = 500;
 }

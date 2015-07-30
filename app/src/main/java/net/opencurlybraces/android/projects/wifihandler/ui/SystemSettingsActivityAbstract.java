@@ -80,7 +80,6 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
         Log.d(TAG, "onStart");
         WifiHandler.registerSettingObserver(this);
         startRepeatingCheck();
-//        doSystemSettingsPreCheck();
     }
 
     @Override
@@ -200,8 +199,6 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
         } else {
             displayCheckSettingsLayout(mScanCheckLayout, mScanNextIcon);
         }
-
-//        checkContinueButtonListener();
     }
 
     protected void setAirplaneLayoutAccordingToSettings() {
@@ -212,8 +209,6 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
         } else {
             displaySettingsCorrectLayout(mAirplaneCheckLayout, mAirplaneNextIcon);
         }
-
-//        checkContinueButtonListener();
     }
 
     protected void setHotspotLayoutAccordingToSettings() {
@@ -223,8 +218,6 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
         } else {
             displaySettingsCorrectLayout(mHotspotCheckLayout, mHotspotNextIcon);
         }
-
-//        checkContinueButtonListener();
     }
 
     protected void setWifiLayoutAccordingToSettings() {
@@ -235,8 +228,6 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
         } else {
             displaySettingsCorrectLayout(mWifiCheckLayout, mWifiNextIcon);
         }
-
-//        checkContinueButtonListener();
     }
 
     private void bindViews() {

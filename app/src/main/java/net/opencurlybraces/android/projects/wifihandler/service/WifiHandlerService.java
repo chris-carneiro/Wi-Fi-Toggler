@@ -92,7 +92,6 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
             + "ACTION_STARTUP_SETTINGS_PRECHECK";
 
 
-
     private WifiScanResultsReceiver mWifiScanResultsReceiver = null;
     private WifiAdapterStateReceiver mWifiAdapterStateReceiver = null;
     private WifiConnectionStateReceiver mWifiConnectionStateReceiver = null;
@@ -132,13 +131,15 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     }
 
     private void schedulePassiveScanCheck() {
-        mCheckPassiveScanHandler.sendMessageDelayed(Message.obtain(mCheckPassiveScanHandler, CHECK_SCAN_ALWAYS_AVAILABLE),
+        mCheckPassiveScanHandler.sendMessageDelayed(Message.obtain(mCheckPassiveScanHandler,
+                        CHECK_SCAN_ALWAYS_AVAILABLE),
                 Config.CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL);
     }
 
     private void lazyInit() {
         if (mCheckPassiveScanHandler == null) {
-            mCheckPassiveScanHandler = new CheckPassiveScanHandler(this, CHECK_SCAN_ALWAYS_AVAILABLE, Config
+            mCheckPassiveScanHandler = new CheckPassiveScanHandler(this,
+                    CHECK_SCAN_ALWAYS_AVAILABLE, Config
                     .CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL);
         }
 
@@ -181,7 +182,6 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
         mCheckPassiveScanHandler.removeMessages(CHECK_SCAN_ALWAYS_AVAILABLE);
         unregisterReceivers();
         NetworkUtils.dismissNotification(this, Config.NOTIFICATION_ID_WARNING);
-
     }
 
     private void unregisterReceivers() {
@@ -219,7 +219,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
                 break;
             case ACTION_HANDLE_ACTIVATE_WIFI_HANDLER:
                 activateWifiHandler();
-                buildForegroundNotification();
+                handleNotifications();
                 break;
             case ACTION_HANDLE_SAVED_WIFI_INSERT:
                 handleSavedWifiInsert();
@@ -241,6 +241,14 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
 
         return START_NOT_STICKY;
 
+    }
+
+    private void handleNotifications() {
+        buildForegroundNotification();
+
+        if (WifiHandler.hasWrongSettingsForAutoToggle()) {
+            NetworkUtils.buildWarningNotification(this);
+        }
     }
 
 
@@ -305,6 +313,7 @@ public class WifiHandlerService extends Service implements DataAsyncQueryHandler
     }
 
     private void settingsPreCheck() {
+        Log.d(TAG, "settingsCheck");
         WifiHandler.setSetting(Config.SCAN_ALWAYS_AVAILABLE_SETTINGS, NetworkUtils
                 .isScanAlwaysAvailable(this));
 

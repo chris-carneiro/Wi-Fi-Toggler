@@ -79,9 +79,6 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             if (enableWifi) {
                 NetworkUtils.enableWifiAdapter(mContext);
             }
-            //            else {
-            //                NetworkUtils.disableWifiAdapter(mContext);
-            //            }
         }
 
         /**

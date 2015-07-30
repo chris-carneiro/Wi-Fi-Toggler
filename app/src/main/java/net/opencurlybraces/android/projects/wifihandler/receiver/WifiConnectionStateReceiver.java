@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
+import net.opencurlybraces.android.projects.wifihandler.Config;
 import net.opencurlybraces.android.projects.wifihandler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifihandler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifihandler.service.WifiHandlerService;
@@ -23,7 +24,7 @@ import net.opencurlybraces.android.projects.wifihandler.util.PrefUtils;
  */
 public class WifiConnectionStateReceiver extends BroadcastReceiver implements
         DataAsyncQueryHandler.AsyncQueryListener {
-    private static final String TAG = "WifiSupplicantReceiver";
+    private static final String TAG = "WifiConnectionReceiver";
 
     public static final String EXTRA_CURRENT_SSID = "net.opencurlybraces.android" +
             ".projects.wifihandler.receiver.current_ssid";
@@ -31,7 +32,7 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
     private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
     private static final String[] PROJECTION_SSID = new String[]{SavedWifi._ID, SavedWifi
             .SSID};
-    private static final String UNKNOWN_SSID = "<unknown ssid>";
+
     private Context mContext = null;
 
     @Override
@@ -99,7 +100,7 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
 
     @Override
     public void onQueryComplete(int token, Object availableSsid, Cursor cursor) {
-        if (UNKNOWN_SSID.equals(availableSsid)) return;
+        if (Config.UNKNOWN_SSID.equals(availableSsid)) return;
         String ssidFromDB = connectedWifiExistInDB(cursor);
 
         Intent insertSavedWifiState = buildUpdateIntentAccordingSsidValue((String) availableSsid,

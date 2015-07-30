@@ -197,7 +197,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
                 handleNormalStartup();
                 break;
         }
-        //        handleNotification(mWifiHandlerActivationSwitch.isChecked());
     }
 
 
@@ -225,7 +224,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         Log.d(TAG, "handleNormalStartup");
         if (!PrefUtils.wereSettingsCorrectAtFirstLaunch(this) && WifiHandler
                 .hasWrongSettingsForFirstLaunch()) {
-            //            mWifiHandlerActivationSwitch.setChecked(false);
             launchStartupCheckActivity();
         } else {
             if (!PrefUtils.isSavedWifiInsertComplete(this)) {
@@ -349,7 +347,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         handleBannerDisplay();
     }
 
-
+// TODO move to util class
     private void doSystemSettingsCheck() {
         Intent checkSettings = new Intent(this, WifiHandlerService.class);
         checkSettings.setAction(WifiHandlerService.ACTION_STARTUP_SETTINGS_PRECHECK);
