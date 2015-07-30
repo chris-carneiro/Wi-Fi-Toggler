@@ -85,6 +85,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         setListAdapterAccordingToSwitchState();
         registerReceivers();
         handleBannerDisplay();
+        doSystemSettingsCheck();
     }
 
     @Override
@@ -349,4 +350,9 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     }
 
 
+    private void doSystemSettingsCheck() {
+        Intent checkSettings = new Intent(this, WifiHandlerService.class);
+        checkSettings.setAction(WifiHandlerService.ACTION_STARTUP_SETTINGS_PRECHECK);
+        startService(checkSettings);
+    }
 }

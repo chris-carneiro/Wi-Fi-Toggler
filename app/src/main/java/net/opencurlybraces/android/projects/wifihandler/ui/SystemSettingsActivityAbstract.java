@@ -262,11 +262,7 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
 
     }
 
-    private void doSystemSettingsPreCheck() {
-        Intent checkSettings = new Intent(this, WifiHandlerService.class);
-        checkSettings.setAction(WifiHandlerService.ACTION_STARTUP_SETTINGS_PRECHECK);
-        startService(checkSettings);
-    }
+
 
     /**
      * Simulates a system broadcast to check accurately the scan always available setting
