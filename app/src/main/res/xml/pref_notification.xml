@@ -3,9 +3,9 @@
     <!-- A 'parent' preference, which enables/disables child preferences (below)
          when checked/unchecked. -->
     <SwitchPreference
-        android:key="net.opencurlybraces.android.projects.wifihandler.prefs.warning_notifications"
-        android:title="@string/pref_title_warning_notifications"
+        android:defaultValue="true"
+        android:key="warning_notifications"
         android:summary="@string/pref_description_warning_notifications"
-        android:defaultValue="true" />
+        android:title="@string/pref_title_warning_notifications"/>
 
 </PreferenceScreen>

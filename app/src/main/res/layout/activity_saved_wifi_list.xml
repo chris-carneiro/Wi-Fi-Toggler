@@ -12,29 +12,29 @@
         android:padding="@dimen/normal_padding">
 
         <TextView
-            android:id="@+id/wifi_handler_switch_label"
+            android:id="@+id/wifi_toggler_switch_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginStart="@dimen/action_bar_title_left_margin"
-            android:text="@string/on_wifi_handler_switch_label_value"
+            android:text="@string/on_wifi_toggler_switch_label_value"
             android:textColor="@color/primary_material_light"
             android:textSize="@dimen/switch_banner_label_value_text_size"
             />
 
         <Switch
-            android:id="@+id/wifi_handler_activation_switch"
+            android:id="@+id/wifi_toggler_activation_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_toEndOf="@id/wifi_handler_switch_label"
+            android:layout_toEndOf="@id/wifi_toggler_switch_label"
             android:checked="true"/>
 
     </RelativeLayout>
 
     <RelativeLayout
-        android:id="@+id/wifi_handler_message_banner"
+        android:id="@+id/wifi_toggler_message_banner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/wifi_handler_switch_banner"
@@ -43,7 +43,7 @@
         android:padding="@dimen/normal_padding">
 
         <TextView
-            android:id="@+id/wifi_handler_message_banner_content"
+            android:id="@+id/wifi_toggler_message_banner_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
@@ -59,7 +59,7 @@
         android:id="@+id/list_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/wifi_handler_message_banner">
+        android:layout_below="@id/wifi_toggler_message_banner">
 
         <ListView
             android:id="@android:id/list"
@@ -74,7 +74,7 @@
             android:layout_centerInParent="true"
             android:layout_margin="@dimen/normal_padding"
             android:padding="@dimen/normal_padding"
-            android:text="@string/wifi_list_info_when_wifi_handler_off"
+            android:text="@string/wifi_list_info_when_wifi_toggler_off"
             android:textAlignment="center"/>
     </RelativeLayout>
 

@@ -3,11 +3,11 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="net.opencurlybraces.android.projects.wifihandler.ui.SettingsActivity$GeneralPreferenceFragment"
+        android:fragment="net.opencurlybraces.android.projects.wifitoggler.ui.SettingsActivity$GeneralPreferenceFragment"
         android:title="@string/pref_header_general"/>
 
     <header
-        android:fragment="net.opencurlybraces.android.projects.wifihandler.ui.SettingsActivity$NotificationPreferenceFragment"
+        android:fragment="net.opencurlybraces.android.projects.wifitoggler.ui.SettingsActivity$NotificationPreferenceFragment"
         android:title="@string/pref_header_notifications"/>
 
 
