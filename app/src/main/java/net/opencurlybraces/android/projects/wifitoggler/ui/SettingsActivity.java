@@ -262,7 +262,7 @@ public class SettingsActivity extends PreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference(PrefUtils.PREF_RUN_AT_STARTUP));
+            bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_RUN_AT_STARTUP));
             bindPreferenceSummaryToValue(findPreference(PrefUtils.PREF_SIGNAL_STRENGTH_THRESHOLD));
         }
     }
@@ -282,7 +282,7 @@ public class SettingsActivity extends PreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference(PrefUtils.PREF_WARNING_NOTIFICATIONS));
+            bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_WARNING_NOTIFICATIONS));
         }
     }
 
