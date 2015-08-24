@@ -8,7 +8,6 @@
         android:id="@+id/saved_wifi_ssid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/wifi_list_row_margin_left"
         android:textColor="@android:color/black"
         />
 

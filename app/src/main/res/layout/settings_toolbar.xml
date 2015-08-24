@@ -11,14 +11,15 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
+        android:background="@drawable/switch_banner_blue_gradient"
         android:minHeight="?attr/actionBarSize"
         app:navigationContentDescription="@string/abc_action_bar_up_description"
         app:navigationIcon="?attr/homeAsUpIndicator"
-        app:theme="@style/ThemeOverlay.AppCompat.Light"
+        app:theme="@style/ThemeOverlay.AppCompat.Dark"
         app:title="@string/action_settings"
+        app:titleTextAppearance="@style/ToolbarTheme"
         />
-
+    <!--app:theme="@style/ThemeOverlay.AppCompat.Light"-->
     <!-- Toolbar shadow view pre LOLLIPOP -->
     <View
         android:id="@+id/toolbar_shadow"
