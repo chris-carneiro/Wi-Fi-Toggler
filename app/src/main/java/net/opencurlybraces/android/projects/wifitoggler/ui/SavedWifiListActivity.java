@@ -129,11 +129,22 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         switch (buttonView.getId()) {
             case R.id.wifi_toggler_activation_switch:
                 handleSwitchLabelValue(isChecked);
+                handleContentViewMessage(isChecked);
                 handleSavedWifiListLoading(isChecked);
                 handleNotification(isChecked);
                 break;
         }
 
+    }
+
+    private void handleContentViewMessage(boolean isChecked) {
+        if (isChecked) {
+            if (mSavedWifiCursorAdapter.getCount() < 1) {
+                mEmptyView.setText(R.string.wifi_list_info_no_known_wifi);
+            }
+        } else {
+            mEmptyView.setText(R.string.wifi_list_info_when_wifi_toggler_off);
+        }
     }
 
     @Override

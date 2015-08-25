@@ -6,6 +6,7 @@
     <string name="wifi_list_info_when_wifi_toggler_off">"To see your saved Wi-Fi networks, and
         enjoy the auto toggle feature,
         switch Wi-Fi Toggler On"</string>
+    <string name="wifi_list_info_no_known_wifi">"No known Wi-Fi networks found."</string>
     <string name="paused_wifi_toggler_notification_context_title">Wi-Fi Toggler
         disabled</string>
     <string name="active_wifi_toggler_notification_context_title">Wi-Fi Toggler active</string>
