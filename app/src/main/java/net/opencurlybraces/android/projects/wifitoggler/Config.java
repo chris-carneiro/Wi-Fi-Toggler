@@ -12,8 +12,7 @@ public class Config {
 
     public static final boolean DEBUG_MODE = false;
 
-    public static final int NOTIFICATION_ID_WARNING = 101;
-    public static final int NOTIFICATION_ID_WIFI_HANDLER_STATE = 100;
+
 
     public static final int WIFI_SIGNAL_STRENGTH_LEVELS = 11;
 

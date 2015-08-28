@@ -9,6 +9,7 @@ import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
 import net.opencurlybraces.android.projects.wifitoggler.service.WifiTogglerService;
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
+import net.opencurlybraces.android.projects.wifitoggler.util.NotifUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 
 /**
@@ -32,7 +33,7 @@ public class ScanAlwaysAvailableReceiver extends BroadcastReceiver {
         if (NetworkUtils.isScanAlwaysAvailable(context)) {
             Log.d(TAG, "Scan always available correct");
             WifiToggler.setSetting(Config.SCAN_ALWAYS_AVAILABLE_SETTINGS, true);
-            NetworkUtils.dismissNotification(context, Config.NOTIFICATION_ID_WARNING);
+            NetworkUtils.dismissNotification(context, NotifUtils.NOTIFICATION_ID_WARNING);
         } else {
             if (warningNotificationsEnabled) {
                 if (PrefUtils.isWifiTogglerActive(context)) {

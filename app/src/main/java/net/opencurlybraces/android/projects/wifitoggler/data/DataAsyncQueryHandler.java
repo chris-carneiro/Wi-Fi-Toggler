@@ -133,14 +133,14 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
         void onUpdateComplete(int token, Object cookie, int result);
 
         /**
-         * Called when an asynchronous delete is completed.
+         * Called when an asynchronous insert is completed.
          *
-         * @param token  the token to identify the query, passed in from {@link #startDelete(int, Object, Uri, String, String[])}.
+         * @param token  the token to identify the query, passed in from {@link #startInsert(int, Object, Uri, ContentValues)} (int,
+         * Object, Uri, String, String[])}.
          * @param cookie
-         * @param result The number of updated rows
+         * @param uri row inserted uri
          */
-//        void onDeleteComplete(int token, Object cookie, int result);
-
+      void onInsertComplete(int token, Object cookie, Uri uri);
     }
 
     public void setQueryListener(AsyncQueryListener listener) {
@@ -165,19 +165,19 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
         }
     }
 
-//    @Override
-//    protected void onDeleteComplete(int token, Object cookie, int result) {
-//        final AsyncQueryListener listener = mListener.get();
-//        if (listener != null) {
-//            listener.onDeleteComplete(token, cookie, result);
-//        }
-//    }
-
     @Override
     protected void onUpdateComplete(int token, Object cookie, int result) {
         final AsyncQueryListener listener = mListener.get();
         if (listener != null) {
             listener.onUpdateComplete(token, cookie, result);
+        }
+    }
+
+    @Override
+    protected void onInsertComplete(int token, Object cookie, Uri uri) {
+        final AsyncQueryListener listener = mListener.get();
+        if (listener != null) {
+            listener.onInsertComplete(token, cookie, uri);
         }
     }
 

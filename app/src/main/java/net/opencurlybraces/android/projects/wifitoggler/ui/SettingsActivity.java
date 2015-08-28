@@ -22,6 +22,7 @@ import android.widget.LinearLayout;
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
+import net.opencurlybraces.android.projects.wifitoggler.util.NotifUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
@@ -173,7 +174,7 @@ public class SettingsActivity extends PreferenceActivity {
                     Log.d(TAG, "onPreferenceChange=" + preference.getKey() + " value=" + value);
                     if (PrefUtils.PREF_WARNING_NOTIFICATIONS.equals(preference.getKey())) {
                         if (!(Boolean) value) {
-                            NetworkUtils.dismissNotification(preference.getContext(), Config
+                            NetworkUtils.dismissNotification(preference.getContext(), NotifUtils
                                     .NOTIFICATION_ID_WARNING);
                         }
                     }

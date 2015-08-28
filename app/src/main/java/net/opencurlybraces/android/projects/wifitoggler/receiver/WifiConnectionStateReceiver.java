@@ -5,6 +5,7 @@ import android.content.ContentProviderResult;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -170,6 +171,11 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
 
     @Override
     public void onUpdateComplete(int token, Object cookie, int result) {
+
+    }
+
+    @Override
+    public void onInsertComplete(int token, Object cookie, Uri uri) {
 
     }
 }

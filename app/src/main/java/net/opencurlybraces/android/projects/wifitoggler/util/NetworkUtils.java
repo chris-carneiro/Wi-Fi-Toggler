@@ -142,7 +142,7 @@ public class NetworkUtils {
                 ;
 
         Notification notification = notifBuilder.build();
-        notifManager.notify(Config.NOTIFICATION_ID_WARNING, notification);
+        notifManager.notify(NotifUtils.NOTIFICATION_ID_WARNING, notification);
     }
 
 

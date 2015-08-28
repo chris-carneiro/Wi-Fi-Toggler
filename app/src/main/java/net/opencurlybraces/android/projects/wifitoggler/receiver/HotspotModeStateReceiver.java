@@ -8,6 +8,7 @@ import android.util.Log;
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
+import net.opencurlybraces.android.projects.wifitoggler.util.NotifUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 
 
@@ -31,7 +32,7 @@ public class HotspotModeStateReceiver extends BroadcastReceiver {
             WifiToggler.setSetting(Config.HOTSPOT_SETTINGS, false);
         } else {
             WifiToggler.setSetting(Config.HOTSPOT_SETTINGS, true);
-            NetworkUtils.dismissNotification(context, Config.NOTIFICATION_ID_WARNING);
+            NetworkUtils.dismissNotification(context, NotifUtils.NOTIFICATION_ID_WARNING);
         }
     }
 }

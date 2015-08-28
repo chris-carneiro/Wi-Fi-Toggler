@@ -10,8 +10,13 @@
     <string name="paused_wifi_toggler_notification_context_title">Wi-Fi Toggler
         disabled</string>
     <string name="active_wifi_toggler_notification_context_title">Wi-Fi Toggler active</string>
+    <string name="new_wifi_inserted_wifi_toggler_notification_context_title">Activate
+        Auto-Toggle ?</string>
+    <string name="activate_auto_toggle_for_new_wifi_notification_content">Auto-Toggle %1$s ?</string>
     <string name="enable_action_title">Enable Wi-Fi Toggler</string>
     <string name="disable_action_title">Pause Wi-Fi Toggler</string>
+    <string name="positive_answer_action">Yes</string>
+    <string name="negative_answer_action">No</string>
     <string name="disable_notification_ticker_content">Wi-Fi Toggler is disabled</string>
     <string name="enable_notification_ticker_content">Wi-Fi Toggler is enabled</string>
     <string name="connected_saved_wifi_status">Connected</string>

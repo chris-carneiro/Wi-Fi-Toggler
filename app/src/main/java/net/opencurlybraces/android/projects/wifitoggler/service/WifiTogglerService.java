@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
@@ -37,6 +38,7 @@ import net.opencurlybraces.android.projects.wifitoggler.receiver.WifiScanResults
 import net.opencurlybraces.android.projects.wifitoggler.ui.SavedWifiListActivity;
 import net.opencurlybraces.android.projects.wifitoggler.util.CheckPassiveScanHandler;
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
+import net.opencurlybraces.android.projects.wifitoggler.util.NotifUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 
 import java.util.ArrayList;
@@ -71,6 +73,11 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
 
     public static final String ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE = SERVICE_ACTION_PREFIX +
             "ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE";
+
+    public static final String ACTION_HANDLE_NOTIFICATION_ACTION_SET_AUTO_TOGGLE =
+            SERVICE_ACTION_PREFIX +
+            "ACTION_HANDLE_NOTIFICATION_ACTION_SET_AUTO_TOGGLE";
+
 
     public static final String ACTION_HANDLE_SAVED_WIFI_INSERT = SERVICE_ACTION_PREFIX +
             "ACTION_HANDLE_SAVED_WIFI_INSERT";
@@ -181,7 +188,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         buildDismissableNotification();
         mCheckPassiveScanHandler.removeMessages(CHECK_SCAN_ALWAYS_AVAILABLE);
         unregisterReceivers();
-        NetworkUtils.dismissNotification(this, Config.NOTIFICATION_ID_WARNING);
+        NetworkUtils.dismissNotification(this, NotifUtils.NOTIFICATION_ID_WARNING);
     }
 
     private void unregisterReceivers() {
@@ -237,6 +244,9 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
             case ACTION_STARTUP_SETTINGS_PRECHECK:
                 settingsPreCheck();
                 break;
+            case ACTION_HANDLE_NOTIFICATION_ACTION_SET_AUTO_TOGGLE:
+                Log.d(TAG, "setAutoToggle");
+                break;
         }
 
         return START_NOT_STICKY;
@@ -259,7 +269,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         values.put(SavedWifi.SSID, ssidToInsert);
         values.put(SavedWifi.STATUS, NetworkUtils.WifiAdapterStatus.CONNECTED);
 
-        mDataAsyncQueryHandler.startInsert(TOKEN_INSERT, null, SavedWifi.CONTENT_URI,
+        mDataAsyncQueryHandler.startInsert(TOKEN_INSERT, ssidToInsert, SavedWifi.CONTENT_URI,
                 values);
     }
 
@@ -366,7 +376,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         notifBuilder.addAction(0, res.getString(R.string.enable_action_title)
                 , createActivateWifiTogglerIntent());
         Notification notification = notifBuilder.build();
-        notifManager.notify(Config.NOTIFICATION_ID_WIFI_HANDLER_STATE, notification);
+        notifManager.notify(NotifUtils.NOTIFICATION_ID_WIFI_HANDLER_STATE, notification);
 
         stopForeground(false);
 
@@ -396,7 +406,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
                 , createPauseWifiTogglerIntent());
 
         Notification notification = notifBuilder.build();
-        startForeground(Config.NOTIFICATION_ID_WIFI_HANDLER_STATE, notification);
+        startForeground(NotifUtils.NOTIFICATION_ID_WIFI_HANDLER_STATE, notification);
 
     }
 
@@ -439,5 +449,10 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
     @Override
     public void onUpdateComplete(int token, Object cookie, int result) {
         Log.d(TAG, "onUpdateComplete: Async Update complete");
+    }
+
+    @Override
+    public void onInsertComplete(int token, Object insertedWifi, Uri uri) {
+        NotifUtils.buildSetAutoToggleChooserNotification(this, (String) insertedWifi);
     }
 }
