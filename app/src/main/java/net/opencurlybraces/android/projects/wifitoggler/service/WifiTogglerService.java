@@ -342,7 +342,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
 
     private void insertSavedWifiBatchAsync(ArrayList<ContentProviderOperation> batch) {
         if (batch == null) return;
-        mDataAsyncQueryHandler.startInsertBatch(TOKEN_INSERT_BATCH, null, WifiTogglerContract
+        mDataAsyncQueryHandler.startBatchInsert(TOKEN_INSERT_BATCH, null, WifiTogglerContract
                 .AUTHORITY, batch);
 
     }
@@ -459,8 +459,8 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
     }
 
     @Override
-    public void onInsertBatchComplete(int token, Object cookie, ContentProviderResult[] results) {
-        Log.d(TAG, "onInsertBatchComplete: Async Batch Insert complete, stopping service");
+    public void onBatchInsertComplete(int token, Object cookie, ContentProviderResult[] results) {
+        Log.d(TAG, "onBatchInsertComplete: Async Batch Insert complete, stopping service");
 
         PrefUtils.setSavedWifiInsertComplete(this, (results != null && results.length > 0));
 

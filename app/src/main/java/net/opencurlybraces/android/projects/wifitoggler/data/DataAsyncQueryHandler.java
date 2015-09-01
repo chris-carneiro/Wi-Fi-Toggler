@@ -106,11 +106,11 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
          * Called when an asynchronous batch insert is completed.
          *
          * @param token   the token to identify the query, passed in from {@link
-         *                #startInsertBatch}.
-         * @param cookie  the cookie object passed in from {@link #startInsertBatch(int, Object, String, ArrayList)}.
+         *                #startBatchInsert}.
+         * @param cookie  the cookie object passed in from {@link #startBatchInsert(int, Object, String, ArrayList)}.
          * @param results the results of the operations
          */
-        void onInsertBatchComplete(int token, Object cookie, ContentProviderResult[]
+        void onBatchInsertComplete(int token, Object cookie, ContentProviderResult[]
                 results);
 
         /**
@@ -151,7 +151,7 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
             results) {
         final AsyncQueryListener listener = mListener.get();
         if (listener != null) {
-            listener.onInsertBatchComplete(token, cookie, results);
+            listener.onBatchInsertComplete(token, cookie, results);
         }
     }
 
@@ -191,7 +191,7 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
      * @param authority  the authority of the ContentProvider to which this batch should be applied
      * @param operations the operations to apply
      */
-    public void startInsertBatch(int token, Object cookie, String authority,
+    public void startBatchInsert(int token, Object cookie, String authority,
                                  ArrayList<ContentProviderOperation> operations) {
         // Use the token as what so cancelOperations works properly
         Message msg = mWorkerThreadHandler.obtainMessage(token);

@@ -95,7 +95,7 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
 
 
     @Override
-    public void onInsertBatchComplete(int token, Object cookie, ContentProviderResult[] results) {
+    public void onBatchInsertComplete(int token, Object cookie, ContentProviderResult[] results) {
 
     }
 

@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
+import net.opencurlybraces.android.projects.wifitoggler.data.model.Wifi;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
@@ -48,7 +49,8 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
     private static class ScanResultAsyncHandler extends AsyncTask<Void, Void, Boolean> {
         private final Context mContext;
 
-        private static final String[] PROJECTION = new String[]{SavedWifi.SSID};
+        private static final String[] PROJECTION = new String[]{SavedWifi.SSID, SavedWifi
+                .AUTO_TOGGLE};
 
         private ScanResultAsyncHandler(final Context context) {
             mContext = context;
@@ -57,15 +59,16 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
         @Override
         protected Boolean doInBackground(Void... params) {
             //            android.os.Debug.waitForDebugger(); THIS IS EVIL
-            List<String> ssiDsFromDB = getSavedSSIDsFromDB();
+            List<Wifi> wifisFromDB = getSavedWifisFromDB();
             List<ScanResult> availableWifis = NetworkUtils.getAvailableWifi(mContext);
             if (availableWifis == null) {
                 return false;
             }
-            boolean enableWifiAdapter = areThereSavedWifiInRange(availableWifis, ssiDsFromDB);
+            boolean enableWifiAdapter = areThereActiveAutoToggleSavedWifiInRange(availableWifis,
+                    wifisFromDB);
 
             handleWifiActivation(enableWifiAdapter);
-            removeUserUnwantedSavedWifi(ssiDsFromDB);
+            removeUserUnwantedSavedWifi(wifisFromDB);
             return enableWifiAdapter;
         }
 
@@ -85,18 +88,18 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
          * Compare the list of saved wifi from db with the system user's saved wifis and remove from
          * db the ones that aren't in the system anymore
          *
-         * @param ssiDsFromDB
+         * @param wifisFromDB
          */
-        private void removeUserUnwantedSavedWifi(List<String> ssiDsFromDB) {
+        private void removeUserUnwantedSavedWifi(List<Wifi> wifisFromDB) {
             List<WifiConfiguration> savedWifis = NetworkUtils.getSavedWifiSync(mContext);
             if (savedWifis == null) {
                 return;
             }
             List<String> savedSSIDs = extractSSIDListFromSavedWifi(savedWifis);
 
-            for (String ssidDb : ssiDsFromDB) {
-                if (!savedSSIDs.contains(ssidDb)) {
-                    deleteSSIDFromDb(ssidDb);
+            for (Wifi wifiDb : wifisFromDB) {
+                if (!savedSSIDs.contains(wifiDb.ssid)) {
+                    deleteSSIDFromDb(wifiDb.ssid);
                 }
             }
         }
@@ -106,18 +109,20 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
                     "=?", new String[]{ssidDb});
         }
 
-        private boolean areThereSavedWifiInRange(List<ScanResult> availableWifiNetworks,
-                                                 List<String>
-                                                         savedSSIDsFromDb) {
-            Log.d(TAG, "areThereSavedWifiInRange availableWifiNetworks=" + (availableWifiNetworks !=
-                    null) +
-                    " savedSSIDsFromDb=" + (savedSSIDsFromDb != null));
-            if (savedSSIDsFromDb == null || availableWifiNetworks == null) {
+        private boolean areThereActiveAutoToggleSavedWifiInRange(List<ScanResult>
+                                                                         availableWifiNetworks,
+                                                                 List<Wifi>
+                                                                         savedWifisFromDb) {
+            Log.d(TAG, "areThereActiveAutoToggleSavedWifiInRange availableWifiNetworks=" +
+                    (availableWifiNetworks !=
+                            null) +
+                    " savedWifisFromDb=" + (savedWifisFromDb != null));
+            if (savedWifisFromDb == null || availableWifiNetworks == null) {
                 return false;
             }
             for (ScanResult wifiNetwork : availableWifiNetworks) {
-                for (String savedWifi : savedSSIDsFromDb) {
-                    if (savedWifi.equals(wifiNetwork.SSID)) {
+                for (Wifi savedWifi : savedWifisFromDb) {
+                    if (savedWifi.ssid.equals(wifiNetwork.SSID) && savedWifi.isAutoToggle) {
                         int signalStrength = WifiManager.calculateSignalLevel
                                 (wifiNetwork.level, Config.WIFI_SIGNAL_STRENGTH_LEVELS);
                         Log.d(TAG, "signalStrength=" + signalStrength + " preferenceThreshold=" +
@@ -145,19 +150,17 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             return ssids;
         }
 
-        private List<String> getSavedSSIDsFromDB() {
-            List<String> savedSSIDs = null;
+        private List<Wifi> getSavedWifisFromDB() {
+            List<Wifi> savedWifis = null;
             Cursor cursor = null;
             try {
                 cursor = mContext.getContentResolver().query(SavedWifi.CONTENT_URI
                         , PROJECTION, null, null, null);
                 if (cursor != null) {
-                    int index = cursor.getColumnIndexOrThrow(SavedWifi.SSID);
-                    savedSSIDs = new ArrayList<>(cursor.getCount());
-
+                    savedWifis = new ArrayList<>(cursor.getCount());
                     while (cursor.moveToNext()) {
-                        String ssid = cursor.getString(index);
-                        savedSSIDs.add(ssid);
+                        Wifi savedWifi = Wifi.buildForCursor(cursor);
+                        savedWifis.add(savedWifi);
                     }
                     cursor.close();
                 }
@@ -168,7 +171,7 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             } finally {
                 if (cursor != null) cursor.close();
             }
-            return savedSSIDs;
+            return savedWifis;
         }
     }
 }
