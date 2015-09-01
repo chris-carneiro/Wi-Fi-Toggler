@@ -71,7 +71,7 @@ public class SavedWifi implements BaseColumns {
     private static final String CREATE_TABLE = "CREATE TABLE " + SavedWifi.TABLE + " ("
             + _ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             + SSID + " TEXT NOT NULL DEFAULT UNKNOWN,"
-            + AUTO_TOGGLE + " INTEGER NOT NULL DEFAULT 0,"
+            + AUTO_TOGGLE + " INTEGER NOT NULL DEFAULT 1,"
             + OPEN_WIFI + " INTEGER NOT NULL DEFAULT 0,"
             + PREFERRED + " INTEGER NOT NULL DEFAULT 0,"
             + BOOSTED + " INTEGER NOT NULL DEFAULT 0,"

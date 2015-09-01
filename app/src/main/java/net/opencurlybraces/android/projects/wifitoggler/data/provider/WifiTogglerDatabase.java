@@ -15,7 +15,7 @@ public class WifiTogglerDatabase extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "wifitoggler.db";
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     private final Context mContext;
 
