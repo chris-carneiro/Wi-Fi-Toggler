@@ -12,6 +12,7 @@ import android.util.Log;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.receiver.WifiConnectionStateReceiver;
 import net.opencurlybraces.android.projects.wifitoggler.service.WifiTogglerService;
+import net.opencurlybraces.android.projects.wifitoggler.ui.SavedWifiListActivity;
 import net.opencurlybraces.android.projects.wifitoggler.ui.SystemSettingsCheckActivity;
 
 /**
@@ -112,16 +113,74 @@ public class NotifUtils {
         notifManager.notify(NotifUtils.NOTIFICATION_ID_WARNING, notification);
     }
 
-    //TODO refactor
-    //    private static PendingIntent createSetAutoToggleStateOffIntent(Context context, String
-    // ssid) {
-    //        Log.d(TAG, "createSetAutoToggleStateOffIntent");
-    //        Intent setAutoToggle = new Intent(WifiTogglerService
-    //                .ACTION_HANDLE_NOTIFICATION_ACTION_SET_AUTO_TOGGLE,
-    //                null, context, WifiTogglerService.class);
-    //        setAutoToggle.putExtra(WifiConnectionStateReceiver
-    //                .EXTRA_CURRENT_SSID, ssid);
-    //        return PendingIntent.getService(context, 0, setAutoToggle,
-    //                PendingIntent.FLAG_UPDATE_CURRENT);
-    //    }
+    public static void buildWifiTogglerPausedNotification(final Context context) {
+        NotificationManager notifManager = (NotificationManager) context.getSystemService(Context
+                .NOTIFICATION_SERVICE);
+        Resources res = context.getResources();
+        Intent notificationIntent = new Intent(context, SavedWifiListActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        PendingIntent intent = PendingIntent.getActivity(context, 0,
+                notificationIntent, 0);
+
+        NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(context)
+                .setContentTitle(res.getString(R.string.app_name))
+                .setContentText(res.getString(R.string
+                        .paused_wifi_toggler_notification_context_title))
+                .setTicker(res.getString(R.string.disable_notification_ticker_content))
+                .setSmallIcon(R.drawable.notif_icon)
+                .setColor(res.getColor(R.color.material_orange_400))
+                .setContentIntent(intent);
+
+        notifBuilder.addAction(0, res.getString(R.string.enable_action_title)
+                , createActivateWifiTogglerIntent(context));
+        Notification notification = notifBuilder.build();
+        notifManager.notify(NotifUtils.NOTIFICATION_ID_WIFI_HANDLER_STATE, notification);
+
+    }
+
+    public static Notification buildWifiTogglerRunningNotification(final Context context) {
+        Resources res = context.getResources();
+
+        Intent notificationIntent = new Intent(context, SavedWifiListActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        PendingIntent intent = PendingIntent.getActivity(context, 0,
+                notificationIntent, 0);
+
+        NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(context)
+                .setContentTitle(res.getString(R.string.app_name))
+                .setContentText(res.getString(R.string
+                        .active_wifi_toggler_notification_context_title))
+                .setTicker(res.getString(R.string.enable_notification_ticker_content))
+                .setSmallIcon(R.drawable.notif_icon)
+                .setColor(res.getColor(R.color.material_teal_400))
+                .setContentIntent(intent);
+
+
+        notifBuilder.addAction(0, res.getString(R.string.disable_action_title)
+                , createPauseWifiTogglerIntent(context));
+
+        Notification notification = notifBuilder.build();
+        return notification;
+    }
+
+    private static PendingIntent createPauseWifiTogglerIntent(final Context context) {
+        Intent pauseIntent = new Intent(WifiTogglerService.ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE,
+                null, context, WifiTogglerService.class);
+
+        return PendingIntent.getService(context, 0, pauseIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    private static PendingIntent createActivateWifiTogglerIntent(final Context context) {
+        Intent activateIntent = new Intent(WifiTogglerService
+                .ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE,
+                null, context, WifiTogglerService.class);
+
+        return PendingIntent.getService(context, 0, activateIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+    }
 }

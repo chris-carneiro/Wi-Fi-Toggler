@@ -1,31 +1,24 @@
 package net.opencurlybraces.android.projects.wifitoggler.service;
 
 import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
-import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
 import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifitoggler.data.provider.WifiTogglerContract;
@@ -36,11 +29,11 @@ import net.opencurlybraces.android.projects.wifitoggler.receiver.ScanAlwaysAvail
 import net.opencurlybraces.android.projects.wifitoggler.receiver.WifiAdapterStateReceiver;
 import net.opencurlybraces.android.projects.wifitoggler.receiver.WifiConnectionStateReceiver;
 import net.opencurlybraces.android.projects.wifitoggler.receiver.WifiScanResultsReceiver;
-import net.opencurlybraces.android.projects.wifitoggler.ui.SavedWifiListActivity;
 import net.opencurlybraces.android.projects.wifitoggler.util.CheckPassiveScanHandler;
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.NotifUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
+import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -178,7 +171,8 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
             Toast.makeText(this, "service destroyed", Toast.LENGTH_LONG).show();
 
         pauseWifiToggler();
-        buildDismissableNotification();
+        NotifUtils.buildWifiTogglerPausedNotification(this);
+        stopForeground(false);
         mCheckPassiveScanHandler.removeMessages(CHECK_SCAN_ALWAYS_AVAILABLE);
         unregisterReceivers();
         NotifUtils.dismissNotification(this, NotifUtils.NOTIFICATION_ID_WARNING);
@@ -206,7 +200,8 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         switch (intent.getAction()) {
             case ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE:
                 activateWifiToggler();
-                buildForegroundNotification();
+                Notification notification = NotifUtils.buildWifiTogglerRunningNotification(this);
+                startForeground(NotifUtils.NOTIFICATION_ID_WIFI_HANDLER_STATE, notification);
                 sendLocalBroadcastAction
                         (ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE);
                 break;
@@ -231,18 +226,18 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
                 handleWifiDisconnectionUpdate();
                 break;
             case ACTION_HANDLE_INSERT_NEW_CONNECTED_WIFI:
-                insertNewConnectedWifi(intent);
+                handleNewConnectedWifiInsert(intent);
                 break;
             case ACTION_STARTUP_SETTINGS_PRECHECK:
-                settingsPreCheck();
+                StartupUtils.doSystemSettingsPreCheck(this);
                 break;
             case ACTION_HANDLE_NOTIFICATION_ACTION_AUTO_TOGGLE_ON:
-                HandleAutoToggleValueUpdate(intent, true, "Enabling auto toggle for " + intent
+                handleAutoToggleValueUpdate(intent, true, "Enabling auto toggle for " + intent
                         .getStringExtra
                                 (WifiConnectionStateReceiver.EXTRA_CURRENT_SSID));
                 break;
             case ACTION_HANDLE_NOTIFICATION_ACTION_AUTO_TOGGLE_OFF:
-                HandleAutoToggleValueUpdate(intent, false, "Auto Toggle set to false");
+                handleAutoToggleValueUpdate(intent, false, "Auto Toggle set to false");
                 break;
         }
 
@@ -253,7 +248,6 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
     private void handleWifiDisconnectionUpdate() {
         ContentValues wifiDisconnected = buildUpdateWifiStatusContentValues
                 (WifiAdapterStatus.DISCONNECTED);
-        //                updateWifiDisconnected();
         String[] disconnected = new String[]{String.valueOf(WifiAdapterStatus.CONNECTED)};
         handleWifiUpdate(wifiDisconnected, SavedWifi.whereStatus, disconnected);
     }
@@ -261,18 +255,16 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
     private void handleWifiConnectionUpdate(Intent intent) {
         ContentValues wifiConnected = buildUpdateWifiStatusContentValues
                 (WifiAdapterStatus.CONNECTED);
-        //                updateConnectedWifi(intent, wifiConnected);
         String[] whereArgs = new String[]{intent.getStringExtra(WifiConnectionStateReceiver
                 .EXTRA_CURRENT_SSID)};
         handleWifiUpdate(wifiConnected, SavedWifi.whereSSID, whereArgs);
     }
 
     //TODO remove Log msg
-    private void HandleAutoToggleValueUpdate(Intent intent, boolean isAutoToggle, String msg) {
+    private void handleAutoToggleValueUpdate(Intent intent, boolean isAutoToggle, String msg) {
         ContentValues autoToggleOn = new ContentValues();
         autoToggleOn.put(SavedWifi.AUTO_TOGGLE, isAutoToggle);
         Log.d(TAG, msg);
-        //        updateConnectedWifi(intent, autoToggleOn);
         String[] whereArgs = new String[]{intent.getStringExtra(WifiConnectionStateReceiver
                 .EXTRA_CURRENT_SSID)};
 
@@ -281,7 +273,6 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
                 .NOTIFICATION_ID_SET_AUTO_TOGGLE_STATE);
     }
 
-    @NonNull
     private ContentValues buildUpdateWifiStatusContentValues(int connected) {
         ContentValues cv = new ContentValues();
         cv.put(SavedWifi.STATUS, connected);
@@ -289,7 +280,8 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
     }
 
     private void handleNotifications() {
-        buildForegroundNotification();
+        Notification notification = NotifUtils.buildWifiTogglerRunningNotification(this);
+        startForeground(NotifUtils.NOTIFICATION_ID_WIFI_HANDLER_STATE, notification);
 
         if (WifiToggler.hasWrongSettingsForAutoToggle()) {
             NotifUtils.buildWarningNotification(this);
@@ -297,7 +289,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
     }
 
 
-    private void insertNewConnectedWifi(Intent intent) {
+    private void handleNewConnectedWifiInsert(Intent intent) {
         String ssidToInsert = intent.getStringExtra(WifiConnectionStateReceiver
                 .EXTRA_CURRENT_SSID);
         ContentValues values = new ContentValues();
@@ -306,27 +298,6 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
 
         mDataAsyncQueryHandler.startInsert(TOKEN_INSERT, ssidToInsert, SavedWifi.CONTENT_URI,
                 values);
-    }
-
-    //TODO refactor
-    //    private void updateConnectedWifi(Intent intent, ContentValues cv) {
-    //        String ssid = intent.getStringExtra(WifiConnectionStateReceiver
-    //                .EXTRA_CURRENT_SSID);
-    //
-    //        mDataAsyncQueryHandler.startUpdate(TOKEN_UPDATE, null, SavedWifi
-    //                        .CONTENT_URI,
-    //                cv,
-    //                SavedWifi.SSID + "=?", new String[]{ssid});
-    //    }
-
-    //TODO refactor
-    private void updateWifiDisconnected() {
-        ContentValues values = buildUpdateWifiStatusContentValues(NetworkUtils.WifiAdapterStatus
-                .DISCONNECTED);
-        mDataAsyncQueryHandler.startUpdate(TOKEN_UPDATE, null, SavedWifi.CONTENT_URI,
-                values,
-                SavedWifi.STATUS + "=?", new String[]{String.valueOf(NetworkUtils
-                        .WifiAdapterStatus.CONNECTED)});
     }
 
     public void handleWifiUpdate(final ContentValues cv, final String where, final String[]
@@ -365,21 +336,6 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         registerReceiver(receiver, intentFilter);
     }
 
-    private void settingsPreCheck() {
-        Log.d(TAG, "settingsCheck");
-        WifiToggler.setSetting(Config.SCAN_ALWAYS_AVAILABLE_SETTINGS, NetworkUtils
-                .isScanAlwaysAvailable(this));
-
-        WifiToggler.setSetting(Config.AIRPLANE_SETTINGS, !NetworkUtils
-                .isAirplaneModeEnabled(this));
-
-        WifiToggler.setSetting(Config.HOTSPOT_SETTINGS, !NetworkUtils
-                .isHotspotEnabled(this));
-
-        WifiToggler.setSetting(Config.STARTUP_CHECK_WIFI_SETTINGS, NetworkUtils
-                .isWifiEnabled(this));
-    }
-
     private void sendLocalBroadcastAction(String action) {
         Intent switchIntent = new Intent();
         switchIntent.setAction(action);
@@ -393,80 +349,6 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
 
     private void activateWifiToggler() {
         PrefUtils.setWifiTogglerActive(this, true);
-    }
-
-
-    private void buildDismissableNotification() {
-        NotificationManager notifManager = (NotificationManager) getSystemService(Context
-                .NOTIFICATION_SERVICE);
-        Resources res = getResources();
-        Intent notificationIntent = new Intent(this, SavedWifiListActivity.class);
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
-        PendingIntent intent = PendingIntent.getActivity(this, 0,
-                notificationIntent, 0);
-
-        NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(this)
-                .setContentTitle(res.getString(R.string.app_name))
-                .setContentText(res.getString(R.string
-                        .paused_wifi_toggler_notification_context_title))
-                .setTicker(res.getString(R.string.disable_notification_ticker_content))
-                .setSmallIcon(R.drawable.notif_icon)
-                .setColor(getResources().getColor(R.color.material_orange_400))
-                .setContentIntent(intent);
-
-        notifBuilder.addAction(0, res.getString(R.string.enable_action_title)
-                , createActivateWifiTogglerIntent());
-        Notification notification = notifBuilder.build();
-        notifManager.notify(NotifUtils.NOTIFICATION_ID_WIFI_HANDLER_STATE, notification);
-
-        stopForeground(false);
-
-    }
-
-    private void buildForegroundNotification() {
-        Resources res = getResources();
-
-        Intent notificationIntent = new Intent(this, SavedWifiListActivity.class);
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
-        PendingIntent intent = PendingIntent.getActivity(this, 0,
-                notificationIntent, 0);
-
-        NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(this)
-                .setContentTitle(res.getString(R.string.app_name))
-                .setContentText(res.getString(R.string
-                        .active_wifi_toggler_notification_context_title))
-                .setTicker(res.getString(R.string.enable_notification_ticker_content))
-                .setSmallIcon(R.drawable.notif_icon)
-                .setColor(getResources().getColor(R.color.material_teal_400))
-                .setContentIntent(intent);
-
-
-        notifBuilder.addAction(0, res.getString(R.string.disable_action_title)
-                , createPauseWifiTogglerIntent());
-
-        Notification notification = notifBuilder.build();
-        startForeground(NotifUtils.NOTIFICATION_ID_WIFI_HANDLER_STATE, notification);
-
-    }
-
-    private PendingIntent createPauseWifiTogglerIntent() {
-        Intent pauseIntent = new Intent(ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE,
-                null, this, WifiTogglerService.class);
-
-        return PendingIntent.getService(this, 0, pauseIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-    }
-
-    private PendingIntent createActivateWifiTogglerIntent() {
-        Intent activateIntent = new Intent(ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE,
-                null, this, WifiTogglerService.class);
-
-        return PendingIntent.getService(this, 0, activateIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     @Override
