@@ -44,7 +44,6 @@ public class SavedWifi implements BaseColumns {
     public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE +
             "/configured_wifi";
 
-
     public static final String SSID = "ssid";
     public static final String AUTO_TOGGLE = "is_auto_toggle";
     public static final String OPEN_WIFI = "is_open_wifi";
@@ -53,6 +52,9 @@ public class SavedWifi implements BaseColumns {
     public static final String IN_RANGE = "is_in_range";
     public static final String LOCKED = "is_locked";
     public static final String STATUS = "status";
+
+    public static final String whereSSID =  SavedWifi.SSID + "=?";
+    public static final String whereStatus =  SavedWifi.STATUS + "=?";
 
     private static final String[] PROJECTION = new String[]{
             _ID,

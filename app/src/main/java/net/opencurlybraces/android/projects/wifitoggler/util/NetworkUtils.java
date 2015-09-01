@@ -120,39 +120,7 @@ public class NetworkUtils {
         return wifiManager.getScanResults();
     }
 
-    public static void buildWarningNotification(final Context context) {
-        NotificationManager notifManager = (NotificationManager) context.getSystemService(Context
-                .NOTIFICATION_SERVICE);
-        Resources res = context.getResources();
-        Intent notificationIntent = new Intent(context, SystemSettingsCheckActivity.class);
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-        PendingIntent intent = PendingIntent.getActivity(context, 0,
-                notificationIntent, 0);
-
-        NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(context)
-                .setContentTitle(res.getString(R.string.system_settings_warning_notification_context_title))
-                .setContentText(res.getString(R.string
-                        .system_settings_warning_notification_ticker))
-                .setTicker(res.getString(R.string.system_settings_warning_notification_ticker))
-                .setSmallIcon(R.drawable.notif_icon)
-                .setColor(context.getResources().getColor(R.color.material_orange_400))
-                .setContentIntent(intent)
-                ;
-
-        Notification notification = notifBuilder.build();
-        notifManager.notify(NotifUtils.NOTIFICATION_ID_WARNING, notification);
-    }
-
-
-    public static void dismissNotification(final Context context, int notificationId) {
-        Log.d(TAG, "dismissNotification notificationID=" + notificationId);
-        NotificationManager notifManager = (NotificationManager) context.getSystemService(Context
-                .NOTIFICATION_SERVICE);
-
-        notifManager.cancel(notificationId);
-    }
 
     /**
      * Gets the state of Airplane Mode.

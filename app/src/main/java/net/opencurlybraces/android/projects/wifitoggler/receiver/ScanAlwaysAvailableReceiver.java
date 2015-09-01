@@ -33,11 +33,11 @@ public class ScanAlwaysAvailableReceiver extends BroadcastReceiver {
         if (NetworkUtils.isScanAlwaysAvailable(context)) {
             Log.d(TAG, "Scan always available correct");
             WifiToggler.setSetting(Config.SCAN_ALWAYS_AVAILABLE_SETTINGS, true);
-            NetworkUtils.dismissNotification(context, NotifUtils.NOTIFICATION_ID_WARNING);
+            NotifUtils.dismissNotification(context, NotifUtils.NOTIFICATION_ID_WARNING);
         } else {
             if (warningNotificationsEnabled) {
                 if (PrefUtils.isWifiTogglerActive(context)) {
-                    NetworkUtils.buildWarningNotification(context);
+                    NotifUtils.buildWarningNotification(context);
                 }
             }
             Log.d(TAG, "Scan always available ko");

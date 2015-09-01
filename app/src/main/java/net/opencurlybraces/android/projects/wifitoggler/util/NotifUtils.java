@@ -12,6 +12,7 @@ import android.util.Log;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.receiver.WifiConnectionStateReceiver;
 import net.opencurlybraces.android.projects.wifitoggler.service.WifiTogglerService;
+import net.opencurlybraces.android.projects.wifitoggler.ui.SystemSettingsCheckActivity;
 
 /**
  * Created by chris on 28/08/15.
@@ -48,12 +49,11 @@ public class NotifUtils {
                 .setColor(res.getColor(R.color.material_orange_400));
 
 
-
         notifBuilder.addAction(0, res.getString(R.string.positive_answer_action)
                 , createSetAutoToggleStateIntent(context, insertedWifi, true));
 
         notifBuilder.addAction(0, res.getString(R.string.negative_answer_action)
-                , createSetAutoToggleStateIntent(context,insertedWifi, false));
+                , createSetAutoToggleStateIntent(context, insertedWifi, false));
 
         Notification notification = notifBuilder.build();
         notifManager.notify(NOTIFICATION_ID_SET_AUTO_TOGGLE_STATE, notification);
@@ -68,22 +68,60 @@ public class NotifUtils {
         setAutoToggle.putExtra(WifiConnectionStateReceiver
                 .EXTRA_CURRENT_SSID, ssid);
         if (isAutoToggle) {
-            setAutoToggle.setAction(WifiTogglerService.ACTION_HANDLE_NOTIFICATION_ACTION_AUTO_TOGGLE_ON);
+            setAutoToggle.setAction(WifiTogglerService
+                    .ACTION_HANDLE_NOTIFICATION_ACTION_AUTO_TOGGLE_ON);
         } else {
-            setAutoToggle.setAction(WifiTogglerService.ACTION_HANDLE_NOTIFICATION_ACTION_AUTO_TOGGLE_OFF);
+            setAutoToggle.setAction(WifiTogglerService
+                    .ACTION_HANDLE_NOTIFICATION_ACTION_AUTO_TOGGLE_OFF);
         }
         return PendingIntent.getService(context, 0, setAutoToggle,
                 PendingIntent.FLAG_ONE_SHOT);
     }
+
+
+    public static void dismissNotification(final Context context, int notificationId) {
+        Log.d(TAG, "dismissNotification notificationID=" + notificationId);
+        NotificationManager notifManager = (NotificationManager) context.getSystemService(Context
+                .NOTIFICATION_SERVICE);
+
+        notifManager.cancel(notificationId);
+    }
+
+    public static void buildWarningNotification(final Context context) {
+        NotificationManager notifManager = (NotificationManager) context.getSystemService(Context
+                .NOTIFICATION_SERVICE);
+        Resources res = context.getResources();
+        Intent notificationIntent = new Intent(context, SystemSettingsCheckActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        PendingIntent intent = PendingIntent.getActivity(context, 0,
+                notificationIntent, 0);
+
+        NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(context)
+                .setContentTitle(res.getString(R.string
+                        .system_settings_warning_notification_context_title))
+                .setContentText(res.getString(R.string
+                        .system_settings_warning_notification_ticker))
+                .setTicker(res.getString(R.string.system_settings_warning_notification_ticker))
+                .setSmallIcon(R.drawable.notif_icon)
+                .setColor(context.getResources().getColor(R.color.material_orange_400))
+                .setContentIntent(intent);
+
+        Notification notification = notifBuilder.build();
+        notifManager.notify(NotifUtils.NOTIFICATION_ID_WARNING, notification);
+    }
+
     //TODO refactor
-//    private static PendingIntent createSetAutoToggleStateOffIntent(Context context, String ssid) {
-//        Log.d(TAG, "createSetAutoToggleStateOffIntent");
-//        Intent setAutoToggle = new Intent(WifiTogglerService
-//                .ACTION_HANDLE_NOTIFICATION_ACTION_SET_AUTO_TOGGLE,
-//                null, context, WifiTogglerService.class);
-//        setAutoToggle.putExtra(WifiConnectionStateReceiver
-//                .EXTRA_CURRENT_SSID, ssid);
-//        return PendingIntent.getService(context, 0, setAutoToggle,
-//                PendingIntent.FLAG_UPDATE_CURRENT);
-//    }
+    //    private static PendingIntent createSetAutoToggleStateOffIntent(Context context, String
+    // ssid) {
+    //        Log.d(TAG, "createSetAutoToggleStateOffIntent");
+    //        Intent setAutoToggle = new Intent(WifiTogglerService
+    //                .ACTION_HANDLE_NOTIFICATION_ACTION_SET_AUTO_TOGGLE,
+    //                null, context, WifiTogglerService.class);
+    //        setAutoToggle.putExtra(WifiConnectionStateReceiver
+    //                .EXTRA_CURRENT_SSID, ssid);
+    //        return PendingIntent.getService(context, 0, setAutoToggle,
+    //                PendingIntent.FLAG_UPDATE_CURRENT);
+    //    }
 }

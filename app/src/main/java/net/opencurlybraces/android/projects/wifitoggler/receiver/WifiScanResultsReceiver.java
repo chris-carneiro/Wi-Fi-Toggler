@@ -91,6 +91,7 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
          * @param wifisFromDB
          */
         private void removeUserUnwantedSavedWifi(List<Wifi> wifisFromDB) {
+            Log.d(TAG, "removeUserUnwantedSavedWifi");
             List<WifiConfiguration> savedWifis = NetworkUtils.getSavedWifiSync(mContext);
             if (savedWifis == null) {
                 return;

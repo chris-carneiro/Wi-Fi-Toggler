@@ -26,13 +26,13 @@ public class HotspotModeStateReceiver extends BroadcastReceiver {
         if (NetworkUtils.isHotspotEnabled(context)) {
             if (warningNotificationsEnabled) {
                 if (PrefUtils.isWifiTogglerActive(context)) {
-                    NetworkUtils.buildWarningNotification(context);
+                    NotifUtils.buildWarningNotification(context);
                 }
             }
             WifiToggler.setSetting(Config.HOTSPOT_SETTINGS, false);
         } else {
             WifiToggler.setSetting(Config.HOTSPOT_SETTINGS, true);
-            NetworkUtils.dismissNotification(context, NotifUtils.NOTIFICATION_ID_WARNING);
+            NotifUtils.dismissNotification(context, NotifUtils.NOTIFICATION_ID_WARNING);
         }
     }
 }

@@ -174,7 +174,7 @@ public class SettingsActivity extends PreferenceActivity {
                     Log.d(TAG, "onPreferenceChange=" + preference.getKey() + " value=" + value);
                     if (PrefUtils.PREF_WARNING_NOTIFICATIONS.equals(preference.getKey())) {
                         if (!(Boolean) value) {
-                            NetworkUtils.dismissNotification(preference.getContext(), NotifUtils
+                            NotifUtils.dismissNotification(preference.getContext(), NotifUtils
                                     .NOTIFICATION_ID_WARNING);
                         }
                     }
