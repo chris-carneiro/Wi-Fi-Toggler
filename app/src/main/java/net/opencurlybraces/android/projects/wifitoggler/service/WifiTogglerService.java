@@ -18,6 +18,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -76,8 +77,13 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
 
     public static final String ACTION_HANDLE_NOTIFICATION_ACTION_SET_AUTO_TOGGLE =
             SERVICE_ACTION_PREFIX +
-            "ACTION_HANDLE_NOTIFICATION_ACTION_SET_AUTO_TOGGLE";
+                    "ACTION_HANDLE_NOTIFICATION_ACTION_SET_AUTO_TOGGLE";
 
+    public static final String ACTION_HANDLE_NOTIFICATION_ACTION_AUTO_TOGGLE_ON
+            = SERVICE_ACTION_PREFIX + "ACTION_HANDLE_NOTIFICATION_ACTION_AUTO_TOGGLE_ON";
+
+    public static final String ACTION_HANDLE_NOTIFICATION_ACTION_AUTO_TOGGLE_OFF
+            = SERVICE_ACTION_PREFIX + "ACTION_HANDLE_NOTIFICATION_ACTION_AUTO_TOGGLE_OFF";
 
     public static final String ACTION_HANDLE_SAVED_WIFI_INSERT = SERVICE_ACTION_PREFIX +
             "ACTION_HANDLE_SAVED_WIFI_INSERT";
@@ -232,7 +238,9 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
                 handleSavedWifiInsert();
                 break;
             case ACTION_HANDLE_SAVED_WIFI_UPDATE_CONNECT:
-                updateConnectedWifi(intent);
+                ContentValues cv = buildUpdateWifiStatusContentValues(NetworkUtils.WifiAdapterStatus
+                        .CONNECTED);
+                updateConnectedWifi(intent, cv);
                 break;
             case ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT:
                 updateWifiDisconnected();
@@ -244,13 +252,37 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
             case ACTION_STARTUP_SETTINGS_PRECHECK:
                 settingsPreCheck();
                 break;
-            case ACTION_HANDLE_NOTIFICATION_ACTION_SET_AUTO_TOGGLE:
-                Log.d(TAG, "setAutoToggle");
+            case ACTION_HANDLE_NOTIFICATION_ACTION_AUTO_TOGGLE_ON:
+                ContentValues contentsOn = new ContentValues();
+                contentsOn.put(SavedWifi.AUTO_TOGGLE, 1);
+                Log.d(TAG, "Enabling auto toggle for " + intent.getStringExtra
+                        (WifiConnectionStateReceiver.EXTRA_CURRENT_SSID));
+                updateConnectedWifi(intent, contentsOn);
+                NetworkUtils.dismissNotification(this, NotifUtils
+                        .NOTIFICATION_ID_SET_AUTO_TOGGLE_STATE);
+                break;
+            case ACTION_HANDLE_NOTIFICATION_ACTION_AUTO_TOGGLE_OFF:
+                ContentValues contentsOff = new ContentValues();
+
+                contentsOff.put(SavedWifi.AUTO_TOGGLE, 0);
+                Log.d(TAG, "Auto Toggle set to false");
+
+                updateConnectedWifi(intent, contentsOff);
+                NetworkUtils.dismissNotification(this, NotifUtils
+                        .NOTIFICATION_ID_SET_AUTO_TOGGLE_STATE);
+
                 break;
         }
 
         return START_NOT_STICKY;
 
+    }
+
+    @NonNull
+    private ContentValues buildUpdateWifiStatusContentValues(int connected) {
+        ContentValues cv = new ContentValues();
+        cv.put(SavedWifi.STATUS, connected);
+        return cv;
     }
 
     private void handleNotifications() {
@@ -273,21 +305,21 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
                 values);
     }
 
-    private void updateConnectedWifi(Intent intent) {
+    //TODO refactor
+    private void updateConnectedWifi(Intent intent, ContentValues cv) {
         String ssid = intent.getStringExtra(WifiConnectionStateReceiver
                 .EXTRA_CURRENT_SSID);
-        ContentValues cv = new ContentValues();
-        cv.put(SavedWifi.STATUS, NetworkUtils.WifiAdapterStatus
-                .CONNECTED);
+
         mDataAsyncQueryHandler.startUpdate(TOKEN_UPDATE, null, SavedWifi
                         .CONTENT_URI,
                 cv,
                 SavedWifi.SSID + "=?", new String[]{ssid});
     }
 
+    //TODO refactor
     private void updateWifiDisconnected() {
-        ContentValues values = new ContentValues();
-        values.put(SavedWifi.STATUS, NetworkUtils.WifiAdapterStatus.DISCONNECTED);
+        ContentValues values = buildUpdateWifiStatusContentValues(NetworkUtils.WifiAdapterStatus
+                .DISCONNECTED);
         mDataAsyncQueryHandler.startUpdate(TOKEN_UPDATE, null, SavedWifi.CONTENT_URI,
                 values,
                 SavedWifi.STATUS + "=?", new String[]{String.valueOf(NetworkUtils

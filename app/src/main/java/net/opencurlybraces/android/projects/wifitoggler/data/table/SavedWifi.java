@@ -166,7 +166,7 @@ public class SavedWifi implements BaseColumns {
     private static ContentValues buildDefaultWifiContentValues(WifiConfiguration wifi) {
         ContentValues values = new ContentValues();
         values.put(SavedWifi.SSID, wifi.SSID.replace("\"", ""));
-        values.put(SavedWifi.AUTO_TOGGLE, 0);
+        values.put(SavedWifi.AUTO_TOGGLE, 1);
         values.put(SavedWifi.OPEN_WIFI, 0);
         values.put(SavedWifi.PREFERRED, 0);
         values.put(SavedWifi.BOOSTED, 0);

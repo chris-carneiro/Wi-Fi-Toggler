@@ -157,7 +157,8 @@ public class SavedWifiListActivity extends AppCompatActivity implements
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String[] projection = {SavedWifi._ID, SavedWifi.SSID, SavedWifi.STATUS};
+        String[] projection = {SavedWifi._ID, SavedWifi.SSID, SavedWifi.STATUS, SavedWifi
+                .AUTO_TOGGLE};
         CursorLoader cursorLoader = new CursorLoader(this,
                 SavedWifi.CONTENT_URI, projection, null, null, null);
         return cursorLoader;

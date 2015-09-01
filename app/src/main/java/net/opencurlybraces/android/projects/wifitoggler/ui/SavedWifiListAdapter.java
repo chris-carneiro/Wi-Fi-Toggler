@@ -39,11 +39,15 @@ public class SavedWifiListAdapter extends CursorAdapter {
 
         TextView ssidView = (TextView) view.getTag(R.string.tag_key_ssid);
         TextView statusView = (TextView) view.getTag(R.string.tag_key_status);
+        RelativeLayout row = (RelativeLayout) view.getTag(R.string.tag_key_row);
+
         int ssidIndex = (int) view.getTag(R.string.tag_key_ssid_index);
         int statusIndex = (int) view.getTag(R.string.tag_key_status_index);
+        int autoToggleIndex = (int) view.getTag(R.string.tag_key_row_index);
 
         String ssid = cursor.getString(ssidIndex);
         int status = cursor.getInt(statusIndex);
+        int autoToggle = cursor.getInt(autoToggleIndex);
 
         ssidView.setText(ssid);
         ssidView.setPadding(15, 0, 0, 0);
@@ -54,6 +58,15 @@ public class SavedWifiListAdapter extends CursorAdapter {
 
         RelativeLayout.LayoutParams lp = createLayoutParamsWithStatus(status);
         ssidView.setLayoutParams(lp);
+
+        if (autoToggle < 1) {
+            Log.d(TAG, "autoToggle disabled for=" + ssid);
+            row.setBackgroundResource(R.drawable
+                    .solid_rectangle_shape_gray_disabled);
+            statusView.setTextColor(context.getResources().getColor(android.R.color.white));
+        } else {
+            row.setBackgroundResource(0);
+        }
 
     }
 
@@ -77,15 +90,23 @@ public class SavedWifiListAdapter extends CursorAdapter {
     }
 
     private View bindViewTags(final Cursor cursor, final View view) {
+        RelativeLayout row = (RelativeLayout) view.findViewById(R.id.saved_wifi_row_layout);
         TextView ssid = (TextView) view.findViewById(R.id.saved_wifi_ssid);
         TextView status = (TextView) view.findViewById(R.id.saved_wifi_state);
         int ssidIndex = cursor.getColumnIndexOrThrow(SavedWifi.SSID);
         int statusIndex = cursor.getColumnIndexOrThrow(SavedWifi.STATUS);
-
+        int autoToggleIndex = cursor.getColumnIndexOrThrow(SavedWifi.AUTO_TOGGLE);
         view.setTag(R.string.tag_key_ssid, ssid);
         view.setTag(R.string.tag_key_status, status);
+        view.setTag(R.string.tag_key_row, row);
         view.setTag(R.string.tag_key_ssid_index, ssidIndex);
         view.setTag(R.string.tag_key_status_index, statusIndex);
+        /**
+         * the row's background changes according to autotoggle value
+         */
+
+        view.setTag(R.string.tag_key_row_index, autoToggleIndex);
+
         return view;
     }
 }

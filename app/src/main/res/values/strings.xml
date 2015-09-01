@@ -26,8 +26,12 @@
         check your settings</string>
     <string name="system_settings_warning_message_banner">Auto toggle unavailable, click here to
         check your settings</string>
+
     <string name="tag_key_ssid">tag_key_ssid</string>
     <string name="tag_key_status">tag_key_status</string>
+    <string name="tag_key_row">tag_key_auto_toggle</string>
     <string name="tag_key_ssid_index">tag_key_ssid_index</string>
     <string name="tag_key_status_index">tag_key_status_index</string>
+    <string name="tag_key_row_index">tag_key_auto_toggle_index</string>
+
 </resources>
