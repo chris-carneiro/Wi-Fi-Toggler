@@ -26,11 +26,29 @@
         <item>Always</item>
     </string-array>
 
+    <string name="pref_title_auto_toggle_default_value_for_new_wifi">Auto toggle new
+    Wi-Fis ?</string>
+
+    <string-array name="pref_auto_toggle_default_value_for_new_wifi_list_values">
+        <item>true</item> <!-- Auto toggle On(default)-->
+        <item>false</item>
+    </string-array>
+
+    <string-array name="pref_auto_toggle_default_value_for_new_wifi_list_titles">
+        <item>Auto toggle On (default)</item>
+        <item>Auto toggle Off</item>
+    </string-array>
+
     <string name="pref_header_notifications">Notifications</string>
 
     <string name="pref_title_warning_notifications">Warning notifications</string>
     <string name="pref_description_warning_notifications">Get notified when system settings
         prevent Wi-Fi Toggler from working properly
+    </string>
+
+    <string name="pref_title_auto_toggle_notifications">Auto toggle notifications</string>
+    <string name="pref_description_auto_toggle_notifications">Get notified to choose whether a
+        new saved Wi-Fi is auto toggle
     </string>
 
     <string

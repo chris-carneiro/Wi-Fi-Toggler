@@ -13,10 +13,11 @@ public class Config {
     public static final boolean DEBUG_MODE = false;
 
 
-
     public static final int WIFI_SIGNAL_STRENGTH_LEVELS = 11;
 
     public static final String DEFAULT_SIGNAL_STRENGTH_THRESHOLD = "4"; // fair
+
+    public static final String DEFAULT_AUTO_TOGGLE_VALUE = "true";
 
     public static final int SYSTEM_SETTINGS_CHECKS = 4;
 

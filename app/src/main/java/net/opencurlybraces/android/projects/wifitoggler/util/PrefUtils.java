@@ -23,7 +23,12 @@ public class PrefUtils {
 
     public static final String PREF_WARNING_NOTIFICATIONS = "warning_notifications";
 
-    public static final String PREF_SIGNAL_STRENGTH_THRESHOLD ="signal_strength_threshold";
+    public static final String PREF_AUTO_TOGGLE_NOTIFICATIONS = "auto_toggle_notifications";
+
+    public static final String PREF_AUTO_TOGGLE_DEFAULT_VALUE_FOR_NEW_WIFI =
+            "auto_toggle_default_value_for_new_wifi";
+
+    public static final String PREF_SIGNAL_STRENGTH_THRESHOLD = "signal_strength_threshold";
 
     public static final String PREF_SAVED_WIFI_INSERTED = PREF_PREFIX + "saved_wifi_completed";
 
@@ -55,6 +60,10 @@ public class PrefUtils {
         return sp.getBoolean(PREF_WARNING_NOTIFICATIONS, true);
     }
 
+    public static boolean areAutoToggleNotificationsEnabled(final Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getBoolean(PREF_AUTO_TOGGLE_NOTIFICATIONS, true);
+    }
 
     public static void markSettingsCorrectAtFirstLaunch(final Context context) {
         Log.d(TAG, "setSettingsCorrectAtFirstLaunch=");
@@ -78,6 +87,31 @@ public class PrefUtils {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return Integer.parseInt(sp.getString(PREF_SIGNAL_STRENGTH_THRESHOLD, Config
                 .DEFAULT_SIGNAL_STRENGTH_THRESHOLD));
+    }
+
+    /**
+     * Gets wifi auto toggle default value for wifis the user connects to for the first time.
+     *
+     * @param context
+     * @return boolean
+     */
+    public static boolean getAutoToggleValueForNewWifi(final Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return Boolean.parseBoolean(sp.getString(PREF_AUTO_TOGGLE_DEFAULT_VALUE_FOR_NEW_WIFI, Config
+                .DEFAULT_AUTO_TOGGLE_VALUE));
+    }
+
+    /**
+     * Set wifi auto toggle default value for wifis the user connects to for the first time.
+     *
+     * @param context
+     * @param isAutoToggle
+     */
+    public static void setAutoToggleValueForNewWifi(final Context context, final boolean
+            isAutoToggle) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().putString(PREF_AUTO_TOGGLE_DEFAULT_VALUE_FOR_NEW_WIFI, String.valueOf
+                (isAutoToggle)).apply();
     }
 
     public static void setSavedWifiInsertComplete(final Context context, boolean completed) {

@@ -21,7 +21,6 @@ import android.widget.LinearLayout;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
-import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.NotifUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
@@ -46,6 +45,8 @@ public class SettingsActivity extends PreferenceActivity {
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
     private static final String TAG = "SettingsActivity";
+
+    private static ListPreference sAutoToggleDefaultValuePref = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
@@ -123,6 +124,10 @@ public class SettingsActivity extends PreferenceActivity {
         bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_RUN_AT_STARTUP));
         bindPreferenceSummaryToValue(findPreference(PrefUtils.PREF_SIGNAL_STRENGTH_THRESHOLD));
         bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_WARNING_NOTIFICATIONS));
+        bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_AUTO_TOGGLE_NOTIFICATIONS));
+        sAutoToggleDefaultValuePref = (ListPreference) findPreference(PrefUtils
+                .PREF_AUTO_TOGGLE_DEFAULT_VALUE_FOR_NEW_WIFI);
+        bindPreferenceSummaryToValue(sAutoToggleDefaultValuePref);
 
     }
 
@@ -171,11 +176,32 @@ public class SettingsActivity extends PreferenceActivity {
             new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object value) {
-                    Log.d(TAG, "onPreferenceChange=" + preference.getKey() + " value=" + value);
+                    Log.d(TAG, "onPreferenceBooleanChange=" + preference.getKey() + " value=" +
+                            value);
+                    Log.d(TAG, "AutoToggleDefaultvalue=" + PrefUtils.getAutoToggleValueForNewWifi
+                            (preference.getContext()));
                     if (PrefUtils.PREF_WARNING_NOTIFICATIONS.equals(preference.getKey())) {
                         if (!(Boolean) value) {
                             NotifUtils.dismissNotification(preference.getContext(), NotifUtils
                                     .NOTIFICATION_ID_WARNING);
+                        }
+                    } else if (PrefUtils.PREF_AUTO_TOGGLE_NOTIFICATIONS.equals(preference.getKey
+                            ())) {
+
+                        if ((Boolean) value) {
+                            PrefUtils.setAutoToggleValueForNewWifi(preference.getContext(),false);
+                            sAutoToggleDefaultValuePref.setEnabled(false);
+                            Log.d(TAG, "AutoToggleDefaultvalue set to false, current value=" +
+                                    PrefUtils
+                                    .getAutoToggleValueForNewWifi
+                                            (preference.getContext()));
+
+                        } else {
+                            sAutoToggleDefaultValuePref.setEnabled(true);
+                            Log.d(TAG, "AutoToggleDefaultvalue left to false, current value=" +
+                                    PrefUtils
+                                            .getAutoToggleValueForNewWifi
+                                                    (preference.getContext()));
                         }
                     }
 
@@ -192,7 +218,8 @@ public class SettingsActivity extends PreferenceActivity {
             new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object value) {
-                    Log.d(TAG, "onPreferenceChange=" + preference.getKey() + " value=" + value);
+                    Log.d(TAG, "onPreferenceSummaryChange=" + preference.getKey() + " value=" +
+                            value);
 
                     String stringValue = value.toString();
 
@@ -265,6 +292,8 @@ public class SettingsActivity extends PreferenceActivity {
             // guidelines.
             bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_RUN_AT_STARTUP));
             bindPreferenceSummaryToValue(findPreference(PrefUtils.PREF_SIGNAL_STRENGTH_THRESHOLD));
+            bindPreferenceSummaryToValue(findPreference(PrefUtils
+                    .PREF_AUTO_TOGGLE_DEFAULT_VALUE_FOR_NEW_WIFI));
         }
     }
 
@@ -284,6 +313,7 @@ public class SettingsActivity extends PreferenceActivity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_WARNING_NOTIFICATIONS));
+            bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_AUTO_TOGGLE_NOTIFICATIONS));
         }
     }
 
