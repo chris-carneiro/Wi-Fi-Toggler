@@ -83,7 +83,10 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
                         WifiTogglerService.class);
                 disconnectSavedWifi.setAction(WifiTogglerService
                         .ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT);
+
+                //TODO add check on wifi that were removed manually by the user from the system DB
                 context.startService(disconnectSavedWifi);
+
                 NetworkUtils.disableWifiAdapter(context);
                 break;
             default:

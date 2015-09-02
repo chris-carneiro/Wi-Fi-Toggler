@@ -295,7 +295,9 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         ContentValues values = new ContentValues();
         values.put(SavedWifi.SSID, ssidToInsert);
         values.put(SavedWifi.STATUS, NetworkUtils.WifiAdapterStatus.CONNECTED);
-
+        if (!PrefUtils.isAutoToggleOnByDefaultOnNewWifi(this)) {
+            values.put(SavedWifi.AUTO_TOGGLE, false);
+        }
         mDataAsyncQueryHandler.startInsert(TOKEN_INSERT, ssidToInsert, SavedWifi.CONTENT_URI,
                 values);
     }
@@ -378,6 +380,8 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
 
     @Override
     public void onInsertComplete(int token, Object insertedWifi, Uri uri) {
-        NotifUtils.buildSetAutoToggleChooserNotification(this, (String) insertedWifi);
+        if (PrefUtils.areAutoToggleNotificationsEnabled(this)) {
+            NotifUtils.buildSetAutoToggleChooserNotification(this, (String) insertedWifi);
+        }
     }
 }

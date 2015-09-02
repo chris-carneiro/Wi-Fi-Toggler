@@ -95,7 +95,7 @@ public class PrefUtils {
      * @param context
      * @return boolean
      */
-    public static boolean getAutoToggleValueForNewWifi(final Context context) {
+    public static boolean isAutoToggleOnByDefaultOnNewWifi(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return Boolean.parseBoolean(sp.getString(PREF_AUTO_TOGGLE_DEFAULT_VALUE_FOR_NEW_WIFI, Config
                 .DEFAULT_AUTO_TOGGLE_VALUE));
