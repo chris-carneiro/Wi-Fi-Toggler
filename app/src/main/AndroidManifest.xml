@@ -42,6 +42,14 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".receiver.ScheduleWifiDisablingReceiver" android:exported="true">
+            <intent-filter>
+                <action
+                    android:name="net.opencurlybraces.android.projects.wifitoggler.ALARM_DISABLE_WIFI" >
+                </action>
+            </intent-filter>
+        </receiver>
+
         <provider
             android:name=".data.provider.WifiTogglerProvider"
             android:authorities="net.opencurlybraces.android.projects.wifitoggler.data.provider"

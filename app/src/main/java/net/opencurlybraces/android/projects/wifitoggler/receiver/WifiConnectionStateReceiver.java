@@ -1,5 +1,7 @@
 package net.opencurlybraces.android.projects.wifitoggler.receiver;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentProviderResult;
 import android.content.Context;
@@ -9,6 +11,7 @@ import android.net.Uri;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -17,7 +20,7 @@ import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.service.WifiTogglerService;
-import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
+import net.opencurlybraces.android.projects.wifitoggler.util.DeletedSavedWifiHandlerTask;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 
 /**
@@ -26,6 +29,8 @@ import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 public class WifiConnectionStateReceiver extends BroadcastReceiver implements
         DataAsyncQueryHandler.AsyncQueryListener {
     private static final String TAG = "WifiConnectionReceiver";
+    private static final String SCHEDULED_DISABLE_WIFI_ACTION = "net" +
+            ".opencurlybraces.android.projects.wifitoggler.ALARM_DISABLE_WIFI";
 
     public static final String EXTRA_CURRENT_SSID = "net.opencurlybraces.android" +
             ".projects.wifitoggler.receiver.current_ssid";
@@ -87,13 +92,27 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
                 //TODO add check on wifi that were removed manually by the user from the system DB
                 context.startService(disconnectSavedWifi);
 
-                NetworkUtils.disableWifiAdapter(context);
+                new DeletedSavedWifiHandlerTask(context).execute();
+                // Might be better to use a handler here...
+                scheduleDisableWifi(context);
                 break;
             default:
                 // Ignore other wifi states
                 Log.d(TAG, "Supplicant state received and ignored=" + state);
                 break;
         }
+    }
+
+
+    private void scheduleDisableWifi(final Context context) {
+        PendingIntent pintent = PendingIntent.getBroadcast(context, 0, new Intent
+                (SCHEDULED_DISABLE_WIFI_ACTION), 0);
+        AlarmManager manager = (AlarmManager) (context.getSystemService(Context
+                        .ALARM_SERVICE
+        ));
+
+        manager.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() +
+                Config.INTERVAL_FIVE_SECOND, pintent);
     }
 
 

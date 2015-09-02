@@ -40,4 +40,6 @@ public class Config {
                     .INTERVAL_HALF_DAY);
 
     public static final long INTERVAL_CHECK_HALF_SECOND = 500;
+
+    public static final long INTERVAL_FIVE_SECOND = 1000 * 5;
 }

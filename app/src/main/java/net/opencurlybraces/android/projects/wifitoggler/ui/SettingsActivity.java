@@ -178,7 +178,8 @@ public class SettingsActivity extends PreferenceActivity {
                 public boolean onPreferenceChange(Preference preference, Object value) {
                     Log.d(TAG, "onPreferenceBooleanChange=" + preference.getKey() + " value=" +
                             value);
-                    Log.d(TAG, "AutoToggleDefaultvalue=" + PrefUtils.isAutoToggleOnByDefaultOnNewWifi
+                    Log.d(TAG, "AutoToggleDefaultvalue=" + PrefUtils
+                            .isAutoToggleOnByDefaultOnNewWifi
                             (preference.getContext()));
                     if (PrefUtils.PREF_WARNING_NOTIFICATIONS.equals(preference.getKey())) {
                         if (!(Boolean) value) {
@@ -189,12 +190,12 @@ public class SettingsActivity extends PreferenceActivity {
                             ())) {
 
                         if ((Boolean) value) {
-                            PrefUtils.setAutoToggleValueForNewWifi(preference.getContext(),false);
+                            PrefUtils.setAutoToggleValueForNewWifi(preference.getContext(), false);
                             sAutoToggleDefaultValuePref.setEnabled(false);
                             Log.d(TAG, "AutoToggleDefaultvalue set to false, current value=" +
                                     PrefUtils
-                                    .isAutoToggleOnByDefaultOnNewWifi
-                                            (preference.getContext()));
+                                            .isAutoToggleOnByDefaultOnNewWifi
+                                                    (preference.getContext()));
 
                         } else {
                             sAutoToggleDefaultValuePref.setEnabled(true);
