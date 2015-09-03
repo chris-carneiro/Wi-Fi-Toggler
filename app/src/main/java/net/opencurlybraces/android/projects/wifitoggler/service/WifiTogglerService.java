@@ -99,7 +99,8 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
             + "ACTION_FINISH_STARTUP_CHECK_ACTIVITY";
     public static final String ACTION_STARTUP_SETTINGS_PRECHECK = SERVICE_ACTION_PREFIX + ""
             + "ACTION_STARTUP_SETTINGS_PRECHECK";
-
+    public static final String ACTION_HANDLE_SCHEDULE_DISABLE_WIFI = "net" +
+            ".opencurlybraces.android.projects.wifitoggler.ACTION_HANDLE_SCHEDULE_DISABLE_WIFI";
 
     private WifiScanResultsReceiver mWifiScanResultsReceiver = null;
     private WifiAdapterStateReceiver mWifiAdapterStateReceiver = null;

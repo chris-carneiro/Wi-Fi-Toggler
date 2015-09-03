@@ -1,7 +1,5 @@
 package net.opencurlybraces.android.projects.wifitoggler.receiver;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentProviderResult;
 import android.content.Context;
@@ -11,7 +9,8 @@ import android.net.Uri;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.SystemClock;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -21,7 +20,10 @@ import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandl
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.service.WifiTogglerService;
 import net.opencurlybraces.android.projects.wifitoggler.util.DeletedSavedWifiHandlerTask;
+import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Created by chris on 30/06/15.
@@ -29,13 +31,14 @@ import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 public class WifiConnectionStateReceiver extends BroadcastReceiver implements
         DataAsyncQueryHandler.AsyncQueryListener {
     private static final String TAG = "WifiConnectionReceiver";
-    private static final String SCHEDULED_DISABLE_WIFI_ACTION = "net" +
-            ".opencurlybraces.android.projects.wifitoggler.ALARM_DISABLE_WIFI";
+
 
     public static final String EXTRA_CURRENT_SSID = "net.opencurlybraces.android" +
             ".projects.wifitoggler.receiver.current_ssid";
 
+
     private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
+    private ScheduleDisableWifi mScheduleDisableWifi = null;
     private static final String[] PROJECTION_SSID = new String[]{SavedWifi._ID, SavedWifi
             .SSID};
 
@@ -61,6 +64,8 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
             mDataAsyncQueryHandler = new DataAsyncQueryHandler(context.getContentResolver(),
                     this);
         }
+
+        mScheduleDisableWifi = new ScheduleDisableWifi(context);
         if (mContext == null) {
             mContext = context;
         }
@@ -94,7 +99,7 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
 
                 new DeletedSavedWifiHandlerTask(context).execute();
                 // Might be better to use a handler here...
-                scheduleDisableWifi(context);
+                scheduleDisableWifi();
                 break;
             default:
                 // Ignore other wifi states
@@ -104,17 +109,11 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
     }
 
 
-    private void scheduleDisableWifi(final Context context) {
-        PendingIntent pintent = PendingIntent.getBroadcast(context, 0, new Intent
-                (SCHEDULED_DISABLE_WIFI_ACTION), 0);
-        AlarmManager manager = (AlarmManager) (context.getSystemService(Context
-                        .ALARM_SERVICE
-        ));
-
-        manager.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() +
-                Config.INTERVAL_FIVE_SECOND, pintent);
+    private void scheduleDisableWifi() {
+        mScheduleDisableWifi.sendMessageDelayed(Message.obtain(mScheduleDisableWifi,
+                        4),
+                Config.INTERVAL_FIVE_SECOND);
     }
-
 
     @Override
     public void onBatchInsertComplete(int token, Object cookie, ContentProviderResult[] results) {
@@ -200,4 +199,23 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
     public void onInsertComplete(int token, Object cookie, Uri uri) {
 
     }
+
+
+    public final class ScheduleDisableWifi extends Handler {
+        private final WeakReference<Context> mHost;
+
+
+        public ScheduleDisableWifi(Context host) {
+            mHost = new WeakReference<>(host);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            Context host = mHost.get();
+            if (host != null) {
+                NetworkUtils.disableWifiAdapter(host);
+            }
+        }
+    }
+
 }
