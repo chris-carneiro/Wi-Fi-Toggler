@@ -5,7 +5,7 @@
         <!-- Customize your theme here. -->
         <!--<item name="android:actionBarStyle">@style/ActionBarTheme</item>-->
         <item name="actionBarStyle">@style/ActionBarTheme</item>
-
+        <item name="android:actionModeBackground">@drawable/switch_banner_blue_gradient</item>
     </style>
 
     <style name="ActionBarTheme"
@@ -16,4 +16,5 @@
     <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="android:textColor">@android:color/white</item>
     </style>
+
 </resources>

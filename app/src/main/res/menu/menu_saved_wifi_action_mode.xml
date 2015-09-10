@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context=".ConfiguredWifiListActivity">
+    <item
+        android:id="@+id/item_auto_toggle_on"
+        android:icon="@drawable/ic_auto_toggle_on"
+        android:title="Enable auto toggle"
+        android:titleCondensed="Enable"
+        app:showAsAction="ifRoom|withText">
+    </item>
+
+    <item
+        android:id="@+id/item_auto_toggle_off"
+        android:icon="@drawable/ic_auto_toggle_off"
+        android:title="Disable auto toggle"
+        android:titleCondensed="Disable"
+        app:showAsAction="ifRoom|withText">
+    </item>
+</menu>
