@@ -12,6 +12,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 
@@ -150,7 +151,7 @@ public class WifiTogglerProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
-        if( deletedRows > 0) {
+        if (deletedRows > 0) {
             getContext().getContentResolver().notifyChange(uri, null);
         }
 
@@ -189,6 +190,7 @@ public class WifiTogglerProvider extends ContentProvider {
         }
 
         getContext().getContentResolver().notifyChange(uri, null);
+        Log.d(TAG, "updatedRow=" + updatedRows);
         return updatedRows;
     }
 

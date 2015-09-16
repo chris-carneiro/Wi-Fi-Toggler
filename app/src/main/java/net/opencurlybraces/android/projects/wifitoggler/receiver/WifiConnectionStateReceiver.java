@@ -200,6 +200,11 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
 
     }
 
+    @Override
+    public void onBatchUpdateComplete(int token, Object cookie, ContentProviderResult[] results) {
+
+    }
+
 
     public final class ScheduleDisableWifi extends Handler {
         private final WeakReference<Context> mHost;

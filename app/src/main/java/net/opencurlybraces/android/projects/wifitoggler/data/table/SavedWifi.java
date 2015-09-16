@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
+import net.opencurlybraces.android.projects.wifitoggler.data.model.Wifi;
 import net.opencurlybraces.android.projects.wifitoggler.data.provider.WifiTogglerContract;
 
 import java.util.ArrayList;
@@ -53,8 +54,9 @@ public class SavedWifi implements BaseColumns {
     public static final String LOCKED = "is_locked";
     public static final String STATUS = "status";
 
-    public static final String whereSSID =  SavedWifi.SSID + "=?";
-    public static final String whereStatus =  SavedWifi.STATUS + "=?";
+    public static final String whereSSID = SavedWifi.SSID + "=?";
+    public static final String whereStatus = SavedWifi.STATUS + "=?";
+    public static final String whereID = SavedWifi._ID + "=?";
 
     private static final String[] PROJECTION = new String[]{
             _ID,
@@ -144,8 +146,8 @@ public class SavedWifi implements BaseColumns {
      * @throws IllegalArgumentException
      */
     @NonNull
-    public static List<ContentProviderOperation> buildBatch(List<WifiConfiguration>
-                                                                    configuredWifis)
+    public static List<ContentProviderOperation> buildBatchInsert(List<WifiConfiguration>
+                                                                          configuredWifis)
             throws IllegalArgumentException {
         if (configuredWifis == null || configuredWifis.isEmpty())
             throw new IllegalArgumentException("Nothing to build");
@@ -165,6 +167,27 @@ public class SavedWifi implements BaseColumns {
         return batch;
     }
 
+    public static List<ContentProviderOperation> buildBatchUpdateAutoToggle(List<Wifi>
+                                                                                    wifis)
+            throws IllegalArgumentException {
+        if (wifis == null || wifis.isEmpty())
+            throw new IllegalArgumentException("Nothing to build");
+
+        List<ContentProviderOperation> batch = new
+                ArrayList<>();
+        for (Wifi wifi : wifis) {
+            Log.d(TAG, "Saved Wifi _id=" + wifi._id + " isAutoToggle=" + wifi.isAutoToggle);
+            ContentValues values = buildUpdateWifiAutoToggleContentValues(wifi);
+            ContentProviderOperation.Builder builder = ContentProviderOperation.
+                    newUpdate(CONTENT_URI);
+            builder.withValues(values).withSelection(whereID, new String[]{String.valueOf(wifi
+                    ._id)});
+            batch.add(builder.build());
+        }
+
+        return batch;
+    }
+
     private static ContentValues buildDefaultWifiContentValues(WifiConfiguration wifi) {
         ContentValues values = new ContentValues();
         values.put(SavedWifi.SSID, wifi.SSID.replace("\"", ""));
@@ -178,5 +201,10 @@ public class SavedWifi implements BaseColumns {
         return values;
     }
 
-
+    private static ContentValues buildUpdateWifiAutoToggleContentValues(Wifi wifi) {
+        ContentValues values = new ContentValues();
+        Log.d(TAG, "IsAutoToggle=" + wifi.isAutoToggle + " ID=" + wifi._id);
+        values.put(SavedWifi.AUTO_TOGGLE, wifi.isAutoToggle);
+        return values;
+    }
 }

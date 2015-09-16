@@ -315,7 +315,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         Log.d(TAG, "handleSavedWifiInsert");
         List<WifiConfiguration> savedWifis = NetworkUtils.getSavedWifiSync(this);
         try {
-            List<ContentProviderOperation> batch = SavedWifi.buildBatch(savedWifis);
+            List<ContentProviderOperation> batch = SavedWifi.buildBatchInsert(savedWifis);
 
             insertSavedWifiBatchAsync((ArrayList<ContentProviderOperation>) batch);
         } catch (IllegalArgumentException e) {
@@ -327,7 +327,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
 
     private void insertSavedWifiBatchAsync(ArrayList<ContentProviderOperation> batch) {
         if (batch == null) return;
-        mDataAsyncQueryHandler.startBatchInsert(TOKEN_INSERT_BATCH, null, WifiTogglerContract
+        mDataAsyncQueryHandler.startBatchOperations(TOKEN_INSERT_BATCH, null, WifiTogglerContract
                 .AUTHORITY, batch);
 
     }
@@ -385,4 +385,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
             NotifUtils.buildSetAutoToggleChooserNotification(this, (String) insertedWifi);
         }
     }
+
+    @Override
+    public void onBatchUpdateComplete(int token, Object cookie, ContentProviderResult[] results) {}
 }

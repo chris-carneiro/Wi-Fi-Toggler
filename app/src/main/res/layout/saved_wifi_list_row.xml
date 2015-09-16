@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/saved_wifi_row_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="@dimen/normal_padding">
+<net.opencurlybraces.android.projects.wifitoggler.ui.ForegroundRelativeLayout
+    android:id="@+id/saved_wifi_row_layout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/normal_padding"
+    android:background="?android:attr/activatedBackgroundIndicator"
+    custom:foreground="?android:attr/selectableItemBackground">
 
     <TextView
         android:id="@+id/saved_wifi_ssid"
@@ -21,4 +25,4 @@
         android:textColor="@android:color/darker_gray"
         />
 
-</RelativeLayout>
+</net.opencurlybraces.android.projects.wifitoggler.ui.ForegroundRelativeLayout>

@@ -33,6 +33,7 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
     private WeakReference<AsyncQueryListener> mListener;
     private Handler mWorkerThreadHandler = null;
     private static final int EVENT_ARG_INSERT_BATCH = 5;
+    private static final int EVENT_ARG_UPDATE_BATCH = 6;
     final WeakReference<ContentResolver> mResolver;
     private static Looper sLooper = null;
 
@@ -75,12 +76,11 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
 
             int token = msg.what;
             int event = msg.arg1;
-
+            WorkerHandlerArgs args = (WorkerHandlerArgs) msg.obj;
             switch (event) {
 
                 case EVENT_ARG_INSERT_BATCH:
-                    WorkerHandlerArgs args = (WorkerHandlerArgs) msg.obj;
-
+                case EVENT_ARG_UPDATE_BATCH:
                     try {
                         args.result = resolver.applyBatch(args.authority,
                                 args.operations);
@@ -106,8 +106,9 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
          * Called when an asynchronous batch insert is completed.
          *
          * @param token   the token to identify the query, passed in from {@link
-         *                #startBatchInsert}.
-         * @param cookie  the cookie object passed in from {@link #startBatchInsert(int, Object, String, ArrayList)}.
+         *                #startBatchOperations}.
+         * @param cookie  the cookie object passed in from {@link #startBatchOperations(int, Object,
+         *                String, ArrayList)}.
          * @param results the results of the operations
          */
         void onBatchInsertComplete(int token, Object cookie, ContentProviderResult[]
@@ -126,7 +127,8 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
         /**
          * Called when an asynchronous update is completed.
          *
-         * @param token  the token to identify the query, passed in from {@link #startUpdate(int, Object, Uri, ContentValues, String, String[])}.
+         * @param token  the token to identify the query, passed in from {@link #startUpdate(int,
+         *               Object, Uri, ContentValues, String, String[])}.
          * @param cookie
          * @param result The number of updated rows
          */
@@ -135,12 +137,25 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
         /**
          * Called when an asynchronous insert is completed.
          *
-         * @param token  the token to identify the query, passed in from {@link #startInsert(int, Object, Uri, ContentValues)} (int,
-         * Object, Uri, String, String[])}.
+         * @param token  the token to identify the query, passed in from {@link #startInsert(int,
+         *               Object, Uri, ContentValues)} (int, Object, Uri, String, String[])}.
          * @param cookie
-         * @param uri row inserted uri
+         * @param uri    row inserted uri
          */
-      void onInsertComplete(int token, Object cookie, Uri uri);
+        void onInsertComplete(int token, Object cookie, Uri uri);
+
+        /**
+         * Called when an asynchronous batch update is completed.
+         *
+         * @param token   the token to identify the query, passed in from {@link
+         *                #startBatchOperations}.
+         * @param cookie  the cookie object passed in from {@link #startBatchOperations(int, Object,
+         *                String, ArrayList)}.
+         * @param results the results of the operations
+         */
+        void onBatchUpdateComplete(int token, Object cookie, ContentProviderResult[]
+                results);
+
     }
 
     public void setQueryListener(AsyncQueryListener listener) {
@@ -152,6 +167,14 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
         final AsyncQueryListener listener = mListener.get();
         if (listener != null) {
             listener.onBatchInsertComplete(token, cookie, results);
+        }
+    }
+
+    protected void onUpdateBatchComplete(int token, Object cookie, ContentProviderResult[]
+            results) {
+        final AsyncQueryListener listener = mListener.get();
+        if (listener != null) {
+            listener.onBatchUpdateComplete(token, cookie, results);
         }
     }
 
@@ -182,8 +205,9 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
     }
 
     /**
-     * This method begins an asynchronous batch insert. When the batch insert operation is done
-     * {@link #onInsertBatchComplete} is called.
+     * This method begins an asynchronous batch operations. When the batch operation is done {@link
+     * #onInsertComplete(int, Object, Uri)} or {@link #onUpdateBatchComplete(int, Object,
+     * ContentProviderResult[])} is called.
      *
      * @param token      token A token passed into {@link #onInsertComplete} to identify the insert
      *                   operation.
@@ -191,11 +215,11 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
      * @param authority  the authority of the ContentProvider to which this batch should be applied
      * @param operations the operations to apply
      */
-    public void startBatchInsert(int token, Object cookie, String authority,
-                                 ArrayList<ContentProviderOperation> operations) {
+    public void startBatchOperations(int token, Object cookie, String authority,
+                                     ArrayList<ContentProviderOperation> operations) {
         // Use the token as what so cancelOperations works properly
         Message msg = mWorkerThreadHandler.obtainMessage(token);
-        msg.arg1 = EVENT_ARG_INSERT_BATCH;
+        msg.arg1 = token;
 
         WorkerHandlerArgs args = new WorkerHandlerArgs();
         args.handler = this;
@@ -212,10 +236,16 @@ public class DataAsyncQueryHandler extends AsyncQueryHandler {
 
         int token = msg.what;
         int event = msg.arg1;
+
         switch (event) {
             case EVENT_ARG_INSERT_BATCH:
                 WorkerHandlerArgs args = (WorkerHandlerArgs) msg.obj;
                 onInsertBatchComplete(token, args.cookie, (ContentProviderResult[]) args.result);
+                break;
+            case EVENT_ARG_UPDATE_BATCH:
+                WorkerHandlerArgs argsUpdate = (WorkerHandlerArgs) msg.obj;
+                onUpdateBatchComplete(token, argsUpdate.cookie, (ContentProviderResult[])
+                        argsUpdate.result);
                 break;
             default:
                 super.handleMessage(msg);
