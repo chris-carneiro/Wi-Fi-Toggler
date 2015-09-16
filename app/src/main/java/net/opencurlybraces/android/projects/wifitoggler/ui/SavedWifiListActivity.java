@@ -18,6 +18,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -44,6 +45,7 @@ import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -67,10 +69,13 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     private SavedWifiListAdapter mSavedWifiCursorAdapter = null;
     private ActionMode mActionMode = null;
     private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
-    private final ArrayList<Wifi> mCheckedItems = new ArrayList();
+    //    private final ArrayList<Wifi> mCheckedItems = new ArrayList();
 
-    private static final String[] PROJECTION_SSID_AUTO_TOGGLE = new String[]{SavedWifi._ID, SavedWifi
-            .SSID, SavedWifi.AUTO_TOGGLE};
+    private final SparseBooleanArray mCheckedItemsSpecs = new SparseBooleanArray();
+
+    private static final String[] PROJECTION_SSID_AUTO_TOGGLE = new String[]{SavedWifi._ID,
+            SavedWifi
+                    .SSID, SavedWifi.AUTO_TOGGLE};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -395,20 +400,14 @@ public class SavedWifiListActivity extends AppCompatActivity implements
 
     @Override
     public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-        Wifi wifi = setWifiId((int) id);
-        if (checked) {
-            mCheckedItems.add(wifi);
-        } else {
-            mCheckedItems.remove(wifi);
-        }
-        Log.d(TAG, "checkedItem=" + mCheckedItems);
-    }
+        Cursor wifiCursor = mSavedWifiCursorAdapter.getCursor();
+        wifiCursor.moveToPosition(position);
+        boolean isAutoToggle = wifiCursor.getInt(wifiCursor.getColumnIndexOrThrow(SavedWifi
+                .AUTO_TOGGLE)) > 0;
+        mCheckedItemsSpecs.put((int) id, !isAutoToggle);
 
-    @NonNull
-    private Wifi setWifiId(int id) {
-        Wifi wifi = new Wifi();
-        wifi._id = id;
-        return wifi;
+        mActionMode.setTitle(mCheckedItemsSpecs.size() + "");
+        Log.d(TAG, "mCheckedItemsSpecs=" + mCheckedItemsSpecs);
     }
 
     @Override
@@ -427,27 +426,31 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     @Override
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.item_auto_toggle_on:
-                for (Wifi wifi : mCheckedItems) {
-                    wifi.isAutoToggle = true;
-                }
-
-                break;
-            case R.id.item_auto_toggle_off:
-                for (Wifi wifi : mCheckedItems) {
-                    wifi.isAutoToggle = false;
-                }
+            case R.id.item_reverse_auto_toggle:
+                ArrayList<Wifi> wifiToUpdate = prepareWifiBatchUpdate();
+                udpateBatchWifiToggleState(wifiToUpdate);
                 break;
         }
-        udpateBatchWifiToggleState();
+
         mActionMode.finish();
         return true;
     }
 
-    private void udpateBatchWifiToggleState() {
+    @NonNull
+    private ArrayList<Wifi> prepareWifiBatchUpdate() {
+        ArrayList<Wifi> wifiToUpdate = new ArrayList<>(mCheckedItemsSpecs.size());
+        for (int i = 0; i < mCheckedItemsSpecs.size(); i++) {
+            Wifi wifi = new Wifi.WifiBuilder().id(mCheckedItemsSpecs.keyAt(i)).autoToggle
+                    (mCheckedItemsSpecs.valueAt(i)).build();
+            wifiToUpdate.add(wifi);
+        }
+        return wifiToUpdate;
+    }
+
+    private void udpateBatchWifiToggleState(List<Wifi> wifis) {
         ArrayList<ContentProviderOperation> operations = (ArrayList<ContentProviderOperation>)
                 SavedWifi.buildBatchUpdateAutoToggle
-                        (mCheckedItems);
+                        (wifis);
 
         mDataAsyncQueryHandler.startBatchOperations(TOKEN_UPDATE_BATCH, null, WifiTogglerContract
                 .AUTHORITY, operations);
@@ -460,7 +463,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     }
 
     private void resetCheckedItemsCache() {
-        mCheckedItems.clear();
+        mCheckedItemsSpecs.clear();
     }
 
     @Override
@@ -492,16 +495,10 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     private void logCursorData(final Cursor cursor) {
         try {
             Log.d(TAG, "Wifi count=" + cursor.getCount());
-            if (cursor.moveToFirst()) {
-                while (cursor.moveToNext()) {
-                    int id = cursor.getInt(cursor.getColumnIndexOrThrow(SavedWifi._ID));
-                    String ssidFromDb = cursor.getString(cursor.getColumnIndexOrThrow(SavedWifi
-                            .SSID));
-                    boolean isAutotoggle = (cursor.getInt(cursor.getColumnIndexOrThrow(SavedWifi
-                            .AUTO_TOGGLE)) > 0);
-                    Log.d(TAG, "Ssid=" + ssidFromDb + " id=" + id + " isAutoToggle=" +
-                            isAutotoggle);
-                }
+            while (cursor.moveToNext()) {
+                Wifi wifi = Wifi.buildForCursor(cursor);
+                Log.d(TAG, "Ssid=" + wifi.getSsid() + " id=" + wifi.get_id() + " isAutoToggle=" +
+                        wifi.isAutoToggle());
             }
             cursor.close();
         } finally {

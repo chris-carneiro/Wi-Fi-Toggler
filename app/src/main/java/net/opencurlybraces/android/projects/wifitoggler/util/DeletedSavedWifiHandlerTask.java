@@ -55,8 +55,8 @@ public class DeletedSavedWifiHandlerTask extends AsyncTask<Object, Object, Objec
         List<String> savedSSIDs = SavedWifiDBUtils.extractSSIDListFromSavedWifi(savedWifis);
 
         for (Wifi wifiDb : wifisFromDB) {
-            if (!savedSSIDs.contains(wifiDb.ssid)) {
-                SavedWifiDBUtils.deleteSSIDFromDb(mContext, wifiDb.ssid);
+            if (!savedSSIDs.contains(wifiDb.getSsid())) {
+                SavedWifiDBUtils.deleteSSIDFromDb(mContext, wifiDb.getSsid());
             }
         }
     }

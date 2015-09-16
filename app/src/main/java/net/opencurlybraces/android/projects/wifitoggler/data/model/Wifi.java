@@ -9,20 +9,80 @@ import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
  * Created by chris on 01/09/15.
  */
 public class Wifi {
-    public int _id;
-    public String ssid;
-    public int status;
-    public boolean isAutoToggle;
+    private long _id;
+    private String ssid;
+    private int status;
+    private boolean isAutoToggle;
+
+    public long get_id() {
+        return _id;
+    }
+
+    public boolean isAutoToggle() {
+        return isAutoToggle;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public String getSsid() {
+        return ssid;
+    }
+
+    private Wifi(WifiBuilder builder) {
+        this._id = builder._id;
+        this.ssid = builder.ssid;
+        this.status = builder.status;
+        this.isAutoToggle = builder.isAutoToggle;
+    }
 
     public static Wifi buildForCursor(final Cursor cursor) {
+        int indexId = cursor.getColumnIndexOrThrow(SavedWifi._ID);
         int indexSsid = cursor.getColumnIndexOrThrow(SavedWifi.SSID);
         int indexIsAutoToggle = cursor.getColumnIndexOrThrow(SavedWifi.AUTO_TOGGLE);
 
-        Wifi wifi = new Wifi();
-        wifi.ssid = cursor.getString(indexSsid);
-        wifi.isAutoToggle = cursor.getInt(indexIsAutoToggle) > 0;
+        long id = cursor.getInt(indexId);
+        String ssid = cursor.getString(indexSsid);
+        boolean isAutoToggle = cursor.getInt(indexIsAutoToggle) > 0;
+
+        Wifi wifi = new Wifi.WifiBuilder().id(id).ssid(ssid).autoToggle(isAutoToggle).build();
+
         return wifi;
     }
+
+    public static class WifiBuilder {
+
+        private long _id;
+        private String ssid;
+        private int status;
+        private boolean isAutoToggle;
+
+        public WifiBuilder id(long id) {
+            this._id = id;
+            return this;
+        }
+
+        public WifiBuilder ssid(String ssid) {
+            this.ssid = ssid;
+            return this;
+        }
+
+        public WifiBuilder status(int status) {
+            this.status = status;
+            return this;
+        }
+
+        public WifiBuilder autoToggle(boolean isAutoToggle) {
+            this.isAutoToggle = isAutoToggle;
+            return this;
+        }
+
+        public Wifi build() {
+            return new Wifi(this);
+        }
+    }
+
 
     @Override
     public boolean equals(Object o) {
@@ -35,7 +95,7 @@ public class Wifi {
 
     @Override
     public int hashCode() {
-        return _id;
+        return (int) _id;
     }
 
     @Override

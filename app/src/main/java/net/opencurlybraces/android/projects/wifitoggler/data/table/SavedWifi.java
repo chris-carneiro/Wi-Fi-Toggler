@@ -176,12 +176,12 @@ public class SavedWifi implements BaseColumns {
         List<ContentProviderOperation> batch = new
                 ArrayList<>();
         for (Wifi wifi : wifis) {
-            Log.d(TAG, "Saved Wifi _id=" + wifi._id + " isAutoToggle=" + wifi.isAutoToggle);
+            Log.d(TAG, "Saved Wifi _id=" + wifi.get_id() + " isAutoToggle=" + wifi.isAutoToggle());
             ContentValues values = buildUpdateWifiAutoToggleContentValues(wifi);
             ContentProviderOperation.Builder builder = ContentProviderOperation.
                     newUpdate(CONTENT_URI);
             builder.withValues(values).withSelection(whereID, new String[]{String.valueOf(wifi
-                    ._id)});
+                    .get_id())});
             batch.add(builder.build());
         }
 
@@ -203,8 +203,8 @@ public class SavedWifi implements BaseColumns {
 
     private static ContentValues buildUpdateWifiAutoToggleContentValues(Wifi wifi) {
         ContentValues values = new ContentValues();
-        Log.d(TAG, "IsAutoToggle=" + wifi.isAutoToggle + " ID=" + wifi._id);
-        values.put(SavedWifi.AUTO_TOGGLE, wifi.isAutoToggle);
+        Log.d(TAG, "IsAutoToggle=" + wifi.isAutoToggle() + " ID=" + wifi.get_id());
+        values.put(SavedWifi.AUTO_TOGGLE, wifi.isAutoToggle());
         return values;
     }
 }

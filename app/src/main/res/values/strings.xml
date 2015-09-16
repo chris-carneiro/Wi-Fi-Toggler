@@ -34,4 +34,7 @@
     <string name="tag_key_status_index">tag_key_status_index</string>
     <string name="tag_key_row_index">tag_key_auto_toggle_index</string>
     <string name="tag_key_row_id_value">tag_key_row_id_value</string>
+
+    <string name="item_reverse_auto_toggle_title">Invert AutoToggle</string>
+
 </resources>

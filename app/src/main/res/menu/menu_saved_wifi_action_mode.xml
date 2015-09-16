@@ -4,18 +4,9 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context=".ConfiguredWifiListActivity">
     <item
-        android:id="@+id/item_auto_toggle_on"
-        android:icon="@drawable/ic_auto_toggle_on"
-        android:title="Enable auto toggle"
-        android:titleCondensed="Enable"
-        app:showAsAction="ifRoom|withText">
-    </item>
-
-    <item
-        android:id="@+id/item_auto_toggle_off"
-        android:icon="@drawable/ic_auto_toggle_off"
-        android:title="Disable auto toggle"
-        android:titleCondensed="Disable"
+        android:id="@+id/item_reverse_auto_toggle"
+        android:title="@string/item_reverse_auto_toggle_title"
+        android:titleCondensed="@string/item_reverse_auto_toggle_title"
         app:showAsAction="ifRoom|withText">
     </item>
 </menu>
