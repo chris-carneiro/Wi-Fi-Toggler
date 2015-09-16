@@ -114,6 +114,8 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         registerReceivers();
         handleBannerDisplay();
         doSystemSettingsCheck();
+        //TODO handle actionMode restore
+
     }
 
     @Override
@@ -180,6 +182,12 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         Log.d(TAG, "onConfigurationChanged");
         boolean isChecked = PrefUtils.isWifiTogglerActive(this);
         handleSavedWifiListLoading(isChecked);
+        //TODO remove workaround until actionmode restore is implemented
+        if (mActionMode != null) {
+            mActionMode.finish();
+            mActionMode = null;
+            mCheckedItemsSpecs.clear();
+        }
     }
 
     @Override
@@ -401,11 +409,14 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     @Override
     public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
         Cursor wifiCursor = mSavedWifiCursorAdapter.getCursor();
-        wifiCursor.moveToPosition(position);
-        boolean isAutoToggle = wifiCursor.getInt(wifiCursor.getColumnIndexOrThrow(SavedWifi
-                .AUTO_TOGGLE)) > 0;
-        mCheckedItemsSpecs.put((int) id, !isAutoToggle);
-
+        if (checked) {
+            wifiCursor.moveToPosition(position);
+            boolean isAutoToggle = wifiCursor.getInt(wifiCursor.getColumnIndexOrThrow(SavedWifi
+                    .AUTO_TOGGLE)) > 0;
+            mCheckedItemsSpecs.put((int) id, !isAutoToggle);
+        } else {
+            mCheckedItemsSpecs.delete((int) id);
+        }
         mActionMode.setTitle(mCheckedItemsSpecs.size() + "");
         Log.d(TAG, "mCheckedItemsSpecs=" + mCheckedItemsSpecs);
     }
