@@ -67,8 +67,8 @@ public class SavedWifiDBUtils {
             availableWifiNetworks, List<Wifi> savedWifisFromDb) {
         Log.d(TAG, "areThereAutoToggleSavedWifiInRange availableWifiNetworks=" +
                 (availableWifiNetworks !=
-                        null) +
-                " savedWifisFromDb=" + (savedWifisFromDb != null));
+                        null ? availableWifiNetworks.size() : null) +
+                " savedWifisFromDb=" + (savedWifisFromDb != null ? savedWifisFromDb.size() : null));
         if (savedWifisFromDb == null || availableWifiNetworks == null) {
             return false;
         }

@@ -98,7 +98,6 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
                 context.startService(disconnectSavedWifi);
 
                 new DeletedSavedWifiHandlerTask(context).execute();
-                // Might be better to use a handler here...
                 scheduleDisableWifi();
                 break;
             default:
