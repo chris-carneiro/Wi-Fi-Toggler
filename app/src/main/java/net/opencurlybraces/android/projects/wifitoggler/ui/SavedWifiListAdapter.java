@@ -14,6 +14,10 @@ import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Created by chris on 13/06/15.
  */
@@ -24,11 +28,15 @@ public class SavedWifiListAdapter extends CursorAdapter {
     final LayoutInflater mLayoutInflater;
 
 
+    private final Set<Long> mHighlightedItems = Collections.synchronizedSet(new HashSet<Long>());
+    private boolean mIsActionMode = false;
+
     public SavedWifiListAdapter(Context context, Cursor c, int flag) {
         super(context, c, flag);
 
         mLayoutInflater = LayoutInflater.from(context);
     }
+
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
@@ -38,7 +46,7 @@ public class SavedWifiListAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-
+        long itemPosition = cursor.getPosition();
         TextView ssidView = (TextView) view.getTag(R.string.tag_key_ssid);
         TextView statusView = (TextView) view.getTag(R.string.tag_key_status);
         ForegroundRelativeLayout row = (ForegroundRelativeLayout) view.getTag(R.string.tag_key_row);
@@ -73,6 +81,13 @@ public class SavedWifiListAdapter extends CursorAdapter {
             statusView.setTextColor(context.getResources().getColor(R.color
                     .material_grey_400));
         }
+
+        if (mIsActionMode && mHighlightedItems.contains(itemPosition)) {
+            row.setBackgroundResource(R.drawable.switch_banner_blue_gradient);
+        } else {
+            row.setBackgroundResource(0);
+        }
+
     }
 
     private RelativeLayout.LayoutParams createLayoutParamsWithStatus(int status) {
@@ -117,6 +132,33 @@ public class SavedWifiListAdapter extends CursorAdapter {
         view.setTag(R.string.tag_key_row_index, autoToggleIndex);
 
         return view;
+    }
+
+
+    public int getHighlightedItemCount() {
+        return mHighlightedItems.size();
+    }
+
+    public void toggleItemHighlighted(long itemPosition) {
+        if (mHighlightedItems.contains(itemPosition)) {
+            mHighlightedItems.remove(itemPosition);
+        } else {
+            mHighlightedItems.add(itemPosition);
+        }
+        notifyDataSetChanged();
+    }
+
+    public void setIsActionMode(boolean isActionMode) {
+        mIsActionMode = isActionMode;
+    }
+
+    public void clearHighlightedItems() {
+        mHighlightedItems.clear();
+        notifyDataSetChanged();
+    }
+
+    public boolean isActionMode() {
+        return mIsActionMode;
     }
 
 }

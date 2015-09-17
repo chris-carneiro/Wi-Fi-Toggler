@@ -13,12 +13,10 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -53,11 +51,13 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         CompoundButton.OnCheckedChangeListener,
         LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener, Observer, AbsListView
         .OnItemLongClickListener, AbsListView.OnItemClickListener,
-        AbsListView.MultiChoiceModeListener, ActionMode.Callback,
+        AbsListView.MultiChoiceModeListener,
         DataAsyncQueryHandler.AsyncQueryListener {
 
     private static final String TAG = "SavedWifiList";
 
+    private static final String STATE_CHOICE_MODE = "choiceMode";
+    private static final String IS_ACTION_MODE = "isActionMode";
     private static final int TOKEN_UPDATE_BATCH = 6;
 
     private TextView mWifiTogglerSwitchLabel = null;
@@ -69,9 +69,8 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     private SavedWifiListAdapter mSavedWifiCursorAdapter = null;
     private ActionMode mActionMode = null;
     private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
-    //    private final ArrayList<Wifi> mCheckedItems = new ArrayList();
 
-    private final SparseBooleanArray mCheckedItemsSpecs = new SparseBooleanArray();
+    //    private final SparseBooleanArray mCheckedItemsSpecs = new SparseBooleanArray();
 
     private static final String[] PROJECTION_SSID_AUTO_TOGGLE = new String[]{SavedWifi._ID,
             SavedWifi
@@ -83,13 +82,36 @@ public class SavedWifiListActivity extends AppCompatActivity implements
             StartupUtils.startStrictMode();
         }
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "OnCreate");
         setContentView(R.layout.activity_saved_wifi_list);
         mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(), this);
         bindViews();
         initCursorLoader();
         mSavedWifiCursorAdapter = (SavedWifiListAdapter) initCursorAdapter();
         mWifiTogglerWifiList.setOnItemLongClickListener(this);
+
+        //        if (savedInstanceState != null && savedInstanceState.getBoolean(IS_ACTION_MODE,
+        // false)) {
+        //            mSavedWifiCursorAdapter.setIsActionMode(true);
+        //            mActionMode = startActionMode(this);
+        //            mWifiTogglerWifiList.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
+        //        } else {
+        //            mActionMode = null;
+        //            mWifiTogglerWifiList.setChoiceMode(AbsListView.CHOICE_MODE_NONE);
+        //        }
+
+        //        int choiceMode =
+        //                (savedInstanceState == null ? ListView.CHOICE_MODE_NONE
+        //                        : savedInstanceState.getInt(STATE_CHOICE_MODE));
+        //
+        //        mWifiTogglerWifiList.setChoiceMode(choiceMode);
     }
+
+    //    @Override
+    //    public void onSaveInstanceState(Bundle state) {
+    //        super.onSaveInstanceState(state);
+    //        state.putBoolean(IS_ACTION_MODE, mSavedWifiCursorAdapter.isActionMode());
+    //    }
 
     @Override
     protected void onStart() {
@@ -183,11 +205,11 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         boolean isChecked = PrefUtils.isWifiTogglerActive(this);
         handleSavedWifiListLoading(isChecked);
         //TODO remove workaround until actionmode restore is implemented
-        if (mActionMode != null) {
-            mActionMode.finish();
-            mActionMode = null;
-            mCheckedItemsSpecs.clear();
-        }
+        //        if (mActionMode != null) {
+        //            mActionMode.finish();
+        //            mActionMode = null;
+        //            mCheckedItemsSpecs.clear();
+        //        }
     }
 
     @Override
@@ -407,23 +429,62 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+        mSavedWifiCursorAdapter.toggleItemHighlighted(position);
+
+        if (mSavedWifiCursorAdapter.getHighlightedItemCount() == 0) {
+            mActionMode.finish();
+        } else {
+            mActionMode.setTitle(
+                    mSavedWifiCursorAdapter.getHighlightedItemCount() + "");
+        }
+
+        //        Log.d(TAG, "onItemClick checkedCount=" + mWifiTogglerWifiList
+        // .getCheckedItemCount());
+        //        boolean isChecked = mCheckedItemsSpecs.get(position, false);
+        //        Log.d(TAG, "isChecked=" + isChecked + " position=" + position);
+        //        mWifiTogglerWifiList.setItemChecked(position, !isChecked);
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        Log.d(TAG, "onItemLONGClick position=" + position + " mActionMode=" + mActionMode);
+        if (mActionMode != null) {
+            return false;
+        }
+
+        mActionMode = startActionMode(this);
+        mSavedWifiCursorAdapter.setIsActionMode(true);
+        mWifiTogglerWifiList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        mWifiTogglerWifiList.setMultiChoiceModeListener(this);
+        mWifiTogglerWifiList.setOnItemClickListener(this);
+        // Start the CAB using the ActionMode.Callback defined above
+        //        mWifiTogglerWifiList.setItemChecked(position, true);
+        mSavedWifiCursorAdapter.toggleItemHighlighted(position);
+        mActionMode.setTitle(
+                mSavedWifiCursorAdapter.getHighlightedItemCount() + "");
+        return true;
+    }
+
+    @Override
     public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
         Cursor wifiCursor = mSavedWifiCursorAdapter.getCursor();
-        if (checked) {
-            wifiCursor.moveToPosition(position);
-            boolean isAutoToggle = wifiCursor.getInt(wifiCursor.getColumnIndexOrThrow(SavedWifi
-                    .AUTO_TOGGLE)) > 0;
-            mCheckedItemsSpecs.put((int) id, !isAutoToggle);
-        } else {
-            mCheckedItemsSpecs.delete((int) id);
-        }
-        mActionMode.setTitle(mCheckedItemsSpecs.size() + "");
-        Log.d(TAG, "mCheckedItemsSpecs=" + mCheckedItemsSpecs);
+        //        if (checked) {
+        //            wifiCursor.moveToPosition(position);
+        //            boolean isAutoToggle = wifiCursor.getInt(wifiCursor.getColumnIndexOrThrow
+        // (SavedWifi
+        //                    .AUTO_TOGGLE)) > 0;
+        //            mCheckedItemsSpecs.put((int) id, !isAutoToggle);
+        //        } else {
+        //            mCheckedItemsSpecs.delete((int) id);
+        //        }
+        //        mActionMode.setTitle(mWifiTogglerWifiList.getCheckedItemCount() + "");
+        //        Log.d(TAG, "mCheckedItemsSpecs=" + mCheckedItemsSpecs);
     }
 
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-        mActionMode = mode;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_saved_wifi_action_mode, menu);
         return true;
@@ -438,8 +499,8 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
         switch (item.getItemId()) {
             case R.id.item_reverse_auto_toggle:
-                ArrayList<Wifi> wifiToUpdate = prepareWifiBatchUpdate();
-                udpateBatchWifiToggleState(wifiToUpdate);
+                //                ArrayList<Wifi> wifiToUpdate = prepareWifiBatchUpdate();
+                //                udpateBatchWifiToggleState(wifiToUpdate);
                 break;
         }
 
@@ -447,16 +508,16 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         return true;
     }
 
-    @NonNull
-    private ArrayList<Wifi> prepareWifiBatchUpdate() {
-        ArrayList<Wifi> wifiToUpdate = new ArrayList<>(mCheckedItemsSpecs.size());
-        for (int i = 0; i < mCheckedItemsSpecs.size(); i++) {
-            Wifi wifi = new Wifi.WifiBuilder().id(mCheckedItemsSpecs.keyAt(i)).autoToggle
-                    (mCheckedItemsSpecs.valueAt(i)).build();
-            wifiToUpdate.add(wifi);
-        }
-        return wifiToUpdate;
-    }
+    //    @NonNull
+    //    private ArrayList<Wifi> prepareWifiBatchUpdate() {
+    //        ArrayList<Wifi> wifiToUpdate = new ArrayList<>(mCheckedItemsSpecs.size());
+    //        for (int i = 0; i < mCheckedItemsSpecs.size(); i++) {
+    //            Wifi wifi = new Wifi.WifiBuilder().id(mCheckedItemsSpecs.keyAt(i)).autoToggle
+    //                    (mCheckedItemsSpecs.valueAt(i)).build();
+    //            wifiToUpdate.add(wifi);
+    //        }
+    //        return wifiToUpdate;
+    //    }
 
     private void udpateBatchWifiToggleState(List<Wifi> wifis) {
         ArrayList<ContentProviderOperation> operations = (ArrayList<ContentProviderOperation>)
@@ -469,27 +530,22 @@ public class SavedWifiListActivity extends AppCompatActivity implements
 
     @Override
     public void onDestroyActionMode(ActionMode mode) {
-        resetCheckedItemsCache();
+        //        resetCheckedItemsCache();
+        //        if (mActionMode != null) {
         mActionMode = null;
+        mSavedWifiCursorAdapter.setIsActionMode(false);
+        mSavedWifiCursorAdapter.clearHighlightedItems();
+        mWifiTogglerWifiList.setChoiceMode(ListView.CHOICE_MODE_NONE);
+        //            mWifiTogglerWifiList.setAdapter(mWifiTogglerWifiList.getAdapter());
+        //        }
+
+
     }
 
-    private void resetCheckedItemsCache() {
-        mCheckedItemsSpecs.clear();
-    }
+    //    private void resetCheckedItemsCache() {
+    //        mCheckedItemsSpecs.clear();
+    //    }
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-    }
-
-    @Override
-    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        Log.d(TAG, "onItemLONGClick position=" + position);
-        mWifiTogglerWifiList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        mWifiTogglerWifiList.setMultiChoiceModeListener(this);
-        mWifiTogglerWifiList.setOnItemClickListener(this);
-        mWifiTogglerWifiList.setItemChecked(position, true);
-        return true;
-    }
 
     @Override
     public void onBatchInsertComplete(int token, Object cookie, ContentProviderResult[] results) {
