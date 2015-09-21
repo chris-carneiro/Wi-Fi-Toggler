@@ -19,7 +19,6 @@
         android:theme="@style/AppTheme">
         <activity
             android:name="net.opencurlybraces.android.projects.wifitoggler.ui.SavedWifiListActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/app_name"
             android:launchMode="singleTask">
             <intent-filter>

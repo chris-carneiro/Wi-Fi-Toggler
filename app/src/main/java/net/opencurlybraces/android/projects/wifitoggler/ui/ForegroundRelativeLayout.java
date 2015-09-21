@@ -27,11 +27,12 @@ import android.graphics.drawable.NinePatchDrawable;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.widget.Checkable;
 import android.widget.RelativeLayout;
 
 import net.opencurlybraces.android.projects.wifitoggler.R;
 
-public class ForegroundRelativeLayout extends RelativeLayout {
+public class ForegroundRelativeLayout extends RelativeLayout implements Checkable {
 
     // UI
     private Drawable foreground;
@@ -41,6 +42,8 @@ public class ForegroundRelativeLayout extends RelativeLayout {
     private boolean foregroundPadding = false;
     private boolean foregroundBoundsChanged = false;
     private boolean backgroundAsForeground = false;
+
+    private boolean mIsChecked = false;
 
     // Constructors
     public ForegroundRelativeLayout(Context context) {
@@ -186,6 +189,32 @@ public class ForegroundRelativeLayout extends RelativeLayout {
         return super.onTouchEvent(e);
     }
 
+    @Override
+    public void setChecked(boolean checked) {
+        this.mIsChecked = checked;
+        changeColor(mIsChecked);
+    }
+
+    @Override
+    public boolean isChecked() {
+        return mIsChecked;
+    }
+
+    @Override
+    public void toggle() {
+        this.mIsChecked = !this.mIsChecked;
+        changeColor(this.mIsChecked);
+    }
+
+
+    private void changeColor(boolean isChecked) {
+        if (isChecked) {
+            setBackgroundColor(getResources().getColor(R.color.material_blue_400));
+        } else {
+            setBackgroundColor(getResources().getColor(android.R.color.transparent));
+        }
+
+    }
 }
 
 

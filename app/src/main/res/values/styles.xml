@@ -5,8 +5,10 @@
         <!-- Customize your theme here. -->
         <!--<item name="android:actionBarStyle">@style/ActionBarTheme</item>-->
         <item name="actionBarStyle">@style/ActionBarTheme</item>
-        <item name="android:actionModeBackground">@drawable/switch_banner_blue_gradient</item>
-        <item name="android:activatedBackgroundIndicator">@drawable/saved_wifi_list_row_background</item>
+        <item name="android:actionModeBackground">@color/material_blue_500</item>
+        <item name="android:activatedBackgroundIndicator">@drawable/saved_wifi_list_row_background
+        </item>
+        <item name="colorPrimaryDark">@color/material_blue_700</item>
         <!--<item name="colorControlActivated">@color/material_teal_400</item>-->
         <!--<item name="android:selectableItemBackground">@drawable/saved_wifi_list_row_background</item>-->
     </style>
@@ -14,8 +16,9 @@
     <style name="ActionBarTheme"
            parent="@style/Widget.AppCompat.Light.ActionBar">
         <!--<item name="android:background">#309DF4</item>-->
-        <item name="background">@drawable/switch_banner_blue_gradient</item>
+        <item name="background">@color/material_blue_500</item>
     </style>
+
     <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="android:textColor">@android:color/white</item>
     </style>

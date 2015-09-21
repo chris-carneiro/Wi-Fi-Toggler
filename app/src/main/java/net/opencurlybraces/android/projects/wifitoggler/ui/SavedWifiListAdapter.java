@@ -2,7 +2,7 @@ package net.opencurlybraces.android.projects.wifitoggler.ui;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +14,7 @@ import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
 
 /**
  * Created by chris on 13/06/15.
@@ -28,7 +26,9 @@ public class SavedWifiListAdapter extends CursorAdapter {
     final LayoutInflater mLayoutInflater;
 
 
-    private final Set<Long> mHighlightedItems = Collections.synchronizedSet(new HashSet<Long>());
+    private final ArrayList<Integer> mSelectedItems = new ArrayList<>();
+    private final SparseBooleanArray mCheckedItemsSpecs = new SparseBooleanArray();
+
     private boolean mIsActionMode = false;
 
     public SavedWifiListAdapter(Context context, Cursor c, int flag) {
@@ -59,7 +59,7 @@ public class SavedWifiListAdapter extends CursorAdapter {
         int status = cursor.getInt(statusIndex);
         int autoToggle = cursor.getInt(autoToggleIndex);
         boolean isAutoToggle = (autoToggle > 0);
-        Log.d(TAG, "ssid=" + ssid + " item position=" + cursor.getPosition());
+        //        Log.d(TAG, "ssid=" + ssid + " item position=" + cursor.getPosition());
         ssidView.setText(ssid);
         ssidView.setPadding(15, 0, 0, 0);
 
@@ -75,14 +75,14 @@ public class SavedWifiListAdapter extends CursorAdapter {
             ssidView.setTextColor(context.getResources().getColor(android.R.color
                     .black));
         } else {
-            Log.d(TAG, "autoToggle disabled for=" + ssid);
+            //            Log.d(TAG, "autoToggle disabled for=" + ssid);
             ssidView.setTextColor(context.getResources().getColor(R.color
                     .material_grey_400));
             statusView.setTextColor(context.getResources().getColor(R.color
                     .material_grey_400));
         }
 
-        if (mIsActionMode && mHighlightedItems.contains(itemPosition)) {
+        if (row.isChecked()) {
             row.setBackgroundResource(R.drawable.switch_banner_blue_gradient);
         } else {
             row.setBackgroundResource(0);
@@ -135,30 +135,47 @@ public class SavedWifiListAdapter extends CursorAdapter {
     }
 
 
-    public int getHighlightedItemCount() {
-        return mHighlightedItems.size();
+    public int getSelectedItemCount() {
+        return mSelectedItems.size();
     }
 
-    public void toggleItemHighlighted(long itemPosition) {
-        if (mHighlightedItems.contains(itemPosition)) {
-            mHighlightedItems.remove(itemPosition);
+    public ArrayList<Integer> getSelectedItems() {
+        return mSelectedItems;
+    }
+
+    /**
+     * Update selected items cache given its position in cache. If the cache contains the position,
+     * it'll be removed from cache so that the item is unselected in the listview. On the other
+     * hand, if the position is not present in cache, it'll be added so that the view is selected
+     * and highlighted
+     *
+     * @param itemPosition
+     * @return boolean true the item at itemPosition is selected false not selected
+     */
+    public boolean toggleSelectedItem(int itemPosition) {
+        boolean selected = false;
+        if (mSelectedItems.contains(itemPosition)) {
+            mSelectedItems.remove(mSelectedItems.indexOf(itemPosition));
         } else {
-            mHighlightedItems.add(itemPosition);
+            selected = true;
+            mSelectedItems.add(itemPosition);
         }
-        notifyDataSetChanged();
+        notifyDataSetInvalidated();
+        return selected;
     }
 
     public void setIsActionMode(boolean isActionMode) {
         mIsActionMode = isActionMode;
     }
 
-    public void clearHighlightedItems() {
-        mHighlightedItems.clear();
-        notifyDataSetChanged();
+    public void clearSelectedItems() {
+        if (!mSelectedItems.isEmpty()) {
+            mSelectedItems.clear();
+            notifyDataSetInvalidated();
+        }
     }
 
     public boolean isActionMode() {
         return mIsActionMode;
     }
-
 }

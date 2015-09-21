@@ -7,8 +7,13 @@
 
     <color name="material_orange_50">#FFF3E0</color>
     <color name="material_orange_400">#FFA726</color>
-    <color name="material_orange_600">#FB8C00</color>
+    <color name="material_orange_500">#FF9800</color>
 
 
     <color name="material_grey_400">#BDBDBD</color>
+
+    <color name="material_blue_400">#42A5F5</color>
+    <color name="material_blue_500">#2196F3</color>
+    <color name="material_blue_600">#1E88E5</color>
+    <color name="material_blue_700">#1976D2</color>
 </resources>
