@@ -2,7 +2,6 @@ package net.opencurlybraces.android.projects.wifitoggler.ui;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,9 +24,7 @@ public class SavedWifiListAdapter extends CursorAdapter {
 
     final LayoutInflater mLayoutInflater;
 
-
     private final ArrayList<Integer> mSelectedItems = new ArrayList<>();
-    private final SparseBooleanArray mCheckedItemsSpecs = new SparseBooleanArray();
 
     private boolean mIsActionMode = false;
 
@@ -46,10 +43,9 @@ public class SavedWifiListAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        long itemPosition = cursor.getPosition();
         TextView ssidView = (TextView) view.getTag(R.string.tag_key_ssid);
         TextView statusView = (TextView) view.getTag(R.string.tag_key_status);
-        ForegroundRelativeLayout row = (ForegroundRelativeLayout) view.getTag(R.string.tag_key_row);
+        CheckableRelativeLayout row = (CheckableRelativeLayout) view.getTag(R.string.tag_key_row);
 
         int ssidIndex = (int) view.getTag(R.string.tag_key_ssid_index);
         int statusIndex = (int) view.getTag(R.string.tag_key_status_index);
@@ -59,7 +55,6 @@ public class SavedWifiListAdapter extends CursorAdapter {
         int status = cursor.getInt(statusIndex);
         int autoToggle = cursor.getInt(autoToggleIndex);
         boolean isAutoToggle = (autoToggle > 0);
-        //        Log.d(TAG, "ssid=" + ssid + " item position=" + cursor.getPosition());
         ssidView.setText(ssid);
         ssidView.setPadding(15, 0, 0, 0);
 
@@ -71,23 +66,31 @@ public class SavedWifiListAdapter extends CursorAdapter {
         ssidView.setLayoutParams(lp);
 
 
-        if (isAutoToggle) {
-            ssidView.setTextColor(context.getResources().getColor(android.R.color
-                    .black));
-        } else {
-            //            Log.d(TAG, "autoToggle disabled for=" + ssid);
-            ssidView.setTextColor(context.getResources().getColor(R.color
-                    .material_grey_400));
-            statusView.setTextColor(context.getResources().getColor(R.color
-                    .material_grey_400));
-        }
+        setTextColor(context, ssidView, statusView, isAutoToggle);
 
+        setBackground(row);
+
+    }
+
+    private void setBackground(CheckableRelativeLayout row) {
         if (row.isChecked()) {
             row.setBackgroundResource(R.drawable.switch_banner_blue_gradient);
         } else {
             row.setBackgroundResource(0);
         }
+    }
 
+    private void setTextColor(Context context, TextView ssidView, TextView statusView, boolean
+            isAutoToggle) {
+        if (isAutoToggle) {
+            ssidView.setTextColor(context.getResources().getColor(android.R.color
+                    .black));
+        } else {
+            ssidView.setTextColor(context.getResources().getColor(R.color
+                    .material_grey_400));
+            statusView.setTextColor(context.getResources().getColor(R.color
+                    .material_grey_400));
+        }
     }
 
     private RelativeLayout.LayoutParams createLayoutParamsWithStatus(int status) {
@@ -135,37 +138,43 @@ public class SavedWifiListAdapter extends CursorAdapter {
     }
 
 
-    public int getSelectedItemCount() {
-        return mSelectedItems.size();
-    }
-
     public ArrayList<Integer> getSelectedItems() {
         return mSelectedItems;
     }
 
+    public int getSelectedItemCount() {
+        return mSelectedItems.size();
+    }
+
     /**
-     * Update selected items cache given its position in cache. If the cache contains the position,
-     * it'll be removed from cache so that the item is unselected in the listview. On the other
-     * hand, if the position is not present in cache, it'll be added so that the view is selected
-     * and highlighted
+     * Update selected items cache given its position in cache. if Checked is true and the item is
+     * not in already in cache, the latter will be cached. If checked is false, the item will be
+     * removed
+     * from cache
      *
      * @param itemPosition
-     * @return boolean true the item at itemPosition is selected false not selected
+     * @param checked
      */
-    public boolean toggleSelectedItem(int itemPosition) {
-        boolean selected = false;
-        if (mSelectedItems.contains(itemPosition)) {
-            mSelectedItems.remove(mSelectedItems.indexOf(itemPosition));
+    public void setSelectedItem(int itemPosition, boolean checked) {
+        if (checked) {
+            if (!mSelectedItems.contains(itemPosition)) {
+                mSelectedItems.add(itemPosition);
+            }
         } else {
-            selected = true;
-            mSelectedItems.add(itemPosition);
+            if (mSelectedItems.contains(itemPosition)) {
+                mSelectedItems.remove(mSelectedItems.indexOf(itemPosition));
+            }
         }
         notifyDataSetInvalidated();
-        return selected;
+
     }
 
     public void setIsActionMode(boolean isActionMode) {
         mIsActionMode = isActionMode;
+    }
+
+    public boolean isActionMode() {
+        return mIsActionMode;
     }
 
     public void clearSelectedItems() {
@@ -173,9 +182,5 @@ public class SavedWifiListAdapter extends CursorAdapter {
             mSelectedItems.clear();
             notifyDataSetInvalidated();
         }
-    }
-
-    public boolean isActionMode() {
-        return mIsActionMode;
     }
 }

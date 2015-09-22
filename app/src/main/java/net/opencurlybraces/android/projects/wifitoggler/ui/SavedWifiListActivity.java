@@ -9,7 +9,6 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -51,6 +50,12 @@ public class SavedWifiListActivity extends AppCompatActivity implements
 
     private static final String TAG = "SavedWifiList";
     private static final int TOKEN_UPDATE_BATCH = 6;
+    private static final String INSTANCE_KEY_CHECKED_ITEMS = "checkedItems";
+    private static final String INSTANCE_KEY_LIST_STATE = "listState";
+    private static final String INSTANCE_KEY_IS_ACTION_MODE = "isActionMode";
+    private static final String[] PROJECTION_SSID_AUTO_TOGGLE = new String[]{SavedWifi._ID,
+            SavedWifi
+                    .SSID, SavedWifi.AUTO_TOGGLE};
 
     private TextView mWifiTogglerSwitchLabel = null;
     private Switch mWifiTogglerActivationSwitch = null;
@@ -58,16 +63,12 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     private TextView mEmptyView = null;
     private RelativeLayout mBanner = null;
     private TextView mBannerContent = null;
+
     private SavedWifiListAdapter mSavedWifiCursorAdapter = null;
     private ActionModeHelper mActionModeCallback = null;
     private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
     private Bundle mSavedInstanceState = null;
-    //    ArrayList<Integer> mCheckedItems = new ArrayList<>();
-    //    ArrayList<Integer> mCheckedItemsOnPause = new ArrayList<>();
-    //    private int mChoiceMode;
-    private static final String[] PROJECTION_SSID_AUTO_TOGGLE = new String[]{SavedWifi._ID,
-            SavedWifi
-                    .SSID, SavedWifi.AUTO_TOGGLE};
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,32 +107,41 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         registerReceivers();
         handleBannerDisplay();
         doSystemSettingsCheck();
+        setOnItemLongClickListener();
+        handleSavedInstanceRestore();
+    }
+
+    private void setOnItemLongClickListener() {
         if (mActionModeCallback == null) {
             mActionModeCallback = new ActionModeHelper(this,
                     mWifiTogglerWifiList);
         }
         mWifiTogglerWifiList.setOnItemLongClickListener(mActionModeCallback);
-
-        handleSavedInstanceRestore();
     }
 
     private void handleSavedInstanceRestore() {
+        Log.d(TAG, "handleSavedInstanceRestore ");
         if (mSavedInstanceState != null) {
-            int choiceMode = mSavedInstanceState.getInt("listState", mWifiTogglerWifiList
-                    .getChoiceMode());
-            mWifiTogglerWifiList.setChoiceMode(choiceMode);
-            if (choiceMode == AbsListView.CHOICE_MODE_MULTIPLE_MODAL) {
-                mWifiTogglerWifiList.setMultiChoiceModeListener(mActionModeCallback);
+            int choiceMode = mSavedInstanceState.getInt(INSTANCE_KEY_LIST_STATE,
+                    mWifiTogglerWifiList
+                            .getChoiceMode());
+            boolean wasInActionModeOnPause = mSavedInstanceState.getBoolean
+                    (INSTANCE_KEY_IS_ACTION_MODE);
+            if (wasInActionModeOnPause) {
+                /**
+                 *  Needed on screen rotation only as listview is apparently reset and so is the
+                 *  choice mode but not when app is put in background.
+                 *  setChoiceMode() destroys the action mode, and we obviously do want that..
+                 */
+                if (mWifiTogglerWifiList.getChoiceMode() != AbsListView
+                        .CHOICE_MODE_MULTIPLE_MODAL) {
+                    mWifiTogglerWifiList.setChoiceMode(choiceMode);
+                }
+                ArrayList<Integer> checkedItems = mSavedInstanceState.getIntegerArrayList
+                        (INSTANCE_KEY_CHECKED_ITEMS);
+                setCachedItemsChecked(checkedItems);
             }
-            ArrayList<Integer> checkedItems = mSavedInstanceState.getIntegerArrayList
-                    ("checkedItems");
-            setCachedItemsChecked(checkedItems);
         }
-    }
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
     }
 
     private void setCachedItemsChecked(ArrayList<Integer> checkedItems) {
@@ -149,13 +159,12 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.d(TAG, "onSaveInstance mWifiTogglerWifiList.getChoiceMode()=" + mWifiTogglerWifiList
-                .getChoiceMode());
-
-        outState.putInt("listState", mWifiTogglerWifiList.getChoiceMode());
-        outState.putIntegerArrayList("checkedItems", mSavedWifiCursorAdapter.getSelectedItems());
-        mSavedInstanceState = outState;
+        outState.putInt(INSTANCE_KEY_LIST_STATE, mWifiTogglerWifiList.getChoiceMode());
+        outState.putIntegerArrayList(INSTANCE_KEY_CHECKED_ITEMS, mSavedWifiCursorAdapter
+                .getSelectedItems());
+        outState.putBoolean(INSTANCE_KEY_IS_ACTION_MODE, mSavedWifiCursorAdapter.isActionMode());
     }
+
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -223,14 +232,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        Log.d(TAG, "onConfigurationChanged");
-        boolean isChecked = PrefUtils.isWifiTogglerActive(this);
-        handleSavedWifiListLoading(isChecked);
-    }
-
-    @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String[] projection = {SavedWifi._ID, SavedWifi.SSID, SavedWifi.STATUS, SavedWifi
                 .AUTO_TOGGLE};
@@ -271,7 +272,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
 
     private CursorAdapter initCursorAdapter() {
         Log.d(TAG, "initCursorAdapter");
-
         if (mSavedWifiCursorAdapter == null) {
             mSavedWifiCursorAdapter = new SavedWifiListAdapter(this, null, 0);
         }

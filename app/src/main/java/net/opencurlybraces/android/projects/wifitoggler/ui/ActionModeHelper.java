@@ -36,11 +36,9 @@ public class ActionModeHelper implements
 
 
     public ActionModeHelper(SavedWifiListActivity wifiListActivity, ListView savedWifiListView) {
-        Log.d(TAG, "ActionModeHelper constructor");
         this.mWifiListActivity = wifiListActivity;
         this.mWifiTogglerWifiList = savedWifiListView;
         mSavedWifiCursorAdapter = (SavedWifiListAdapter) savedWifiListView.getAdapter();
-        Log.d(TAG, "mSavedWifiCursorAdapter=" + mSavedWifiCursorAdapter);
         mWifiTogglerWifiList.setMultiChoiceModeListener(this);
     }
 
@@ -65,7 +63,6 @@ public class ActionModeHelper implements
         } else {
             mSelectedItemsSpecs.delete(id);
         }
-
     }
 
     @Override
@@ -104,12 +101,12 @@ public class ActionModeHelper implements
         Log.d(TAG, "OnDestroyActionMode");
         mActionMode = null;
         mSavedWifiCursorAdapter.setIsActionMode(false);
-//        mSavedWifiCursorAdapter.clearSelectedItems();
+        mSavedWifiCursorAdapter.clearSelectedItems();
     }
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        Log.d(TAG, "onItemLONGClick position=" + position + " mActionMode=" + mActionMode);
+        Log.d(TAG, "onItemLONGClick position=" + position);
 
         mSavedWifiCursorAdapter.setIsActionMode(true);
         mWifiTogglerWifiList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
@@ -122,20 +119,16 @@ public class ActionModeHelper implements
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Log.d(TAG, "onItemClick");
-
     }
 
     @Override
     public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-        Log.d(TAG, "onItemCheckedChanged actionMode=" + mode);
+        Log.d(TAG, "onItemCheckedChanged");
         if (mActionMode == null) return;
-        mSavedWifiCursorAdapter.toggleSelectedItem(position);
+        mSavedWifiCursorAdapter.setSelectedItem(position, checked);
         mActionMode.setTitle(
-                mWifiTogglerWifiList.getCheckedItemCount() + "");
+                mSavedWifiCursorAdapter.getSelectedItemCount() + "");
         setAutoToggleValueForSelectedItems(position, (int) id, checked);
     }
 
-    public ActionMode getActionMode() {
-        return mActionMode;
-    }
 }
