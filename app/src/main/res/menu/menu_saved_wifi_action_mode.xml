@@ -7,6 +7,12 @@
         android:id="@+id/item_reverse_auto_toggle"
         android:title="@string/item_reverse_auto_toggle_title"
         android:titleCondensed="@string/item_reverse_auto_toggle_title"
-        app:showAsAction="ifRoom|withText">
-    </item>
+        app:showAsAction="ifRoom|withText"/>
+
+    <item
+        android:id="@+id/item_settings_select_all"
+        android:orderInCategory="100"
+        android:title="@string/action_settings_select_all"
+        app:showAsAction="never"/>
+
 </menu>

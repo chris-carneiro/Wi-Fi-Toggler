@@ -469,11 +469,15 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         startService(checkSettings);
     }
 
-    protected void udpateBatchWifiToggleState(List<Wifi> wifis) {
+    protected ArrayList<ContentProviderOperation> udpateBatchWifiToggleState(List<Wifi> wifis) {
         ArrayList<ContentProviderOperation> operations = (ArrayList<ContentProviderOperation>)
                 SavedWifi.buildBatchUpdateAutoToggle
                         (wifis);
+        return operations;
 
+    }
+
+    protected void startBatchUpdate(ArrayList<ContentProviderOperation> operations) {
         mDataAsyncQueryHandler.startBatchOperations(TOKEN_UPDATE_BATCH, null, WifiTogglerContract
                 .AUTHORITY, operations);
     }

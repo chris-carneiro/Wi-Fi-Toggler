@@ -60,7 +60,7 @@ public class CheckableRelativeLayout extends RelativeLayout implements Checkable
 
     private void changeColor(boolean isChecked) {
         if (isChecked) {
-            setBackgroundColor(getResources().getColor(R.color.material_blue_400));
+            setBackgroundColor(getResources().getColor(R.color.material_blue_100));
         } else {
             setBackgroundColor(getResources().getColor(android.R.color.transparent));
         }

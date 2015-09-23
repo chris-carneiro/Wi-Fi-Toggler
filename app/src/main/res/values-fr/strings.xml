@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Wi-Fi Toggler</string>
     <string name="action_settings">Préférences</string>
+    <string name="action_settings_select_all">Tout Sélectionner</string>
     <string name="off_wifi_toggler_switch_label_value">En pause</string>
     <string name="on_wifi_toggler_switch_label_value">Actif</string>
     <string name="wifi_list_info_when_wifi_toggler_off">"Activez Wi-Fi Toggler pour voir vos réseaux sauvegardés et profiter de l'activation automatique du Wi-Fi"</string>

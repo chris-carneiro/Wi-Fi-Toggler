@@ -149,8 +149,7 @@ public class SavedWifiListAdapter extends CursorAdapter {
     /**
      * Update selected items cache given its position in cache. if Checked is true and the item is
      * not in already in cache, the latter will be cached. If checked is false, the item will be
-     * removed
-     * from cache
+     * removed from cache
      *
      * @param itemPosition
      * @param checked
@@ -167,6 +166,14 @@ public class SavedWifiListAdapter extends CursorAdapter {
         }
         notifyDataSetInvalidated();
 
+    }
+
+    public int selectAllItems() {
+        int count = getCount();
+        for (int i = 0; i < count; i++) {
+            setSelectedItem(i, true);
+        }
+        return count;
     }
 
     public void setIsActionMode(boolean isActionMode) {

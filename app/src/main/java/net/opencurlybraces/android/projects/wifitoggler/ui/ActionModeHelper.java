@@ -1,6 +1,9 @@
 package net.opencurlybraces.android.projects.wifitoggler.ui;
 
+import android.app.Activity;
+import android.content.ContentProviderOperation;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
@@ -16,6 +19,7 @@ import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.data.model.Wifi;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -42,16 +46,6 @@ public class ActionModeHelper implements
         mWifiTogglerWifiList.setMultiChoiceModeListener(this);
     }
 
-
-    private ArrayList<Wifi> prepareWifiBatchUpdate() {
-        ArrayList<Wifi> wifiToUpdate = new ArrayList<>(mSelectedItemsSpecs.size());
-        for (int i = 0; i < mSelectedItemsSpecs.size(); i++) {
-            Wifi wifi = new Wifi.WifiBuilder().id(mSelectedItemsSpecs.keyAt(i)).autoToggle
-                    (mSelectedItemsSpecs.valueAt(i)).build();
-            wifiToUpdate.add(wifi);
-        }
-        return wifiToUpdate;
-    }
 
     private void setAutoToggleValueForSelectedItems(int position, int id, boolean selected) {
         if (selected) {
@@ -87,12 +81,29 @@ public class ActionModeHelper implements
 
         switch (item.getItemId()) {
             case R.id.item_reverse_auto_toggle:
-                ArrayList<Wifi> wifiToUpdate = prepareWifiBatchUpdate();
-                mWifiListActivity.udpateBatchWifiToggleState(wifiToUpdate);
+
+                updateItemsAsync();
+                mActionMode.finish();
+                break;
+            case R.id.item_settings_select_all:
+                selectAllItems();
                 break;
         }
-        mActionMode.finish();
+
         return true;
+    }
+
+    private void selectAllItems() {
+        int count = mSavedWifiCursorAdapter.selectAllItems();
+        for (int i = 0; i < count; i++) {
+            mWifiTogglerWifiList.setItemChecked(i, true);
+        }
+    }
+
+    private void updateItemsAsync() {
+        AsyncUpdate performAsyncUpdate = new AsyncUpdate(mWifiListActivity);
+        performAsyncUpdate.pushSelectedItemSpecs(mSelectedItemsSpecs);
+        performAsyncUpdate.execute();
     }
 
 
@@ -146,6 +157,53 @@ public class ActionModeHelper implements
         mActionMode.setTitle(
                 mSavedWifiCursorAdapter.getSelectedItemCount() + "");
         setAutoToggleValueForSelectedItems(position, (int) id, checked);
+    }
+
+
+    /**
+     * Used to asynchronously update wifi items in DB.
+     */
+    private static class AsyncUpdate extends
+            AsyncTask<Void, Void, ArrayList<ContentProviderOperation>> {
+
+        private SparseBooleanArray mSelectedItemsSpecs = null;
+
+        private final SavedWifiListActivity mWifiListActivity;
+
+        public AsyncUpdate(Activity listActivity) {
+            this.mWifiListActivity = (SavedWifiListActivity) new WeakReference<>(listActivity)
+                    .get();
+        }
+
+        @Override
+        protected ArrayList<ContentProviderOperation> doInBackground(Void... params) {
+            if (mWifiListActivity == null) return null;
+            ArrayList<Wifi> wifiToUpdate = prepareWifiBatchUpdate();
+
+            return mWifiListActivity.udpateBatchWifiToggleState(wifiToUpdate);
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<ContentProviderOperation> operations) {
+            super.onPostExecute(operations);
+            if (mWifiListActivity == null) return; //you never know...
+            mWifiListActivity.startBatchUpdate(operations);
+        }
+
+
+        public void pushSelectedItemSpecs(SparseBooleanArray selectedItems) {
+            this.mSelectedItemsSpecs = selectedItems;
+        }
+
+        private ArrayList<Wifi> prepareWifiBatchUpdate() {
+            ArrayList<Wifi> wifiToUpdate = new ArrayList<>(mSelectedItemsSpecs.size());
+            for (int i = 0; i < mSelectedItemsSpecs.size(); i++) {
+                Wifi wifi = new Wifi.WifiBuilder().id(mSelectedItemsSpecs.keyAt(i)).autoToggle
+                        (mSelectedItemsSpecs.valueAt(i)).build();
+                wifiToUpdate.add(wifi);
+            }
+            return wifiToUpdate;
+        }
     }
 
 }
