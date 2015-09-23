@@ -5,7 +5,7 @@
 
     <string name="pref_header_general">General</string>
     <string name="pref_title_run_at_startup">Run Wi-Fi Toggler at startup</string>
-    <string name="pref_description_run_at_startup">Automatically activate Wi-Fi Toggler when your
+    <string name="pref_description_run_at_startup">Automatically run Wi-Fi Toggler when your
         phone starts up
     </string>
 

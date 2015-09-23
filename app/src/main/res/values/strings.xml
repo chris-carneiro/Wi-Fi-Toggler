@@ -1,24 +1,24 @@
 <resources>
     <string name="app_name">Wi-Fi Toggler</string>
     <string name="action_settings">Settings</string>
-    <string name="off_wifi_toggler_switch_label_value">Off</string>
-    <string name="on_wifi_toggler_switch_label_value">On</string>
+    <string name="off_wifi_toggler_switch_label_value">Paused</string>
+    <string name="on_wifi_toggler_switch_label_value">Running</string>
     <string name="wifi_list_info_when_wifi_toggler_off">"To see your saved Wi-Fi networks, and
         enjoy the auto toggle feature,
         switch Wi-Fi Toggler On"</string>
     <string name="wifi_list_info_no_known_wifi">"No known Wi-Fi networks found."</string>
     <string name="paused_wifi_toggler_notification_context_title">Wi-Fi Toggler
-        disabled</string>
-    <string name="active_wifi_toggler_notification_context_title">Wi-Fi Toggler active</string>
+        paused</string>
+    <string name="active_wifi_toggler_notification_context_title">Wi-Fi Toggler running</string>
     <string name="new_wifi_inserted_wifi_toggler_notification_context_title">Activate
         Auto-Toggle ?</string>
     <string name="activate_auto_toggle_for_new_wifi_notification_content">Auto-Toggle %1$s ?</string>
     <string name="enable_action_title">Enable Wi-Fi Toggler</string>
-    <string name="disable_action_title">Pause Wi-Fi Toggler</string>
+    <string name="pause_action_title">Pause Wi-Fi Toggler</string>
     <string name="positive_answer_action">Yes</string>
     <string name="negative_answer_action">No</string>
-    <string name="disable_notification_ticker_content">Wi-Fi Toggler is disabled</string>
-    <string name="enable_notification_ticker_content">Wi-Fi Toggler is enabled</string>
+    <string name="pause_notification_ticker_content">Wi-Fi Toggler paused</string>
+    <string name="enable_notification_ticker_content">Wi-Fi Toggler running</string>
     <string name="connected_saved_wifi_status">Connected</string>
     <string name="system_settings_warning_notification_context_title">Conflicting System
         Settings</string>
@@ -35,6 +35,6 @@
     <string name="tag_key_row_index">tag_key_auto_toggle_index</string>
     <string name="tag_key_row_id_value">tag_key_row_id_value</string>
 
-    <string name="item_reverse_auto_toggle_title">Invert AutoToggle</string>
+    <string name="item_reverse_auto_toggle_title">Reverse AutoToggle</string>
 
 </resources>

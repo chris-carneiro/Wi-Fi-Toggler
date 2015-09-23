@@ -128,7 +128,7 @@ public class NotifUtils {
                 .setContentTitle(res.getString(R.string.app_name))
                 .setContentText(res.getString(R.string
                         .paused_wifi_toggler_notification_context_title))
-                .setTicker(res.getString(R.string.disable_notification_ticker_content))
+                .setTicker(res.getString(R.string.pause_notification_ticker_content))
                 .setSmallIcon(R.drawable.notif_icon)
                 .setColor(res.getColor(R.color.material_orange_400))
                 .setContentIntent(intent);
@@ -160,7 +160,7 @@ public class NotifUtils {
                 .setContentIntent(intent);
 
 
-        notifBuilder.addAction(0, res.getString(R.string.disable_action_title)
+        notifBuilder.addAction(0, res.getString(R.string.pause_action_title)
                 , createPauseWifiTogglerIntent(context));
 
         Notification notification = notifBuilder.build();
