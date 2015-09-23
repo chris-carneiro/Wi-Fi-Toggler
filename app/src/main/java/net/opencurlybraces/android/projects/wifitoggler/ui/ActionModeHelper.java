@@ -126,6 +126,23 @@ public class ActionModeHelper implements
         Log.d(TAG, "onItemCheckedChanged");
         if (mActionMode == null) return;
         mSavedWifiCursorAdapter.setSelectedItem(position, checked);
+
+        /**
+         *   {@link super()#onItemCheckedStateChanged(ActionMode, int, long, boolean)} calls
+         *   {@link ActionMode#finish()} when {@link
+         *   ListView#getCheckedItemCount()} equals 0
+         *
+         *   For some reason, we can't rely on {@link  ListView#getCheckedItemCount()}.
+         *   When in selection mode, if the app is paused and resumed, the checked item count is
+         *   incremented by 1 and {@link ListView#getCheckedItemCount()} returns the wrong
+         *   value whereas {@link ListView#getCheckedItemPositions()} size is right.
+         *   As a consequence I decided to rely on my own cache and finish action mode manually.
+         */
+
+        if (mSavedWifiCursorAdapter.getSelectedItemCount() == 0) {
+            mActionMode.finish();
+            return;
+        }
         mActionMode.setTitle(
                 mSavedWifiCursorAdapter.getSelectedItemCount() + "");
         setAutoToggleValueForSelectedItems(position, (int) id, checked);

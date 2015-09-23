@@ -51,8 +51,11 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     private static final String TAG = "SavedWifiList";
     private static final int TOKEN_UPDATE_BATCH = 6;
     private static final String INSTANCE_KEY_CHECKED_ITEMS = "checkedItems";
-    private static final String INSTANCE_KEY_LIST_STATE = "listState";
+    private static final String INSTANCE_KEY_LIST_CHOICE_MODE = "listChoiceMode";
     private static final String INSTANCE_KEY_IS_ACTION_MODE = "isActionMode";
+    private static final String INSTANCE_KEY_FIRST_VISIBLE_POSITION = "firstVisiblePosition";
+    private static final String INSTANCE_KEY_OFFSET_FROM_TOP = "offsetFromTop";
+
     private static final String[] PROJECTION_SSID_AUTO_TOGGLE = new String[]{SavedWifi._ID,
             SavedWifi
                     .SSID, SavedWifi.AUTO_TOGGLE};
@@ -108,7 +111,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         handleBannerDisplay();
         doSystemSettingsCheck();
         setOnItemLongClickListener();
-        handleSavedInstanceRestore();
+        restoreListViewState();
     }
 
     private void setOnItemLongClickListener() {
@@ -119,10 +122,12 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         mWifiTogglerWifiList.setOnItemLongClickListener(mActionModeCallback);
     }
 
-    private void handleSavedInstanceRestore() {
-        Log.d(TAG, "handleSavedInstanceRestore ");
+    private void restoreListViewState() {
+        Log.d(TAG, "restoreListViewState ");
+
         if (mSavedInstanceState != null) {
-            int choiceMode = mSavedInstanceState.getInt(INSTANCE_KEY_LIST_STATE,
+
+            int choiceMode = mSavedInstanceState.getInt(INSTANCE_KEY_LIST_CHOICE_MODE,
                     mWifiTogglerWifiList
                             .getChoiceMode());
             boolean wasInActionModeOnPause = mSavedInstanceState.getBoolean
@@ -141,6 +146,12 @@ public class SavedWifiListActivity extends AppCompatActivity implements
                         (INSTANCE_KEY_CHECKED_ITEMS);
                 setCachedItemsChecked(checkedItems);
             }
+
+            int firstVisiblePosition = mSavedInstanceState.getInt
+                    (INSTANCE_KEY_FIRST_VISIBLE_POSITION);
+            int offsetTop = mSavedInstanceState.getInt(INSTANCE_KEY_OFFSET_FROM_TOP);
+            // restore index and position
+            mWifiTogglerWifiList.setSelectionFromTop(firstVisiblePosition, offsetTop);
         }
     }
 
@@ -159,10 +170,21 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(INSTANCE_KEY_LIST_STATE, mWifiTogglerWifiList.getChoiceMode());
-        outState.putIntegerArrayList(INSTANCE_KEY_CHECKED_ITEMS, mSavedWifiCursorAdapter
-                .getSelectedItems());
-        outState.putBoolean(INSTANCE_KEY_IS_ACTION_MODE, mSavedWifiCursorAdapter.isActionMode());
+        if (mSavedWifiCursorAdapter.isActionMode()) {
+            outState.putInt(INSTANCE_KEY_LIST_CHOICE_MODE, mWifiTogglerWifiList.getChoiceMode());
+            outState.putIntegerArrayList(INSTANCE_KEY_CHECKED_ITEMS, mSavedWifiCursorAdapter
+                    .getSelectedItems());
+            outState.putBoolean(INSTANCE_KEY_IS_ACTION_MODE, mSavedWifiCursorAdapter.isActionMode
+                    ());
+
+        }
+        int firstVisiblePosition = mWifiTogglerWifiList.getFirstVisiblePosition();
+        View v = mWifiTogglerWifiList.getChildAt(0);
+        int top = (v == null) ? 0 : (v.getTop() - mWifiTogglerWifiList.getPaddingTop());
+
+        outState.putInt(INSTANCE_KEY_FIRST_VISIBLE_POSITION, firstVisiblePosition);
+        outState.putInt(INSTANCE_KEY_OFFSET_FROM_TOP, top);
+        mSavedInstanceState = outState; // Needed on Pause/Resume to keep selected items' state
     }
 
 
