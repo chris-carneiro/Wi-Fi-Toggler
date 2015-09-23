@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Wi-Fi Toggler</string>
+    <string name="action_settings">Préférences</string>
+    <string name="off_wifi_toggler_switch_label_value">En pause</string>
+    <string name="on_wifi_toggler_switch_label_value">Actif</string>
+    <string name="wifi_list_info_when_wifi_toggler_off">"Activez Wi-Fi Toggler pour voir vos réseaux sauvegardés et profiter de l'activation automatique du Wi-Fi"</string>
+    <string name="wifi_list_info_no_known_wifi">Aucun Wi-Fi sauvegardé disponible pour auto activation.</string>
+    <string name="paused_wifi_toggler_notification_context_title">Wi-Fi Toggler
+        en pause</string>
+    <string name="active_wifi_toggler_notification_context_title">Wi-Fi Toggler activé</string>
+    <string name="new_wifi_inserted_wifi_toggler_notification_context_title">"Activer
+        l'auto activation ?"</string>
+    <string name="activate_auto_toggle_for_new_wifi_notification_content">Auto activation pour %1$s ?</string>
+    <string name="enable_action_title">Activer Wi-Fi Toggler</string>
+    <string name="pause_action_title">Désactiver Wi-Fi Toggler</string>
+    <string name="positive_answer_action">Oui</string>
+    <string name="negative_answer_action">Non</string>
+    <string name="pause_notification_ticker_content">Wi-Fi Toggler en pause</string>
+    <string name="enable_notification_ticker_content">Wi-Fi Toggler actif</string>
+    <string name="connected_saved_wifi_status">Connected</string>
+    <string name="system_settings_warning_notification_context_title">Conflit avec les préférences
+        système</string>
+    <string name="system_settings_warning_notification_ticker">Auto activation non disponible,
+        cliquer et vérifier vos préférences</string>
+    <string name="system_settings_warning_message_banner">Auto activation non disponible,
+        cliquer pour vérifier vos préférences</string>
+
+    <string name="tag_key_ssid">tag_key_ssid</string>
+    <string name="tag_key_status">tag_key_status</string>
+    <string name="tag_key_row">tag_key_auto_toggle</string>
+    <string name="tag_key_ssid_index">tag_key_ssid_index</string>
+    <string name="tag_key_status_index">tag_key_status_index</string>
+    <string name="tag_key_row_index">tag_key_auto_toggle_index</string>
+    <string name="tag_key_row_id_value">tag_key_row_id_value</string>
+
+    <string name="item_reverse_auto_toggle_title">"Inverser l'auto activation"</string>
+
+    <string name="title_activity_settings">Préférences</string>
+
+    <!-- Strings related to Settings -->
+
+    <string name="pref_header_general">Général</string>
+    <string name="pref_title_run_at_startup">Lancer Wi-Fi Toggler au démarrage</string>
+    <string name="pref_description_run_at_startup">Lance Wi-Fi Toggler au démarrage de votre
+        téléphone</string>
+
+    <string name="pref_title_signal_strength_threshold">"Force du signal pour l'auto activation"</string>
+    <string-array name="pref_wifi_signal_strength_list_values">
+        <item>8</item>
+        <item>6</item>
+        <item>4</item>
+        <item>2</item>
+        <item>0</item>
+    </string-array>
+
+    <string-array name="pref_wifi_signal_strength_list_titles">
+        <item>Excellent</item>
+        <item>Très bon</item>
+        <item>Bon</item>
+        <item>Faible</item>
+        <item>Toujours</item>
+    </string-array>
+
+    <string name="pref_title_auto_toggle_default_value_for_new_wifi">Auto activer nouveaux Wi-Fis ?</string>
+
+    <string-array name="pref_auto_toggle_default_value_for_new_wifi_list_values">
+        <item>true</item>
+        <!-- Auto toggle On(default)-->
+        <item>false</item>
+    </string-array>
+
+    <string-array name="pref_auto_toggle_default_value_for_new_wifi_list_titles">
+        <item>Auto toggle On (défaut)</item>
+        <item>Auto toggle Off</item>
+    </string-array>
+
+    <string name="pref_header_notifications">Notifications</string>
+
+    <string name="pref_title_warning_notifications">"Notifications d'avertissement"</string>
+    <string name="pref_description_warning_notifications">"Etre notifé lorsque les préférences système empêchent l'auto activation des Wi-Fis"</string>
+
+    <string name="pref_title_auto_toggle_notifications">"Notifications d'auto activation"</string>
+    <string name="pref_description_auto_toggle_notifications">"Etre notifié à la sauvegarde d'un nouveau Wi-Fi et choisir son auto activation."
+    </string>
+
+    <string
+        name="key_pref_warning_notifications">net.opencurlybraces.android.projects.wifitoggler.prefs
+        .warning_notifications</string>
+    <string
+        name="key_pref_general_signal_strength">net.opencurlybraces.android.projects.wifitoggler.prefs
+        .signal_strength_threshold</string>
+    <string
+        name="key_pref_run_at_startup">net.opencurlybraces.android.projects.wifitoggler.prefs
+        .run_at_startup</string>
+
+    <!-- related to StartupSettingsCheckActivity  -->
+    <string name="startup_check_title_activity">Préparez vos préférences système</string>
+    <string name="check_system_settings_title_activity">Vérifiez vos préférences système</string>
+    <string name="startup_check_wifi_settings_title">Préférences Wi-Fi</string>
+    <string name="startup_check_wifi_settings_desc">Le Wi-Fi doit être activé</string>
+    <string name="startup_check_airplane_settings_title">Mode Action</string>
+    <string name="startup_check_airplane_settings_desc">Le mode avion doit être désactivé</string>
+    <string name="startup_check_scan_always_available_settings_title">Recherche toujours disponible</string>
+    <string name="startup_check_scan_always_available_settings_desc">La recherche de Wi-Fi doit toujours être disponible</string>
+    <string name="startup_check_hotspot_settings_title">"Point d'accès"</string>
+    <string name="startup_check_hotspot_settings_desc">"Le point d'accès doit être inactif"</string>
+
+
+    <string name="startup_check_settings_continue_button_text">Continuer</string>
+
+</resources>
