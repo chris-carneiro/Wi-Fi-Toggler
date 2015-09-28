@@ -7,4 +7,11 @@
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_disabled_wifi"
+        android:orderInCategory="100"
+        android:title="@string/action_disabled_wifis"
+        android:visible="false"
+        app:showAsAction="never"/>
 </menu>

@@ -1,8 +1,6 @@
 package net.opencurlybraces.android.projects.wifitoggler.ui;
 
-import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.Context;
 import android.content.CursorLoader;
@@ -13,7 +11,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -21,8 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.CompoundButton;
-import android.widget.CursorAdapter;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -30,31 +25,22 @@ import android.widget.TextView;
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
-import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifitoggler.data.model.Wifi;
-import net.opencurlybraces.android.projects.wifitoggler.data.provider.WifiTogglerContract;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.service.WifiTogglerService;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-public class SavedWifiListActivity extends AppCompatActivity implements
+public class SavedWifiListActivity extends SavedWifiBaseListActivity implements
         CompoundButton.OnCheckedChangeListener,
-        LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener, Observer,
-        DataAsyncQueryHandler.AsyncQueryListener {
+        View.OnClickListener, Observer {
 
     private static final String TAG = "SavedWifiList";
-    private static final int TOKEN_UPDATE_BATCH = 6;
-    private static final String INSTANCE_KEY_CHECKED_ITEMS = "checkedItems";
-    private static final String INSTANCE_KEY_LIST_CHOICE_MODE = "listChoiceMode";
-    private static final String INSTANCE_KEY_IS_ACTION_MODE = "isActionMode";
-    private static final String INSTANCE_KEY_FIRST_VISIBLE_POSITION = "firstVisiblePosition";
-    private static final String INSTANCE_KEY_OFFSET_FROM_TOP = "offsetFromTop";
+
 
     private static final String[] PROJECTION_SSID_AUTO_TOGGLE = new String[]{SavedWifi._ID,
             SavedWifi
@@ -62,29 +48,19 @@ public class SavedWifiListActivity extends AppCompatActivity implements
 
     private TextView mWifiTogglerSwitchLabel = null;
     private Switch mWifiTogglerActivationSwitch = null;
-    private ListView mWifiTogglerWifiList = null;
-    private TextView mEmptyView = null;
     private RelativeLayout mBanner = null;
     private TextView mBannerContent = null;
 
-    private SavedWifiListAdapter mSavedWifiCursorAdapter = null;
     private ActionModeHelper mActionModeCallback = null;
-    private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
     private Bundle mSavedInstanceState = null;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (Config.DEBUG_MODE) {
-            StartupUtils.startStrictMode();
-        }
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "OnCreate");
         setContentView(R.layout.activity_saved_wifi_list);
-        mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(), this);
+        bindListView();
         bindViews();
-        initCursorLoader();
-        mSavedWifiCursorAdapter = (SavedWifiListAdapter) initCursorAdapter();
     }
 
     @Override
@@ -106,12 +82,50 @@ public class SavedWifiListActivity extends AppCompatActivity implements
 
         startupCheck();
         handleNotification(mWifiTogglerActivationSwitch.isChecked());
-        setListAdapterAccordingToSwitchState();
+//        setListAdapter();
         registerReceivers();
         handleBannerDisplay();
         doSystemSettingsCheck();
         setOnItemLongClickListener();
         restoreListViewState();
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String[] projection = {SavedWifi._ID, SavedWifi.SSID, SavedWifi.STATUS, SavedWifi
+                .AUTO_TOGGLE};
+        CursorLoader cursorLoader = new CursorLoader(this,
+                SavedWifi.CONTENT_URI, projection, SavedWifi.whereAutoToggle, new String[]{"1"},
+                null);
+        return cursorLoader;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_saved_wifi_list, menu);
+        MenuItem disabledWifi = menu.findItem(R.id.action_disabled_wifi);
+        disabledWifi.setVisible(true);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+            displaySettingsActivity();
+            return true;
+        } else if (id == R.id.action_disabled_wifi) {
+            displayDisabledWifiListActivity();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    protected void displayDisabledWifiListActivity() {
+        Intent showDisabledWifis = new Intent(this, SavedDisabledWifiListActivity.class);
+        startActivity(showDisabledWifis);
     }
 
     private void setOnItemLongClickListener() {
@@ -201,34 +215,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         unregisterReceivers();
     }
 
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_configured_wifi_list, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            displaySettingsActivity();
-            return true;
-        }
-
-        return false;
-    }
-
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         Log.d(TAG, "onCheckedChanged");
@@ -253,35 +239,9 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         }
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String[] projection = {SavedWifi._ID, SavedWifi.SSID, SavedWifi.STATUS, SavedWifi
-                .AUTO_TOGGLE};
-        CursorLoader cursorLoader = new CursorLoader(this,
-                SavedWifi.CONTENT_URI, projection, null, null, null);
-        return cursorLoader;
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mSavedWifiCursorAdapter.swapCursor(data);
-        mWifiTogglerWifiList.setEmptyView(mEmptyView);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mSavedWifiCursorAdapter.swapCursor(null);
-    }
-
-    private void initCursorLoader() {
-        getLoaderManager().initLoader(0, null, this);
-    }
-
     private void bindViews() {
         mWifiTogglerSwitchLabel = (TextView) findViewById(R.id.wifi_toggler_switch_label);
         mWifiTogglerActivationSwitch = (Switch) findViewById(R.id.wifi_toggler_activation_switch);
-        mWifiTogglerWifiList = (ListView) findViewById(android.R.id.list);
-        mEmptyView = (TextView) findViewById(android.R.id.empty);
         mWifiTogglerActivationSwitch.setOnCheckedChangeListener(this);
         mBannerContent = (TextView) findViewById(R.id.wifi_toggler_message_banner_content);
         mBannerContent.setEllipsize(TextUtils.TruncateAt.MARQUEE);
@@ -291,14 +251,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         mBanner.setOnClickListener(this);
     }
 
-
-    private CursorAdapter initCursorAdapter() {
-        Log.d(TAG, "initCursorAdapter");
-        if (mSavedWifiCursorAdapter == null) {
-            mSavedWifiCursorAdapter = new SavedWifiListAdapter(this, null, 0);
-        }
-        return mSavedWifiCursorAdapter;
-    }
 
     private void startupCheck() {
         int startupMode = StartupUtils.appStartMode(this);
@@ -388,22 +340,9 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         }
     }
 
-    private void handleSavedWifiListLoading(boolean isChecked) {
-        Log.d(TAG, "handleSavedWifiListLoading=" + isChecked);
-        if (isChecked) {
-            mWifiTogglerWifiList.setAdapter(mSavedWifiCursorAdapter);
-        } else {
-            mWifiTogglerWifiList.setAdapter(null);
-        }
-    }
-
-    private void displaySettingsActivity() {
-        Intent preferencesIntent = new Intent(this, SettingsActivity.class);
-        startActivity(preferencesIntent);
-    }
-
-    private void setListAdapterAccordingToSwitchState() {
-        Log.d(TAG, "setListAdapterAccordingToSwitchState");
+    @Override
+    protected void setListAdapter() {
+        Log.d(TAG, "setListAdapter");
         if (PrefUtils.isWifiTogglerActive(this)) {
             mWifiTogglerActivationSwitch.setChecked(true);
             mWifiTogglerWifiList.setAdapter(mSavedWifiCursorAdapter);
@@ -469,19 +408,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         startService(checkSettings);
     }
 
-    protected ArrayList<ContentProviderOperation> udpateBatchWifiToggleState(List<Wifi> wifis) {
-        ArrayList<ContentProviderOperation> operations = (ArrayList<ContentProviderOperation>)
-                SavedWifi.buildBatchUpdateAutoToggle
-                        (wifis);
-        return operations;
-
-    }
-
-    protected void startBatchUpdate(ArrayList<ContentProviderOperation> operations) {
-        mDataAsyncQueryHandler.startBatchOperations(TOKEN_UPDATE_BATCH, null, WifiTogglerContract
-                .AUTHORITY, operations);
-    }
-
 
     @Override
     public void onBatchInsertComplete(int token, Object cookie, ContentProviderResult[] results) {
@@ -513,7 +439,6 @@ public class SavedWifiListActivity extends AppCompatActivity implements
 
     @Override
     public void onUpdateComplete(int token, Object cookie, int result) {
-
     }
 
     @Override

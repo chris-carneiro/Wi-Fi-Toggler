@@ -57,6 +57,7 @@ public class SavedWifi implements BaseColumns {
     public static final String whereSSID = SavedWifi.SSID + "=?";
     public static final String whereStatus = SavedWifi.STATUS + "=?";
     public static final String whereID = SavedWifi._ID + "=?";
+    public static final String whereAutoToggle = SavedWifi.AUTO_TOGGLE + "=?";
 
     private static final String[] PROJECTION = new String[]{
             _ID,
