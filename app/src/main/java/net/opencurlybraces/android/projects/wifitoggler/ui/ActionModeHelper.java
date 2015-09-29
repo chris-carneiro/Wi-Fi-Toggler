@@ -23,7 +23,8 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
- * Created by chris on 18/09/15.
+ * Created by chris on 18/09/15. TODO make a sample project that shows the use of this helper with
+ * listview state restore then remove this class from project
  */
 public class ActionModeHelper implements
         AdapterView.OnItemLongClickListener, AbsListView.OnItemClickListener,

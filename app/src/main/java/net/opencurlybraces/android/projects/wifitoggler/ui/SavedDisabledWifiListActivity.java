@@ -1,10 +1,8 @@
 package net.opencurlybraces.android.projects.wifitoggler.ui;
 
-import android.content.ContentProviderResult;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 
@@ -45,24 +43,5 @@ public class SavedDisabledWifiListActivity extends SavedWifiBaseListActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    @Override
-    public void onBatchInsertComplete(int token, Object cookie, ContentProviderResult[] results) {
-    }
-
-    @Override
-    public void onQueryComplete(int token, Object cookie, Cursor cursor) {
-    }
-
-    @Override
-    public void onUpdateComplete(int token, Object cookie, int result) {
-    }
-
-    @Override
-    public void onInsertComplete(int token, Object cookie, Uri uri) {
-    }
-
-    @Override
-    public void onBatchUpdateComplete(int token, Object cookie, ContentProviderResult[] results) {
-    }
 
 }

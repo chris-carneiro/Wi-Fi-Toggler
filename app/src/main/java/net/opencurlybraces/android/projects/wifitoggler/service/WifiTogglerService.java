@@ -111,9 +111,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
     private HotspotModeStateReceiver mHotspotModeStateReceiver = null;
 
 
-    private static final int TOKEN_INSERT = 2;
-    private static final int TOKEN_UPDATE = 3;
-    private static final int TOKEN_INSERT_BATCH = 5;
+
     private CheckPassiveScanHandler mCheckPassiveScanHandler;
     private final int CHECK_SCAN_ALWAYS_AVAILABLE = 3;
 
@@ -299,14 +297,14 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         if (!PrefUtils.isAutoToggleOnByDefaultOnNewWifi(this)) {
             values.put(SavedWifi.AUTO_TOGGLE, false);
         }
-        mDataAsyncQueryHandler.startInsert(TOKEN_INSERT, ssidToInsert, SavedWifi.CONTENT_URI,
+        mDataAsyncQueryHandler.startInsert(Config.TOKEN_INSERT, ssidToInsert, SavedWifi.CONTENT_URI,
                 values);
     }
 
     public void handleWifiUpdate(final ContentValues cv, final String where, final String[]
             whereArgs) {
 
-        mDataAsyncQueryHandler.startUpdate(TOKEN_UPDATE, null, SavedWifi.CONTENT_URI,
+        mDataAsyncQueryHandler.startUpdate(Config.TOKEN_UPDATE, null, SavedWifi.CONTENT_URI,
                 cv,
                 where, whereArgs);
     }
@@ -327,7 +325,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
 
     private void insertSavedWifiBatchAsync(ArrayList<ContentProviderOperation> batch) {
         if (batch == null) return;
-        mDataAsyncQueryHandler.startBatchOperations(TOKEN_INSERT_BATCH, null, WifiTogglerContract
+        mDataAsyncQueryHandler.startBatchOperations(Config.TOKEN_INSERT_BATCH, null, WifiTogglerContract
                 .AUTHORITY, batch);
 
     }

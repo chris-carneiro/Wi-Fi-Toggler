@@ -42,4 +42,12 @@ public class Config {
     public static final long INTERVAL_CHECK_HALF_SECOND = 500;
 
     public static final long INTERVAL_FIVE_SECOND = 1000 * 5;
+
+    /**
+     * Async queries tokens
+     */
+    public static final int TOKEN_INSERT = 2;
+    public static final int TOKEN_UPDATE = 3;
+    public static final int TOKEN_INSERT_BATCH = 5;
+
 }
