@@ -24,6 +24,8 @@ import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandl
 import net.opencurlybraces.android.projects.wifitoggler.data.model.Wifi;
 import net.opencurlybraces.android.projects.wifitoggler.data.provider.WifiTogglerContract;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
+import net.opencurlybraces.android.projects.wifitoggler.ui.SwipeDismissListViewTouchListener
+        .DismissCallbacks;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
 import java.util.ArrayList;
@@ -32,7 +34,7 @@ import java.util.List;
 
 public abstract class SavedWifiBaseListActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
-        DataAsyncQueryHandler.AsyncQueryListener {
+        DataAsyncQueryHandler.AsyncQueryListener, DismissCallbacks {
 
     private static final String TAG = "BaseListActivity";
 
@@ -225,38 +227,7 @@ public abstract class SavedWifiBaseListActivity extends AppCompatActivity implem
             mTouchListener =
                     new SwipeDismissListViewTouchListener(
                             mWifiTogglerWifiList,
-                            new SwipeDismissListViewTouchListener.DismissCallbacks() {
-                                @Override
-                                public boolean canDismiss(int position) {
-                                    return true;
-                                }
-
-                                @Override
-                                public void onDismiss(ListView listView, int[]
-                                        reverseSortedPositions) {
-                                    for (int position : reverseSortedPositions) {
-                                        long itemId = mSavedWifiCursorAdapter.getItemId(position);
-                                        Cursor item = (Cursor) mSavedWifiCursorAdapter.getItem
-                                                (position);
-                                        item.moveToPosition(position);
-                                        boolean isAutoToggle = (item.getInt(item
-                                                .getColumnIndexOrThrow
-                                                (SavedWifi.AUTO_TOGGLE)) > 0);
-                                        ContentValues cv = new ContentValues();
-                                        cv.put(SavedWifi.AUTO_TOGGLE, !isAutoToggle);
-                                        mDataAsyncQueryHandler.startUpdate(Config.TOKEN_UPDATE,
-                                                null,
-                                                SavedWifi.CONTENT_URI,
-                                                cv,
-                                                SavedWifi.whereID, new String[]{String.valueOf
-                                                        (itemId)});
-                                    }
-                                    mSavedWifiCursorAdapter
-                                            .notifyDataSetChanged();
-                                }
-                            });
-
-
+                            this);
         }
         mWifiTogglerWifiList.setOnTouchListener(mTouchListener);
         // Setting this scroll listener is required to ensure that during ListView scrolling,
@@ -266,6 +237,25 @@ public abstract class SavedWifiBaseListActivity extends AppCompatActivity implem
 
         mWifiTogglerWifiList.setEmptyView(mEmptyView);
 
+    }
+
+
+    public ContentValues buildContentValuesForUpdate(Cursor cursor) {
+        boolean isAutoToggle = (cursor.getInt(cursor
+                .getColumnIndexOrThrow
+                        (SavedWifi.AUTO_TOGGLE)) > 0);
+        ContentValues cv = new ContentValues();
+        cv.put(SavedWifi.AUTO_TOGGLE, !isAutoToggle);
+        return cv;
+    }
+
+    public void updateAutoToggleValue(long itemId, ContentValues cv) {
+        mDataAsyncQueryHandler.startUpdate(Config.TOKEN_UPDATE,
+                null,
+                SavedWifi.CONTENT_URI,
+                cv,
+                SavedWifi.whereID, new String[]{String.valueOf
+                        (itemId)});
     }
 
     @Override
@@ -321,5 +311,23 @@ public abstract class SavedWifiBaseListActivity extends AppCompatActivity implem
                 cursor.close();
             }
         }
+    }
+
+    @Override
+    public boolean canDismiss(int position) {
+        return true;
+    }
+
+    @Override
+    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+        for (int position : reverseSortedPositions) {
+            long itemId = mSavedWifiCursorAdapter.getItemId(position);
+            Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem
+                    (position);
+            ContentValues cv = buildContentValuesForUpdate(cursor);
+            updateAutoToggleValue(itemId, cv);
+        }
+        mSavedWifiCursorAdapter
+                .notifyDataSetChanged();
     }
 }

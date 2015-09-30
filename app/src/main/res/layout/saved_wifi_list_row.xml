@@ -4,23 +4,41 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="@dimen/normal_padding"
+
     >
 
-    <TextView
-        android:id="@+id/saved_wifi_ssid"
+    <RelativeLayout
+        android:id="@+id/saved_wifi_row_content_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/black"
-        />
+        android:padding="@dimen/normal_padding">
+
+        <TextView
+            android:id="@+id/saved_wifi_ssid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            />
+
+        <TextView
+            android:id="@+id/saved_wifi_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@id/saved_wifi_ssid"
+            android:layout_below="@id/saved_wifi_ssid"
+            android:textColor="@android:color/darker_gray"
+            />
+    </RelativeLayout>
 
     <TextView
-        android:id="@+id/saved_wifi_state"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignStart="@id/saved_wifi_ssid"
-        android:layout_below="@id/saved_wifi_ssid"
-        android:textColor="@android:color/darker_gray"
-        />
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/saved_wifi_row_content_layout"
+        android:background="@drawable/saved_wifi_list_divider"
+        android:gravity="center_vertical"
+        android:minHeight="?android:attr/listPreferredItemHeightSmall"
+        android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+        android:textAppearance="?android:attr/textAppearanceListItemSmall"/>
 
 </net.opencurlybraces.android.projects.wifitoggler.ui.CheckableRelativeLayout>
