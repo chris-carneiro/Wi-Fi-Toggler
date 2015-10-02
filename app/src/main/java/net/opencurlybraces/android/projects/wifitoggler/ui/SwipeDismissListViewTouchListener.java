@@ -86,6 +86,7 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
     private VelocityTracker mVelocityTracker;
     private int mDownPosition;
     private View mDownView;
+
     private boolean mPaused;
     private int mOriginalHeight;
 
@@ -117,7 +118,8 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
      * @param callbacks The callback to trigger when the user has indicated that she would like to
      *                  dismiss one or more list items.
      */
-    public SwipeDismissListViewTouchListener(ListView listView, DismissCallbacks callbacks) {
+    public SwipeDismissListViewTouchListener(ListView listView, DismissCallbacks
+            callbacks) {
         ViewConfiguration vc = ViewConfiguration.get(listView.getContext());
         mSlop = vc.getScaledTouchSlop();
         mMinFlingVelocity = vc.getScaledMinimumFlingVelocity() * 16;
@@ -261,8 +263,12 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
                             .setListener(new AnimatorListenerAdapter() {
                                 @Override
                                 public void onAnimationEnd(Animator animation) {
+
                                     performDismiss(downView, downPosition);
+
+
                                 }
+
                             });
                 } else {
                     // cancel
@@ -340,7 +346,8 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
         final ViewGroup.LayoutParams lp = dismissView.getLayoutParams();
         mOriginalHeight = dismissView.getHeight();
 
-        ValueAnimator animator = ValueAnimator.ofInt(mOriginalHeight, 1).setDuration(mAnimationTime);
+        ValueAnimator animator = ValueAnimator.ofInt(mOriginalHeight, 1).setDuration
+                (mAnimationTime);
 
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -361,7 +368,7 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
                     // animation with a stale position
                     mDownPosition = ListView.INVALID_POSITION;
 
-//                    resetDeletedViews();
+                    //                    resetDeletedViews();
                 }
             }
         });

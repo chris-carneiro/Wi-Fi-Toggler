@@ -14,6 +14,11 @@
     <string name="new_wifi_inserted_wifi_toggler_notification_context_title">Activate
         Auto-Toggle ?</string>
     <string name="activate_auto_toggle_for_new_wifi_notification_content">Auto-Toggle %1$s ?</string>
+    <string name="wifi_disabled_confirmation_bottom_overlay_content">Auto-Toggle off
+        for %1$s</string>
+     <string name="wifi_enabled_confirmation_bottom_overlay_content">Auto-Toggle on
+        for %1$s</string>
+    <string name="wifi_undo_action_text">UNDO</string>
     <string name="enable_action_title">Enable Wi-Fi Toggler</string>
     <string name="pause_action_title">Pause Wi-Fi Toggler</string>
     <string name="positive_answer_action">Yes</string>

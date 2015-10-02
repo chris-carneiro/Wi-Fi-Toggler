@@ -1,6 +1,7 @@
 package net.opencurlybraces.android.projects.wifitoggler.ui;
 
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -15,10 +17,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
@@ -26,11 +30,10 @@ import net.opencurlybraces.android.projects.wifitoggler.service.WifiTogglerServi
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
-import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
-public class SavedWifiListActivity extends SavedWifiBaseListActivity implements
+public class SavedWifiListActivity extends SavedWifiListActivityAbstract implements
         CompoundButton.OnCheckedChangeListener,
         View.OnClickListener, Observer {
 
@@ -40,8 +43,7 @@ public class SavedWifiListActivity extends SavedWifiBaseListActivity implements
     private Switch mWifiTogglerActivationSwitch = null;
     private RelativeLayout mBanner = null;
     private TextView mBannerContent = null;
-
-    private ActionModeHelper mActionModeCallback = null;
+    private TextView mUndoButton = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +51,7 @@ public class SavedWifiListActivity extends SavedWifiBaseListActivity implements
         setContentView(R.layout.activity_saved_wifi_list);
         bindListView();
         bindViews();
+
 
     }
 
@@ -74,9 +77,6 @@ public class SavedWifiListActivity extends SavedWifiBaseListActivity implements
         registerReceivers();
         handleBannerDisplay();
         doSystemSettingsCheck();
-        //        setOnItemLongClickListener();
-//        restoreListViewState();
-
 
     }
 
@@ -119,30 +119,6 @@ public class SavedWifiListActivity extends SavedWifiBaseListActivity implements
         startActivity(showDisabledWifis);
     }
 
-    private void setOnItemLongClickListener() {
-        if (mActionModeCallback == null) {
-            mActionModeCallback = new ActionModeHelper(this,
-                    mWifiTogglerWifiList);
-        }
-        mWifiTogglerWifiList.setOnItemLongClickListener(mActionModeCallback);
-    }
-
-
-
-    private void setCachedItemsChecked(ArrayList<Integer> checkedItems) {
-        Log.d(TAG, "setCachedItemsChecked checkedItems=" + checkedItems);
-        if (checkedItems == null || checkedItems.isEmpty()) {
-            Log.d(TAG, "No Items to check");
-            return;
-        }
-        for (int i = 0; i < checkedItems.size(); i++) {
-            int position = checkedItems.get(i);
-            mWifiTogglerWifiList.setItemChecked(position, true);
-        }
-    }
-
-
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -173,7 +149,9 @@ public class SavedWifiListActivity extends SavedWifiBaseListActivity implements
         }
     }
 
-    private void bindViews() {
+    @Override
+    protected void bindViews() {
+        mEmptyView.setText(getString(R.string.wifi_list_info_no_known_wifi));
         mWifiTogglerSwitchLabel = (TextView) findViewById(R.id.wifi_toggler_switch_label);
         mWifiTogglerActivationSwitch = (Switch) findViewById(R.id.wifi_toggler_activation_switch);
         mWifiTogglerActivationSwitch.setOnCheckedChangeListener(this);
@@ -183,6 +161,15 @@ public class SavedWifiListActivity extends SavedWifiBaseListActivity implements
         mBannerContent.setSelected(true);
         mBanner = (RelativeLayout) findViewById(R.id.wifi_toggler_message_banner);
         mBanner.setOnClickListener(this);
+        mDismissConfirmationText = (TextView) findViewById(R.id.tv_confirmation_message_wifi);
+        mDismissConfirmationText.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+        mDismissConfirmationText.setSingleLine(true);
+
+        mDismissConfirmationBanner = (RelativeLayout) findViewById(R.id
+                .saved_wifi_confirmation_banner);
+
+        mUndoButton = (TextView) findViewById(R.id.undo_action_wifi_button);
+        mUndoButton.setOnClickListener(this);
     }
 
 
@@ -327,7 +314,21 @@ public class SavedWifiListActivity extends SavedWifiBaseListActivity implements
             case R.id.wifi_toggler_message_banner:
                 launchSystemSettingsCheckActivity();
                 break;
+            case R.id.undo_action_wifi_button:
+                handleUndoAction();
+                break;
         }
+    }
+
+    @Override
+    public void handleUndoAction() {
+        ContentValues cv = new ContentValues();
+        cv.put(SavedWifi.AUTO_TOGGLE, true);
+        mDataAsyncQueryHandler.startUpdate(Config.TOKEN_UPDATE, null, SavedWifi
+                .CONTENT_URI, cv, SavedWifi
+                .whereID, new String[]{String.valueOf(mItemIdToUndo.get())});
+        mAutoHideHandler.removeMessages(WHAT_AUTO_HIDE);
+        mAutoHideHandler.sendMessage(Message.obtain(mAutoHideHandler));
     }
 
     @Override
@@ -341,5 +342,22 @@ public class SavedWifiListActivity extends SavedWifiBaseListActivity implements
         checkSettings.setAction(WifiTogglerService.ACTION_STARTUP_SETTINGS_PRECHECK);
         startService(checkSettings);
     }
+
+    @Override
+    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+        super.onDismiss(listView, reverseSortedPositions);
+        for (int position : reverseSortedPositions) {
+            long itemId = mSavedWifiCursorAdapter.getItemId(position);
+
+            updateAutoToggleValue(itemId, position);
+            displayConfirmationBannerWithUndo(position, R.string.wifi_disabled_confirmation_bottom_overlay_content);
+            cacheItemIdForUndo(itemId);
+            mSavedWifiCursorAdapter
+                    .notifyDataSetChanged();
+        }
+
+
+    }
+
 
 }

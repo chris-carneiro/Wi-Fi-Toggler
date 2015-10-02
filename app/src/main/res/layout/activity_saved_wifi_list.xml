@@ -16,7 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/wifi_list_row_margin_left"
+            android:layout_marginStart="@dimen/wifi_list_row_margin_left"
             android:text="@string/on_wifi_toggler_switch_label_value"
             android:textColor="@android:color/white"
             android:textSize="@dimen/switch_banner_label_value_text_size"/>
@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="@dimen/wifi_list_row_margin_left"
+            android:layout_marginEnd="@dimen/wifi_list_row_margin_left"
             android:layout_toEndOf="@id/wifi_toggler_switch_label"
             android:checked="true"/>
 
@@ -61,31 +61,12 @@
             />
 
     </RelativeLayout>
+    <include
+        layout="@layout/saved_wifi_list_layout"
+        />
 
-    <RelativeLayout
-        android:id="@+id/list_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/wifi_toggler_message_banner"
-        >
-
-        <ListView
-            android:id="@android:id/list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:divider="@null"
-            android:dividerHeight="0dp"
-            />
-
-        <TextView
-            android:id="@android:id/empty"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_margin="@dimen/normal_padding"
-            android:padding="@dimen/normal_padding"
-            android:text="@string/wifi_list_info_when_wifi_toggler_off"
-            android:textAlignment="center"/>
-    </RelativeLayout>
+    <include
+        layout="@layout/saved_wifi_confirmation_overlay_layout"
+        />
 
 </RelativeLayout>

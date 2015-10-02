@@ -41,4 +41,6 @@
         android:paddingStart="?android:attr/listPreferredItemPaddingStart"
         android:textAppearance="?android:attr/textAppearanceListItemSmall"/>
 
+
+
 </net.opencurlybraces.android.projects.wifitoggler.ui.CheckableRelativeLayout>

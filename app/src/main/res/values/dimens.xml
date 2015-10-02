@@ -4,6 +4,7 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="action_bar_title_left_margin">30dp</dimen>
     <dimen name="normal_padding">10dp</dimen>
+    <dimen name="medium_padding">15dp</dimen>
     <dimen name="switch_banner_height">60dp</dimen>
     <dimen name="switch_banner_label_value_text_size">18sp</dimen>
     <dimen name="message_banner_text_size">14sp</dimen>

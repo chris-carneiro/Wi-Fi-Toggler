@@ -9,6 +9,8 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -16,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
@@ -28,18 +31,21 @@ import net.opencurlybraces.android.projects.wifitoggler.ui.SwipeDismissListViewT
         .DismissCallbacks;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 
-public abstract class SavedWifiBaseListActivity extends AppCompatActivity implements
+public abstract class SavedWifiListActivityAbstract extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
-        DataAsyncQueryHandler.AsyncQueryListener, DismissCallbacks {
+        DataAsyncQueryHandler.AsyncQueryListener, DismissCallbacks, View.OnClickListener {
 
     private static final String TAG = "BaseListActivity";
 
     private static final int TOKEN_UPDATE_BATCH = 6;
 
+    protected static final int WHAT_AUTO_HIDE = 5;
     private static final String[] PROJECTION_SSID_AUTO_TOGGLE = new String[]{SavedWifi._ID,
             SavedWifi
                     .SSID, SavedWifi.AUTO_TOGGLE};
@@ -56,10 +62,14 @@ public abstract class SavedWifiBaseListActivity extends AppCompatActivity implem
 
     protected ListView mWifiTogglerWifiList = null;
     protected TextView mEmptyView = null;
-
+    protected RelativeLayout mDismissConfirmationBanner = null;
+    protected TextView mDismissConfirmationText = null;
     private Bundle mSavedInstanceState = null;
 
     private SwipeDismissListViewTouchListener mTouchListener = null;
+
+    protected ViewAutoHideHandler mAutoHideHandler = null;
+    protected AtomicLong mItemIdToUndo = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,17 +89,18 @@ public abstract class SavedWifiBaseListActivity extends AppCompatActivity implem
         super.onResume();
         setListAdapter();
         restoreListViewState();
-
-
     }
+
+    protected abstract void setListAdapter();
+
+    protected abstract void handleUndoAction();
+
+    protected abstract void bindViews();
 
     protected void bindListView() {
         mWifiTogglerWifiList = (ListView) findViewById(android.R.id.list);
         mEmptyView = (TextView) findViewById(android.R.id.empty);
     }
-
-
-    protected abstract void setListAdapter();
 
     protected ArrayList<ContentProviderOperation> udpateBatchWifiToggleState(List<Wifi> wifis) {
         ArrayList<ContentProviderOperation> operations = (ArrayList<ContentProviderOperation>)
@@ -134,6 +145,7 @@ public abstract class SavedWifiBaseListActivity extends AppCompatActivity implem
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        // TODO remove once we're sure we don't roll back to actionmode
         if (mSavedWifiCursorAdapter.isActionMode()) {
             outState.putInt(INSTANCE_KEY_LIST_CHOICE_MODE, mWifiTogglerWifiList.getChoiceMode());
             outState.putIntegerArrayList(INSTANCE_KEY_CHECKED_ITEMS, mSavedWifiCursorAdapter
@@ -163,35 +175,10 @@ public abstract class SavedWifiBaseListActivity extends AppCompatActivity implem
         Log.d(TAG, "restoreListViewState ");
 
         if (mSavedInstanceState != null) {
-
-            //            int choiceMode = mSavedInstanceState.getInt(INSTANCE_KEY_LIST_CHOICE_MODE,
-            //                    mWifiTogglerWifiList
-            //                            .getChoiceMode());
-            //            boolean wasInActionModeOnPause = mSavedInstanceState.getBoolean
-            //                    (INSTANCE_KEY_IS_ACTION_MODE);
-            //
-            //            if (wasInActionModeOnPause) {
-            //                /**
-            //                 *  Needed on screen rotation only as listview is apparently reset
-            // and so is the
-            //                 *  choice mode but not when app is put in background.
-            //                 *  setChoiceMode() destroys the action mode, and we obviously do
-            // want that..
-            //                 */
-            //                if (mWifiTogglerWifiList.getChoiceMode() != AbsListView
-            //                        .CHOICE_MODE_MULTIPLE_MODAL) {
-            //                    mWifiTogglerWifiList.setChoiceMode(choiceMode);
-            //                }
-            //                ArrayList<Integer> checkedItems = mSavedInstanceState
-            // .getIntegerArrayList
-            //                        (INSTANCE_KEY_CHECKED_ITEMS);
-            //                setCachedItemsChecked(checkedItems);
-            //            }
-
             int firstVisiblePosition = mSavedInstanceState.getInt
                     (INSTANCE_KEY_FIRST_VISIBLE_POSITION);
             int offsetTop = mSavedInstanceState.getInt(INSTANCE_KEY_OFFSET_FROM_TOP);
-            // restore index and position
+            // restore ListView scroll position
             mWifiTogglerWifiList.setSelectionFromTop(firstVisiblePosition, offsetTop);
         }
     }
@@ -240,7 +227,9 @@ public abstract class SavedWifiBaseListActivity extends AppCompatActivity implem
     }
 
 
-    public ContentValues buildContentValuesForUpdate(Cursor cursor) {
+    public ContentValues buildContentValuesForUpdate(int position) {
+        Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem
+                (position);
         boolean isAutoToggle = (cursor.getInt(cursor
                 .getColumnIndexOrThrow
                         (SavedWifi.AUTO_TOGGLE)) > 0);
@@ -249,7 +238,9 @@ public abstract class SavedWifiBaseListActivity extends AppCompatActivity implem
         return cv;
     }
 
-    public void updateAutoToggleValue(long itemId, ContentValues cv) {
+    public void updateAutoToggleValue(long itemId, int position) {
+        ContentValues cv = buildContentValuesForUpdate(position);
+
         mDataAsyncQueryHandler.startUpdate(Config.TOKEN_UPDATE,
                 null,
                 SavedWifi.CONTENT_URI,
@@ -320,14 +311,47 @@ public abstract class SavedWifiBaseListActivity extends AppCompatActivity implem
 
     @Override
     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
-        for (int position : reverseSortedPositions) {
-            long itemId = mSavedWifiCursorAdapter.getItemId(position);
-            Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem
-                    (position);
-            ContentValues cv = buildContentValuesForUpdate(cursor);
-            updateAutoToggleValue(itemId, cv);
-        }
-        mSavedWifiCursorAdapter
-                .notifyDataSetChanged();
+        Log.d(TAG, "onDismiss");
+
+        mAutoHideHandler = new ViewAutoHideHandler(mDismissConfirmationBanner);
+        mAutoHideHandler.sendMessageDelayed(Message.obtain(mAutoHideHandler,
+                        WHAT_AUTO_HIDE),
+                Config.INTERVAL_FIVE_SECOND);
+
     }
+
+
+    public void cacheItemIdForUndo(long itemId) {
+        mItemIdToUndo = new AtomicLong();
+        mItemIdToUndo.set(itemId);
+    }
+
+    public void displayConfirmationBannerWithUndo(int position, int messageResourceId) {
+        Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem
+                (position);
+        String confirmation = getResources().getString(messageResourceId);
+        String ssid = cursor.getString(cursor.getColumnIndexOrThrow(SavedWifi.SSID));
+        String confirmationMessage = String.format(confirmation, ssid);
+        mDismissConfirmationText.setText(confirmationMessage);
+        mDismissConfirmationBanner.animate().alpha(1.0f).setDuration(300);
+    }
+
+    protected static class ViewAutoHideHandler extends Handler {
+        private final WeakReference<RelativeLayout> mViewToHide;
+
+        public ViewAutoHideHandler(RelativeLayout viewToHide) {
+            mViewToHide = new WeakReference<>(viewToHide);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            Log.d(TAG, "handleMessage");
+            RelativeLayout viewToHide = mViewToHide.get();
+            if (viewToHide != null) {
+                Log.d(TAG, "Message received alpha =" + viewToHide.getAlpha());
+                viewToHide.animate().alpha(0.0f).setDuration(300);
+            }
+        }
+    }
+
 }

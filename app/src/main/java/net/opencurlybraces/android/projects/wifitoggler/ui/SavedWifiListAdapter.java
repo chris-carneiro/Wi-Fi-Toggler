@@ -68,16 +68,7 @@ public class SavedWifiListAdapter extends CursorAdapter {
 
         setTextColor(context, ssidView, statusView, isAutoToggle);
 
-        setBackground(row);
 
-    }
-
-    private void setBackground(CheckableRelativeLayout row) {
-        if (row.isChecked()) {
-            row.setBackgroundResource(R.drawable.switch_banner_blue_gradient);
-        } else {
-            row.setBackgroundResource(0);
-        }
     }
 
     private void setTextColor(Context context, TextView ssidView, TextView statusView, boolean
