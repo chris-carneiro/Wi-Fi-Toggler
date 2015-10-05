@@ -76,7 +76,7 @@ public class WifiTogglerProvider extends ContentProvider {
         String orderBy;
 
         if (TextUtils.isEmpty(sortOrder)) {
-            orderBy = "status ASC, is_auto_toggle DESC, ssid COLLATE NOCASE ASC ";
+            orderBy = "status ASC, ssid COLLATE NOCASE ASC ";
         } else {
             orderBy = sortOrder;
         }
