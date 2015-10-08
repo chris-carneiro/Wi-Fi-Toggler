@@ -60,7 +60,6 @@ public class NotifUtils {
         notifManager.notify(NOTIFICATION_ID_SET_AUTO_TOGGLE_STATE, notification);
     }
 
-    //TODO refactor
     private static PendingIntent createSetAutoToggleStateIntent(Context context, String ssid,
                                                                 boolean isAutoToggle) {
         Log.d(TAG, "createSetAutoToggleStateIntent");

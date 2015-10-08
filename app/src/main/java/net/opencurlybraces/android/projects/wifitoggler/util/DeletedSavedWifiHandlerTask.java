@@ -15,8 +15,6 @@ import java.util.List;
  */
 public class DeletedSavedWifiHandlerTask extends AsyncTask<Object, Object, Object> {
     public static final String TAG = "DeletedSavedWifiTask";
-    //TODO commit _ID added to fix  java.lang.IllegalArgumentException: column '_id'
-    // getSavedWifisFromDB
     private static final String[] PROJECTION = new String[]{SavedWifi._ID, SavedWifi.SSID, SavedWifi
             .AUTO_TOGGLE};
 

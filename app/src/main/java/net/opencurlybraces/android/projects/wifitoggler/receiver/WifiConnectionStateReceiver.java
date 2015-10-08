@@ -94,7 +94,6 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
                 disconnectSavedWifi.setAction(WifiTogglerService
                         .ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT);
 
-                //TODO add check on wifi that were removed manually by the user from the system DB
                 context.startService(disconnectSavedWifi);
 
                 new DeletedSavedWifiHandlerTask(context).execute();
@@ -109,9 +108,10 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
 
 
     private void scheduleDisableWifi() {
+        Log.d(TAG, "Adapter deactivation scheduled");
         mScheduleDisableWifi.sendMessageDelayed(Message.obtain(mScheduleDisableWifi,
                         4),
-                Config.INTERVAL_FIVE_SECOND);
+                Config.INTERVAL_TWENTY_SECONDS);
     }
 
     @Override

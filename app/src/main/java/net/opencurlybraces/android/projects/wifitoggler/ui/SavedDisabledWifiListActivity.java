@@ -72,18 +72,14 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
 
         for (int position : reverseSortedPositions) {
 
-            long itemId = mSavedWifiCursorAdapter.getItemId(position);
+            long itemId =  mSavedWifiCursorAdapter.getItemId(position);
             updateAutoToggleValue(itemId, position);
-            displayConfirmationBannerWithUndo(position, R.string.wifi_enabled_confirmation_bottom_overlay_content);
-            cacheItemIdForUndo(itemId);
-
+            displayConfirmationBannerWithUndo(position, R.string
+                    .wifi_enabled_confirmation_bottom_overlay_content);
             mSavedWifiCursorAdapter
                     .notifyDataSetChanged();
         }
     }
-
-
-
 
 
     @Override
@@ -101,7 +97,8 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
         cv.put(SavedWifi.AUTO_TOGGLE, false);
         mDataAsyncQueryHandler.startUpdate(Config.TOKEN_UPDATE, null, SavedWifi
                 .CONTENT_URI, cv, SavedWifi
-                .whereID, new String[]{String.valueOf(mItemIdToUndo.get())});
+                .whereID, new String[]{String.valueOf(mSavedWifiCursorAdapter.getItemIdToUndo()
+        )});
         mAutoHideHandler.removeMessages(WHAT_AUTO_HIDE);
         mAutoHideHandler.sendMessage(Message.obtain(mAutoHideHandler));
     }

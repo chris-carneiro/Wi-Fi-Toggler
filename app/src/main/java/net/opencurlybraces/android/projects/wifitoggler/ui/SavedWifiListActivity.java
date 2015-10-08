@@ -42,8 +42,6 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
     private TextView mWifiTogglerSwitchLabel = null;
     private Switch mWifiTogglerActivationSwitch = null;
     private RelativeLayout mBanner = null;
-    private TextView mBannerContent = null;
-    private TextView mUndoButton = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -155,7 +153,7 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
         mWifiTogglerSwitchLabel = (TextView) findViewById(R.id.wifi_toggler_switch_label);
         mWifiTogglerActivationSwitch = (Switch) findViewById(R.id.wifi_toggler_activation_switch);
         mWifiTogglerActivationSwitch.setOnCheckedChangeListener(this);
-        mBannerContent = (TextView) findViewById(R.id.wifi_toggler_message_banner_content);
+        TextView mBannerContent = (TextView) findViewById(R.id.wifi_toggler_message_banner_content);
         mBannerContent.setEllipsize(TextUtils.TruncateAt.MARQUEE);
         mBannerContent.setSingleLine(true);
         mBannerContent.setSelected(true);
@@ -168,7 +166,7 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
         mDismissConfirmationBanner = (RelativeLayout) findViewById(R.id
                 .saved_wifi_confirmation_banner);
 
-        mUndoButton = (TextView) findViewById(R.id.undo_action_wifi_button);
+        TextView mUndoButton = (TextView) findViewById(R.id.undo_action_wifi_button);
         mUndoButton.setOnClickListener(this);
     }
 
@@ -324,9 +322,14 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
     public void handleUndoAction() {
         ContentValues cv = new ContentValues();
         cv.put(SavedWifi.AUTO_TOGGLE, true);
-        mDataAsyncQueryHandler.startUpdate(Config.TOKEN_UPDATE, null, SavedWifi
-                .CONTENT_URI, cv, SavedWifi
-                .whereID, new String[]{String.valueOf(mItemIdToUndo.get())});
+
+        mDataAsyncQueryHandler.startUpdate(Config.TOKEN_UPDATE, mSavedWifiCursorAdapter
+                        .getItemIdToUndo(),
+                SavedWifi
+                        .CONTENT_URI, cv, SavedWifi
+                        .whereID, new String[]{String.valueOf(mSavedWifiCursorAdapter
+                        .getItemIdToUndo())});
+
         mAutoHideHandler.removeMessages(WHAT_AUTO_HIDE);
         mAutoHideHandler.sendMessage(Message.obtain(mAutoHideHandler));
     }
@@ -347,17 +350,13 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
         super.onDismiss(listView, reverseSortedPositions);
         for (int position : reverseSortedPositions) {
-            long itemId = mSavedWifiCursorAdapter.getItemId(position);
+            int itemId = (int) mSavedWifiCursorAdapter.getItemId(position);
 
             updateAutoToggleValue(itemId, position);
-            displayConfirmationBannerWithUndo(position, R.string.wifi_disabled_confirmation_bottom_overlay_content);
-            cacheItemIdForUndo(itemId);
+            displayConfirmationBannerWithUndo(position, R.string
+                    .wifi_disabled_confirmation_bottom_overlay_content);
             mSavedWifiCursorAdapter
                     .notifyDataSetChanged();
         }
-
-
     }
-
-
 }

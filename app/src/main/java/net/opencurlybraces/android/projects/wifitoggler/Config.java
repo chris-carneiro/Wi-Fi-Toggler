@@ -43,6 +43,8 @@ public class Config {
 
     public static final long INTERVAL_FIVE_SECOND = 1000 * 5;
 
+    public static final long INTERVAL_TWENTY_SECONDS = INTERVAL_FIVE_SECOND * 4;
+
     /**
      * Async queries tokens
      */

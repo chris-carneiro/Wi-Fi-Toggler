@@ -1,7 +1,6 @@
 package net.opencurlybraces.android.projects.wifitoggler.ui;
 
 import android.app.LoaderManager;
-import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -25,16 +24,12 @@ import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifitoggler.data.model.Wifi;
-import net.opencurlybraces.android.projects.wifitoggler.data.provider.WifiTogglerContract;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.ui.SwipeDismissListViewTouchListener
         .DismissCallbacks;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 
 public abstract class SavedWifiListActivityAbstract extends AppCompatActivity implements
@@ -43,16 +38,11 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
 
     private static final String TAG = "BaseListActivity";
 
-    private static final int TOKEN_UPDATE_BATCH = 6;
-
     protected static final int WHAT_AUTO_HIDE = 5;
     private static final String[] PROJECTION_SSID_AUTO_TOGGLE = new String[]{SavedWifi._ID,
             SavedWifi
                     .SSID, SavedWifi.AUTO_TOGGLE};
 
-    protected static final String INSTANCE_KEY_CHECKED_ITEMS = "checkedItems";
-    protected static final String INSTANCE_KEY_LIST_CHOICE_MODE = "listChoiceMode";
-    protected static final String INSTANCE_KEY_IS_ACTION_MODE = "isActionMode";
     protected static final String INSTANCE_KEY_FIRST_VISIBLE_POSITION = "firstVisiblePosition";
     protected static final String INSTANCE_KEY_OFFSET_FROM_TOP = "offsetFromTop";
 
@@ -69,7 +59,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     private SwipeDismissListViewTouchListener mTouchListener = null;
 
     protected ViewAutoHideHandler mAutoHideHandler = null;
-    protected AtomicLong mItemIdToUndo = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,19 +92,6 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         mEmptyView = (TextView) findViewById(android.R.id.empty);
     }
 
-    protected ArrayList<ContentProviderOperation> udpateBatchWifiToggleState(List<Wifi> wifis) {
-        ArrayList<ContentProviderOperation> operations = (ArrayList<ContentProviderOperation>)
-                SavedWifi.buildBatchUpdateAutoToggle
-                        (wifis);
-        return operations;
-
-    }
-
-    protected void startBatchUpdate(ArrayList<ContentProviderOperation> operations) {
-        mDataAsyncQueryHandler.startBatchOperations(TOKEN_UPDATE_BATCH, null, WifiTogglerContract
-                .AUTHORITY, operations);
-    }
-
     protected void displaySettingsActivity() {
         Intent preferencesIntent = new Intent(this, SettingsActivity.class);
         startActivity(preferencesIntent);
@@ -145,15 +122,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        // TODO remove once we're sure we don't roll back to actionmode
-        if (mSavedWifiCursorAdapter.isActionMode()) {
-            outState.putInt(INSTANCE_KEY_LIST_CHOICE_MODE, mWifiTogglerWifiList.getChoiceMode());
-            outState.putIntegerArrayList(INSTANCE_KEY_CHECKED_ITEMS, mSavedWifiCursorAdapter
-                    .getSelectedItems());
-            outState.putBoolean(INSTANCE_KEY_IS_ACTION_MODE, mSavedWifiCursorAdapter.isActionMode
-                    ());
 
-        }
         int firstVisiblePosition = mWifiTogglerWifiList.getFirstVisiblePosition();
         View v = mWifiTogglerWifiList.getChildAt(0);
         int top = (v == null) ? 0 : (v.getTop() - mWifiTogglerWifiList.getPaddingTop());
@@ -242,7 +211,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         ContentValues cv = buildContentValuesForUpdate(position);
 
         mDataAsyncQueryHandler.startUpdate(Config.TOKEN_UPDATE,
-                null,
+                itemId,
                 SavedWifi.CONTENT_URI,
                 cv,
                 SavedWifi.whereID, new String[]{String.valueOf
@@ -256,7 +225,9 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
 
     @Override
     public void onUpdateComplete(int token, Object cookie, int result) {
-        Log.d(TAG, "udpated rows count" + result);
+        if (cookie != null) {
+            cacheItemIdForUndo((long) cookie);
+        }
     }
 
     @Override
@@ -322,8 +293,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
 
 
     public void cacheItemIdForUndo(long itemId) {
-        mItemIdToUndo = new AtomicLong();
-        mItemIdToUndo.set(itemId);
+        mSavedWifiCursorAdapter.setItemIdToUndo(itemId);
     }
 
     public void displayConfirmationBannerWithUndo(int position, int messageResourceId) {

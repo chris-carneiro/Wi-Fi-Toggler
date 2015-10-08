@@ -1,10 +1,13 @@
 package net.opencurlybraces.android.projects.wifitoggler.ui;
 
+import android.animation.Animator;
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.CursorAdapter;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -12,8 +15,6 @@ import android.widget.TextView;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
-
-import java.util.ArrayList;
 
 /**
  * Created by chris on 13/06/15.
@@ -24,9 +25,16 @@ public class SavedWifiListAdapter extends CursorAdapter {
 
     final LayoutInflater mLayoutInflater;
 
-    private final ArrayList<Integer> mSelectedItems = new ArrayList<>();
 
-    private boolean mIsActionMode = false;
+    public long getItemIdToUndo() {
+        return mItemIdUndo;
+    }
+
+    public void setItemIdToUndo(long itemIdToUndo) {
+        this.mItemIdUndo = itemIdToUndo;
+    }
+
+    protected long mItemIdUndo;
 
     public SavedWifiListAdapter(Context context, Cursor c, int flag) {
         super(context, c, flag);
@@ -41,11 +49,13 @@ public class SavedWifiListAdapter extends CursorAdapter {
         return bindViewTags(cursor, view);
     }
 
+
     @Override
-    public void bindView(View view, Context context, Cursor cursor) {
+    public void bindView(final View view, Context context, Cursor cursor) {
         TextView ssidView = (TextView) view.getTag(R.string.tag_key_ssid);
         TextView statusView = (TextView) view.getTag(R.string.tag_key_status);
-        CheckableRelativeLayout row = (CheckableRelativeLayout) view.getTag(R.string.tag_key_row);
+        final RelativeLayout row = (RelativeLayout) view.getTag(R.string
+                .tag_key_row);
 
         int ssidIndex = (int) view.getTag(R.string.tag_key_ssid_index);
         int statusIndex = (int) view.getTag(R.string.tag_key_status_index);
@@ -64,11 +74,49 @@ public class SavedWifiListAdapter extends CursorAdapter {
 
         RelativeLayout.LayoutParams lp = createLayoutParamsWithStatus(status);
         ssidView.setLayoutParams(lp);
-
-
         setTextColor(context, ssidView, statusView, isAutoToggle);
 
+        handleUndoItemAnimation(cursor, row);
 
+    }
+
+    //TOOD create animation builder
+    public void handleUndoItemAnimation(Cursor cursor, final RelativeLayout row) {
+        if (getItemId(cursor.getPosition()) == getItemIdToUndo()) {
+            setItemIdToUndo(-1);// prevent animation onResume
+            final ViewTreeObserver observer = row.getViewTreeObserver();
+
+            observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+
+                @Override
+                public void onGlobalLayout() {
+                    if (observer.isAlive()) {
+                        observer.removeOnGlobalLayoutListener(
+                                this);
+                    }
+                    row.setTranslationX(row.getWidth());
+                    row.setAlpha(0.0f);
+                    row.animate().alpha(1f).translationX(0)
+                            .setDuration(500).setListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+                        }
+                    });
+                }
+            });
+        }
     }
 
     private void setTextColor(Context context, TextView ssidView, TextView statusView, boolean
@@ -104,6 +152,7 @@ public class SavedWifiListAdapter extends CursorAdapter {
     }
 
     private View bindViewTags(final Cursor cursor, final View view) {
+
         RelativeLayout row = (RelativeLayout) view.findViewById(R.id.saved_wifi_row_layout);
         TextView ssid = (TextView) view.findViewById(R.id.saved_wifi_ssid);
         TextView status = (TextView) view.findViewById(R.id.saved_wifi_state);
@@ -125,60 +174,8 @@ public class SavedWifiListAdapter extends CursorAdapter {
 
         view.setTag(R.string.tag_key_row_index, autoToggleIndex);
 
+
         return view;
     }
 
-
-    public ArrayList<Integer> getSelectedItems() {
-        return mSelectedItems;
-    }
-
-    public int getSelectedItemCount() {
-        return mSelectedItems.size();
-    }
-
-    /**
-     * Update selected items cache given its position in cache. if Checked is true and the item is
-     * not in already in cache, the latter will be cached. If checked is false, the item will be
-     * removed from cache
-     *
-     * @param itemPosition
-     * @param checked
-     */
-    public void setSelectedItem(int itemPosition, boolean checked) {
-        if (checked) {
-            if (!mSelectedItems.contains(itemPosition)) {
-                mSelectedItems.add(itemPosition);
-            }
-        } else {
-            if (mSelectedItems.contains(itemPosition)) {
-                mSelectedItems.remove(mSelectedItems.indexOf(itemPosition));
-            }
-        }
-        notifyDataSetInvalidated();
-
-    }
-
-    public int selectAllItems() {
-        int count = getCount();
-        for (int i = 0; i < count; i++) {
-            setSelectedItem(i, true);
-        }
-        return count;
-    }
-
-    public void setIsActionMode(boolean isActionMode) {
-        mIsActionMode = isActionMode;
-    }
-
-    public boolean isActionMode() {
-        return mIsActionMode;
-    }
-
-    public void clearSelectedItems() {
-        if (!mSelectedItems.isEmpty()) {
-            mSelectedItems.clear();
-            notifyDataSetInvalidated();
-        }
-    }
 }
