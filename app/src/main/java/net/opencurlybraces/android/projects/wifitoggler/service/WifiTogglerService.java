@@ -99,8 +99,6 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
             + "ACTION_FINISH_STARTUP_CHECK_ACTIVITY";
     public static final String ACTION_STARTUP_SETTINGS_PRECHECK = SERVICE_ACTION_PREFIX + ""
             + "ACTION_STARTUP_SETTINGS_PRECHECK";
-    public static final String ACTION_HANDLE_SCHEDULE_DISABLE_WIFI = "net" +
-            ".opencurlybraces.android.projects.wifitoggler.ACTION_HANDLE_SCHEDULE_DISABLE_WIFI";
 
     private WifiScanResultsReceiver mWifiScanResultsReceiver = null;
     private WifiAdapterStateReceiver mWifiAdapterStateReceiver = null;
@@ -111,9 +109,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
     private HotspotModeStateReceiver mHotspotModeStateReceiver = null;
 
 
-
     private CheckPassiveScanHandler mCheckPassiveScanHandler;
-    private final int CHECK_SCAN_ALWAYS_AVAILABLE = 3;
 
     @Override
     public void onCreate() {
@@ -140,13 +136,13 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
 
     private void schedulePassiveScanCheck() {
         mCheckPassiveScanHandler.sendMessageDelayed(Message.obtain(mCheckPassiveScanHandler,
-                        CHECK_SCAN_ALWAYS_AVAILABLE),
+                        Config.WHAT_CHECK_SCAN_ALWAYS_AVAILABLE),
                 Config.CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL);
     }
 
     private void initFields() {
         mCheckPassiveScanHandler = new CheckPassiveScanHandler(this,
-                CHECK_SCAN_ALWAYS_AVAILABLE, Config
+                Config.WHAT_CHECK_SCAN_ALWAYS_AVAILABLE, Config
                 .CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL);
 
         mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(), this);
@@ -172,7 +168,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         pauseWifiToggler();
         NotifUtils.buildWifiTogglerPausedNotification(this);
         stopForeground(false);
-        mCheckPassiveScanHandler.removeMessages(CHECK_SCAN_ALWAYS_AVAILABLE);
+        mCheckPassiveScanHandler.removeMessages(Config.WHAT_CHECK_SCAN_ALWAYS_AVAILABLE);
         unregisterReceivers();
         NotifUtils.dismissNotification(this, NotifUtils.NOTIFICATION_ID_WARNING);
     }
@@ -325,7 +321,8 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
 
     private void insertSavedWifiBatchAsync(ArrayList<ContentProviderOperation> batch) {
         if (batch == null) return;
-        mDataAsyncQueryHandler.startBatchOperations(Config.TOKEN_INSERT_BATCH, null, WifiTogglerContract
+        mDataAsyncQueryHandler.startBatchOperations(Config.TOKEN_INSERT_BATCH, null,
+                WifiTogglerContract
                 .AUTHORITY, batch);
 
     }
@@ -385,5 +382,6 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
     }
 
     @Override
-    public void onBatchUpdateComplete(int token, Object cookie, ContentProviderResult[] results) {}
+    public void onBatchUpdateComplete(int token, Object cookie, ContentProviderResult[] results) {
+    }
 }

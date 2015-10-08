@@ -30,7 +30,6 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
 
     private static final String TAG = "SystemSettingsAbstract";
 
-    protected static final int TICK_WHAT = 2;
 
     protected RelativeLayout mScanCheckLayout = null;
     protected RelativeLayout mAirplaneCheckLayout = null;
@@ -49,7 +48,7 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
     private static final String TETHER_SETTINGS_CLASSNAME = "com.android.settings";
 
     protected final CheckPassiveScanHandler mCheckPassiveHandler = new CheckPassiveScanHandler
-            (this, 2, Config.INTERVAL_CHECK_HALF_SECOND);
+            (this, Config.WHAT_REPEAT_CHECK_SCAN_ALWAYS, Config.INTERVAL_CHECK_HALF_SECOND);
 
     protected abstract void onContinueClicked();
 
@@ -270,7 +269,7 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
     protected abstract void startRepeatingCheck();
 
     protected void stopRepeatingCheck() {
-        mCheckPassiveHandler.removeMessages(TICK_WHAT);
+        mCheckPassiveHandler.removeMessages(Config.WHAT_REPEAT_CHECK_SCAN_ALWAYS);
     }
 
     @Override

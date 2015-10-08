@@ -38,7 +38,6 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
 
     private static final String TAG = "BaseListActivity";
 
-    protected static final int WHAT_AUTO_HIDE = 5;
     private static final String[] PROJECTION_SSID_AUTO_TOGGLE = new String[]{SavedWifi._ID,
             SavedWifi
                     .SSID, SavedWifi.AUTO_TOGGLE};
@@ -286,7 +285,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
 
         mAutoHideHandler = new ViewAutoHideHandler(mDismissConfirmationBanner);
         mAutoHideHandler.sendMessageDelayed(Message.obtain(mAutoHideHandler,
-                        WHAT_AUTO_HIDE),
+                        Config.WHAT_AUTO_HIDE),
                 Config.INTERVAL_FIVE_SECOND);
 
     }

@@ -330,7 +330,7 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
                         .whereID, new String[]{String.valueOf(mSavedWifiCursorAdapter
                         .getItemIdToUndo())});
 
-        mAutoHideHandler.removeMessages(WHAT_AUTO_HIDE);
+        mAutoHideHandler.removeMessages(Config.WHAT_AUTO_HIDE);
         mAutoHideHandler.sendMessage(Message.obtain(mAutoHideHandler));
     }
 

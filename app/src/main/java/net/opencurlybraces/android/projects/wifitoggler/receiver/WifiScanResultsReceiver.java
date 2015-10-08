@@ -79,9 +79,8 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             Log.d(TAG, "handleWifiActivation");
             if (enableWifi) {
                 NetworkUtils.enableWifiAdapter(mContext);
-            }
+            } // else here in the future maybe schedule adapter deactivation as an open wifi
+            // workaround
         }
-
-
     }
 }

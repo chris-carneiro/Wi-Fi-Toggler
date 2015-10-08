@@ -31,9 +31,7 @@ public class Config {
 
     public static final String UNKNOWN_SSID = "<unknown ssid>";
 
-    /**
-     * Every hour
-     */
+
     public static final long CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL = (DEBUG_MODE ? 1000 *
             60 :
             AlarmManager
@@ -51,5 +49,15 @@ public class Config {
     public static final int TOKEN_INSERT = 2;
     public static final int TOKEN_UPDATE = 3;
     public static final int TOKEN_INSERT_BATCH = 5;
+
+
+    /**
+     * handler scheduled actions ids
+     **/
+    public static final int WHAT_REPEAT_CHECK_SCAN_ALWAYS = 2;
+    public static final int WHAT_CHECK_SCAN_ALWAYS_AVAILABLE = 3;
+    public static final int WHAT_SCHEDULE_DISABLE_ADAPTER = 4;
+    public static final int WHAT_AUTO_HIDE = 5;
+
 
 }

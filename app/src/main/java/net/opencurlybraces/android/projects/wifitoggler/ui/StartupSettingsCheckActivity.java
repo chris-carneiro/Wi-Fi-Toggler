@@ -27,7 +27,7 @@ public class StartupSettingsCheckActivity extends SystemSettingsActivityAbstract
 
     @Override
     protected void startRepeatingCheck() {
-        mCheckPassiveHandler.sendMessageDelayed(Message.obtain(mCheckPassiveHandler, TICK_WHAT),
+        mCheckPassiveHandler.sendMessageDelayed(Message.obtain(mCheckPassiveHandler, Config.WHAT_REPEAT_CHECK_SCAN_ALWAYS),
                 Config.INTERVAL_CHECK_HALF_SECOND);
     }
 

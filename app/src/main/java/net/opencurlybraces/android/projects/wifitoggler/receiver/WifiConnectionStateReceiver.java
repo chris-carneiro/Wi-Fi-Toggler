@@ -110,7 +110,7 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
     private void scheduleDisableWifi() {
         Log.d(TAG, "Adapter deactivation scheduled");
         mScheduleDisableWifi.sendMessageDelayed(Message.obtain(mScheduleDisableWifi,
-                        4),
+                        Config.WHAT_SCHEDULE_DISABLE_ADAPTER),
                 Config.INTERVAL_TWENTY_SECONDS);
     }
 
