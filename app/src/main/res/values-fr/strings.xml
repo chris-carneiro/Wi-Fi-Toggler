@@ -110,4 +110,16 @@
 
     <string name="startup_check_settings_continue_button_text">Continuer</string>
 
+    <string name="wifi_disabled_confirmation_bottom_overlay_content">Auto activation
+        off pour %1$s</string>
+    <string name="wifi_enabled_confirmation_bottom_overlay_content">Auto activation on
+    pour %1$s</string>
+    <string name="wifi_undo_action_text">Annuler</string>
+
+    <string name="title_activity_disabled_wifi_list">Wi-Fis désactivés</string>
+
+    <string name="action_disabled_wifis">Wi-Fis désactivés</string>
+
+    <string name="wifi_list_info_no_disabled_known_wifi">"Vous n'avez désactivé aucun Wi-Fi"</string>
+
 </resources>
