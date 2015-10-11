@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
+import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.data.model.Wifi;
 import net.opencurlybraces.android.projects.wifitoggler.data.provider.WifiTogglerContract;
 
@@ -191,7 +192,8 @@ public class SavedWifi implements BaseColumns {
 
     private static ContentValues buildDefaultWifiContentValues(WifiConfiguration wifi) {
         ContentValues values = new ContentValues();
-        values.put(SavedWifi.SSID, wifi.SSID.replace("\"", ""));
+        String ssid = (wifi.SSID != null ? wifi.SSID.replace("\"", "") : Config.UNKNOWN_SSID);
+        values.put(SavedWifi.SSID, ssid);
         values.put(SavedWifi.AUTO_TOGGLE, 1);
         values.put(SavedWifi.OPEN_WIFI, 0);
         values.put(SavedWifi.PREFERRED, 0);
