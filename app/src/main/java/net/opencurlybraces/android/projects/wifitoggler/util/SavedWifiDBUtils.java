@@ -74,7 +74,7 @@ public class SavedWifiDBUtils {
         }
         for (ScanResult wifiNetwork : availableWifiNetworks) {
             for (Wifi savedWifi : savedWifisFromDb) {
-                if (savedWifi.getSsid().equals(wifiNetwork.SSID) && savedWifi.isAutoToggle()) {
+                if (wifiNetwork.SSID.equals(savedWifi.getSsid()) && savedWifi.isAutoToggle()) {
                     int signalStrength = WifiManager.calculateSignalLevel
                             (wifiNetwork.level, Config.WIFI_SIGNAL_STRENGTH_LEVELS);
                     Log.d(TAG, "signalStrength=" + signalStrength + " preferenceThreshold=" +
