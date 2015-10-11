@@ -13,6 +13,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.squareup.leakcanary.RefWatcher;
+
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
@@ -97,6 +99,13 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
     @Override
     protected void onPause() {
         super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        RefWatcher refWatcher = WifiToggler.getRefWatcher(this);
+        refWatcher.watch(this);
     }
 
     @Override

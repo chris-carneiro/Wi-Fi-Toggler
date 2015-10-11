@@ -20,8 +20,11 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.squareup.leakcanary.RefWatcher;
+
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
+import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
 import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifitoggler.data.model.Wifi;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
@@ -78,6 +81,13 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         super.onResume();
         setListAdapter();
         restoreListViewState();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        RefWatcher refWatcher = WifiToggler.getRefWatcher(this);
+        refWatcher.watch(this);
     }
 
     protected abstract void setListAdapter();

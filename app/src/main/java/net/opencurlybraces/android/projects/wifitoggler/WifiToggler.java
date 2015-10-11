@@ -1,8 +1,12 @@
 package net.opencurlybraces.android.projects.wifitoggler;
 
 import android.app.Application;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import com.squareup.leakcanary.LeakCanary;
+import com.squareup.leakcanary.RefWatcher;
 
 import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifitoggler.util.ObservableMap;
@@ -20,10 +24,11 @@ public class WifiToggler extends Application {
 
     private static ObservableMap mObservableSystemSettings = null;
     private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
-
+    private RefWatcher refWatcher;
     @Override
     public void onCreate() {
         super.onCreate();
+        refWatcher = LeakCanary.install(this);
         Log.d(TAG, "onCreate");
         if (mDataAsyncQueryHandler == null) {
             mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(), null);
@@ -80,6 +85,12 @@ public class WifiToggler extends Application {
     public static void setSetting(String key, boolean isCorrect) {
         Log.d(TAG, "put");
         mObservableSystemSettings.put(key, isCorrect);
+    }
+
+
+    public static RefWatcher getRefWatcher(Context context) {
+        WifiToggler application = (WifiToggler) context.getApplicationContext();
+        return application.refWatcher;
     }
 
 }

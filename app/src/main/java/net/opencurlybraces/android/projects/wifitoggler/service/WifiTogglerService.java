@@ -18,6 +18,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.squareup.leakcanary.RefWatcher;
+
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
 import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandler;
@@ -171,6 +173,9 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         mCheckPassiveScanHandler.removeMessages(Config.WHAT_CHECK_SCAN_ALWAYS_AVAILABLE);
         unregisterReceivers();
         NotifUtils.dismissNotification(this, NotifUtils.NOTIFICATION_ID_WARNING);
+
+        RefWatcher refWatcher = WifiToggler.getRefWatcher(this);
+        refWatcher.watch(this);
     }
 
     private void unregisterReceivers() {
@@ -323,7 +328,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         if (batch == null) return;
         mDataAsyncQueryHandler.startBatchOperations(Config.TOKEN_INSERT_BATCH, null,
                 WifiTogglerContract
-                .AUTHORITY, batch);
+                        .AUTHORITY, batch);
 
     }
 
