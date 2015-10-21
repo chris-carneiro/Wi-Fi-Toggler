@@ -6,7 +6,10 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Message;
+import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -34,6 +37,9 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
         setContentView(R.layout.activity_disabled_saved_wifi_list);
         bindListView();
         bindViews();
+        ActionBar actionBar = getSupportActionBar();
+        if(actionBar != null)
+            actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -46,6 +52,17 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
         mUndoButton.setOnClickListener(this);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+
+    }
 
     @Override
     protected void setListAdapter() {

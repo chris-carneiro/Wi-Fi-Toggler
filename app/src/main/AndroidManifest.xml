@@ -53,6 +53,9 @@
         <activity
             android:name="net.opencurlybraces.android.projects.wifitoggler.ui.SavedDisabledWifiListActivity"
             android:label="@string/title_activity_disabled_wifi_list">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.SavedWifiListActivity" />
         </activity>
 
         <activity
