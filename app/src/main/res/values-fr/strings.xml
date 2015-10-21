@@ -106,7 +106,9 @@
     <string name="startup_check_scan_always_available_settings_desc">La recherche de Wi-Fi doit toujours être disponible</string>
     <string name="startup_check_hotspot_settings_title">"Point d'accès"</string>
     <string name="startup_check_hotspot_settings_desc">"Le point d'accès doit être inactif"</string>
-
+    <string name="startup_check_location_permission_settings_title">Position (Autorisation)</string>
+    <string name="startup_check_location_permission_settings_desc">Accès à la position doit être
+        autorisée</string>
 
     <string name="startup_check_settings_continue_button_text">Continuer</string>
 

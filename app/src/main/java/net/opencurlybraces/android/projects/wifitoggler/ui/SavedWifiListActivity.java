@@ -7,6 +7,7 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Message;
@@ -21,6 +22,8 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+
+import com.google.android.gms.common.ConnectionResult;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
@@ -49,8 +52,6 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
         setContentView(R.layout.activity_saved_wifi_list);
         bindListView();
         bindViews();
-
-
     }
 
     @Override
@@ -72,12 +73,10 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
 
         startupCheck();
         handleNotification(mWifiTogglerActivationSwitch.isChecked());
-        registerReceivers();
         handleBannerDisplay();
         doSystemSettingsCheck();
-
+        registerReceivers();
     }
-
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -192,7 +191,9 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
             launchStartupCheckActivity();
         } else {
             PrefUtils.markSettingsCorrectAtFirstLaunch(this);
-            loadSavedWifiIntoDatabase();
+            if (!PrefUtils.isSavedWifiInsertComplete(this)) {
+                loadSavedWifiIntoDatabase();
+            }
         }
     }
 
@@ -277,11 +278,16 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
 
     private void handleBannerDisplay() {
         Log.d(TAG, "handleBannerDisplay");
-        if (WifiToggler.hasWrongSettingsForAutoToggle()) {
-            mBanner.setVisibility(View.VISIBLE);
-        } else {
-            mBanner.setVisibility(View.GONE);
-        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (WifiToggler.hasWrongSettingsForAutoToggle()) {
+                    mBanner.setVisibility(View.VISIBLE);
+                } else {
+                    mBanner.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 
     private void registerNotificationReceiver() {
@@ -337,7 +343,8 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
     @Override
     public void update(Observable observable, Object data) {
         handleBannerDisplay();
-    }
+    } // can be
+    // called back from a worker thread
 
     // TODO move to util class
     private void doSystemSettingsCheck() {
@@ -358,5 +365,17 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
             mSavedWifiCursorAdapter
                     .notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
     }
 }

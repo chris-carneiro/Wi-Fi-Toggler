@@ -1,11 +1,13 @@
 package net.opencurlybraces.android.projects.wifitoggler.util;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
@@ -120,6 +122,12 @@ public class StartupUtils {
 
         WifiToggler.setSetting(Config.STARTUP_CHECK_WIFI_SETTINGS, NetworkUtils
                 .isWifiEnabled(context));
+
+        if (Config.RUNNING_MARSHMALLOW) {
+            WifiToggler.setSetting(Config.CHECK_LOCATION_PERMISSION_SETTINGS, ContextCompat
+                    .checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                    PackageManager.PERMISSION_GRANTED);
+        }
     }
 
 }

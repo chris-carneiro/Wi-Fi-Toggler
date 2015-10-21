@@ -2,6 +2,9 @@ package net.opencurlybraces.android.projects.wifitoggler.ui;
 
 import android.os.Bundle;
 import android.os.Message;
+import android.util.Log;
+
+import com.google.android.gms.common.ConnectionResult;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
@@ -26,7 +29,8 @@ public class SystemSettingsCheckActivity extends SystemSettingsActivityAbstract 
 
     @Override
     protected void startRepeatingCheck() {
-        mCheckPassiveHandler.sendMessageDelayed(Message.obtain(mCheckPassiveHandler, Config.WHAT_REPEAT_CHECK_SCAN_ALWAYS),
+        mCheckPassiveHandler.sendMessageDelayed(Message.obtain(mCheckPassiveHandler, Config
+                        .WHAT_REPEAT_CHECK_SCAN_ALWAYS),
                 Config.INTERVAL_CHECK_HALF_SECOND);
     }
 
@@ -51,8 +55,25 @@ public class SystemSettingsCheckActivity extends SystemSettingsActivityAbstract 
         setHotspotLayoutAccordingToSettings();
         setScanLayoutAccordingToSettings();
         setAirplaneLayoutAccordingToSettings();
+        if (Config.RUNNING_MARSHMALLOW) {
+            setLocationPermissionLayoutAccordingToSettings();
+        }
         checkContinueButtonListener();
 
     }
 
+    @Override
+    public void onConnected(Bundle bundle) {
+        Log.d(TAG, "onConnected");
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.d(TAG, "onConnectionSuspended");
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.d(TAG, "onConnectionFailed");
+    }
 }

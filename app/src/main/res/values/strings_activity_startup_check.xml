@@ -12,7 +12,9 @@
         is disabled</string>
     <string name="startup_check_hotspot_settings_title">Hotspot settings</string>
     <string name="startup_check_hotspot_settings_desc">Hotspot mode has to be disabled</string>
-
+    <string name="startup_check_location_permission_settings_title">Location (Permission)</string>
+    <string name="startup_check_location_permission_settings_desc">Access to location must
+        be granted</string>
 
     <string name="startup_check_settings_continue_button_text">Continue</string>
 </resources>

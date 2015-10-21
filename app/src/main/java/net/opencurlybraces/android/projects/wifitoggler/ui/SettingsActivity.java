@@ -20,11 +20,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import com.squareup.leakcanary.RefWatcher;
-
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
-import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
 import net.opencurlybraces.android.projects.wifitoggler.util.NotifUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
@@ -79,8 +76,6 @@ public class SettingsActivity extends PreferenceActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        RefWatcher refWatcher = WifiToggler.getRefWatcher(this);
-        refWatcher.watch(this);
     }
 
     @Override

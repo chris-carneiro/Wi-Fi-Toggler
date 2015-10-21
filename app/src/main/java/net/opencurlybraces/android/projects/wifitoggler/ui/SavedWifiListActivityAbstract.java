@@ -4,6 +4,7 @@ import android.app.LoaderManager;
 import android.content.ContentProviderResult;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
@@ -19,12 +20,23 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.squareup.leakcanary.RefWatcher;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStates;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
-import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
 import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifitoggler.data.model.Wifi;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
@@ -37,7 +49,9 @@ import java.lang.ref.WeakReference;
 
 public abstract class SavedWifiListActivityAbstract extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
-        DataAsyncQueryHandler.AsyncQueryListener, DismissCallbacks, View.OnClickListener {
+        DataAsyncQueryHandler.AsyncQueryListener, DismissCallbacks, View.OnClickListener,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+        ResultCallback<LocationSettingsResult> {
 
     private static final String TAG = "BaseListActivity";
 
@@ -48,6 +62,8 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     protected static final String INSTANCE_KEY_FIRST_VISIBLE_POSITION = "firstVisiblePosition";
     protected static final String INSTANCE_KEY_OFFSET_FROM_TOP = "offsetFromTop";
 
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1002;
+    private int REQUEST_CHECK_SETTINGS = 1003;
 
     protected SavedWifiListAdapter mSavedWifiCursorAdapter = null;
     protected DataAsyncQueryHandler mDataAsyncQueryHandler = null;
@@ -62,6 +78,9 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
 
     protected ViewAutoHideHandler mAutoHideHandler = null;
 
+    private GoogleApiClient mGoogleApiClient = null;
+    private LocationRequest mLocationRequest = null;
+    private PendingResult<LocationSettingsResult> mLocationSettingsResult = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +93,70 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         initCursorLoader();
         mSavedWifiCursorAdapter = (SavedWifiListAdapter) initCursorAdapter();
 
+        if (Config.RUNNING_MARSHMALLOW) {
+            if (checkPlayServices()) {
+                buildGoogleApiClient();
+                buildLocationRequest();
+            }
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.connect();
+
+            LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                    .addLocationRequest(mLocationRequest);
+
+            mLocationSettingsResult = LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder
+                            .build());
+
+            mLocationSettingsResult.setResultCallback(this);
+
+        }
+    }
+
+    private void buildLocationRequest() {
+        mLocationRequest = new LocationRequest()
+                .setInterval(Config.INTERVAL_FIVE_SECOND)
+                .setFastestInterval(1000)
+                .setPriority(LocationRequest.PRIORITY_LOW_POWER);
+    }
+
+    @Override
+    public void onResult(LocationSettingsResult locationSettingsResult) {
+        final Status status = locationSettingsResult.getStatus();
+//        final LocationSettingsStates locationStates = locationSettingsResult
+//                .getLocationSettingsStates();
+
+        switch (status.getStatusCode()) {
+            case LocationSettingsStatusCodes.SUCCESS:
+                Log.d(TAG, "LocationSettingsStatusCodes.SUCCESS");
+                break;
+            case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                // Location settings are not satisfied. But could be fixed by showing
+                // the user
+                // a dialog.
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    status.startResolutionForResult(
+                            SavedWifiListActivityAbstract.this,
+                            REQUEST_CHECK_SETTINGS);
+                } catch (IntentSender.SendIntentException e) {
+                    // Ignore the error.
+                }
+                break;
+            case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                // Location settings are not satisfied. However, we have no way to
+                // fix the
+                // settings so we won't show the dialog.
+                Log.d(TAG, "LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
+                //TODO in the future warn the user
+                break;
+        }
     }
 
     @Override
@@ -86,8 +169,9 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        RefWatcher refWatcher = WifiToggler.getRefWatcher(this);
-        refWatcher.watch(this);
+
+        mWifiTogglerWifiList.setOnTouchListener(null);
+        mWifiTogglerWifiList.setOnScrollListener(null);
     }
 
     protected abstract void setListAdapter();
@@ -331,6 +415,32 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
                 viewToHide.animate().alpha(0.0f).setDuration(300);
             }
         }
+    }
+
+    private synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API).build();
+    }
+
+
+    private boolean checkPlayServices() {
+        int resultCode = GooglePlayServicesUtil
+                .isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
+                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            } else {
+                Toast.makeText(getApplicationContext(),
+                        "This device is not supported.", Toast.LENGTH_LONG)
+                        .show();
+                finish();
+            }
+            return false;
+        }
+        return true;
     }
 
 }

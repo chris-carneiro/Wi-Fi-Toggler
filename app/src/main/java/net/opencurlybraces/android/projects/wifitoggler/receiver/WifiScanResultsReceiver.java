@@ -3,9 +3,12 @@ package net.opencurlybraces.android.projects.wifitoggler.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
+import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.data.model.Wifi;
 import net.opencurlybraces.android.projects.wifitoggler.util.DeletedSavedWifiHandlerTask;
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
@@ -24,10 +27,15 @@ import java.util.List;
 public class WifiScanResultsReceiver extends BroadcastReceiver {
     private static final String TAG = "WifiScanResultsReceiver";
 
+
     @Override
     public void onReceive(Context context, Intent intent) {
+        boolean locationPermissionGranted = !Config.RUNNING_MARSHMALLOW || (ContextCompat
+                .checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED);
 
-        if (!NetworkUtils.isWifiConnected(context)) {
+        Log.d(TAG, "onReceive locationPermissionGranted=" + locationPermissionGranted);
+        if (!NetworkUtils.isWifiConnected(context) && locationPermissionGranted) {
             new ScanResultAsyncHandler(context).execute();
         } else {
 
@@ -40,6 +48,7 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
         }
 
     }
+
 
     private static class ScanResultAsyncHandler extends DeletedSavedWifiHandlerTask {
 

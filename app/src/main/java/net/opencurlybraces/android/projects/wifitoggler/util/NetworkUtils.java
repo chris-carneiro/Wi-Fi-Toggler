@@ -1,23 +1,16 @@
 package net.opencurlybraces.android.projects.wifitoggler.util;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.provider.Settings;
-import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
-import net.opencurlybraces.android.projects.wifitoggler.R;
-import net.opencurlybraces.android.projects.wifitoggler.ui.SystemSettingsCheckActivity;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -120,6 +113,14 @@ public class NetworkUtils {
         return wifiManager.getScanResults();
     }
 
+
+    public static String getCurrentSsid(final Context context) {
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        String currentSsid = wifiInfo.getSSID();
+        Log.d(TAG, "currentSsid=" + currentSsid);
+        return (!TextUtils.isEmpty(currentSsid) ? currentSsid.replace("\"", "") : null);
+    }
 
 
     /**

@@ -18,8 +18,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.squareup.leakcanary.RefWatcher;
-
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
 import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandler;
@@ -120,6 +118,8 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         if (Config.DEBUG_MODE)
             Toast.makeText(this, "service created", Toast.LENGTH_LONG).show();
         initFields();
+
+
         registerReceivers();
         schedulePassiveScanCheck();
     }
@@ -173,9 +173,6 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         mCheckPassiveScanHandler.removeMessages(Config.WHAT_CHECK_SCAN_ALWAYS_AVAILABLE);
         unregisterReceivers();
         NotifUtils.dismissNotification(this, NotifUtils.NOTIFICATION_ID_WARNING);
-
-        RefWatcher refWatcher = WifiToggler.getRefWatcher(this);
-        refWatcher.watch(this);
     }
 
     private void unregisterReceivers() {
@@ -215,6 +212,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
             case ACTION_HANDLE_ACTIVATE_WIFI_HANDLER:
                 activateWifiToggler();
                 handleNotifications();
+                //TODO add update saved wifi status if connected to a known wifi
                 break;
             case ACTION_HANDLE_SAVED_WIFI_INSERT:
                 handleSavedWifiInsert();
@@ -360,12 +358,32 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
 
         PrefUtils.setSavedWifiInsertComplete(this, (results != null && results.length > 0));
 
-        Intent handleSavedWifiInsert = new Intent(this, WifiTogglerService.class);
-        handleSavedWifiInsert.setAction(WifiTogglerService.ACTION_HANDLE_ACTIVATE_WIFI_HANDLER);
-        startService(handleSavedWifiInsert);
-
+        Intent handleActivateWifiHandler = new Intent(this, WifiTogglerService.class);
+        handleActivateWifiHandler.setAction(WifiTogglerService.ACTION_HANDLE_ACTIVATE_WIFI_HANDLER);
+        startService(handleActivateWifiHandler);
         sendLocalBroadcastAction(ACTION_FINISH_STARTUP_CHECK_ACTIVITY);
+        /**
+         * In rare cases and for unknown reason(for now) the current wifi state is not updated in DB
+         * right after first Launch.
+         * This makes sure the current wifi is updated to connected state when it is the case...
+         * TODO this should not be necessary and might hide a deeper issue that must be further
+         * investigated...
+         */
+        if (NetworkUtils.isWifiConnected(this)) {
+            Log.d(TAG, "CurrentSSid=" + NetworkUtils.getCurrentSsid(this));
+            makeSureWifiStateIsUpdatedInDB();
+        }
+    }
 
+    public void makeSureWifiStateIsUpdatedInDB() {
+        String currentSsid = NetworkUtils.getCurrentSsid(this);
+        Intent updateWifiStatus = new Intent(this,
+                WifiTogglerService.class);
+        updateWifiStatus.putExtra(WifiConnectionStateReceiver.EXTRA_CURRENT_SSID,
+                currentSsid);
+
+        updateWifiStatus.setAction(WifiTogglerService
+                .ACTION_HANDLE_SAVED_WIFI_UPDATE_CONNECT);
     }
 
     @Override

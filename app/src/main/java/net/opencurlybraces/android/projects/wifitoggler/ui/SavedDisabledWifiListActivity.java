@@ -12,6 +12,8 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.common.ConnectionResult;
+
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
@@ -101,5 +103,17 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
         )});
         mAutoHideHandler.removeMessages(Config.WHAT_AUTO_HIDE);
         mAutoHideHandler.sendMessage(Message.obtain(mAutoHideHandler));
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
     }
 }

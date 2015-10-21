@@ -4,10 +4,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
+
+import com.google.android.gms.common.ConnectionResult;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
@@ -27,7 +30,8 @@ public class StartupSettingsCheckActivity extends SystemSettingsActivityAbstract
 
     @Override
     protected void startRepeatingCheck() {
-        mCheckPassiveHandler.sendMessageDelayed(Message.obtain(mCheckPassiveHandler, Config.WHAT_REPEAT_CHECK_SCAN_ALWAYS),
+        mCheckPassiveHandler.sendMessageDelayed(Message.obtain(mCheckPassiveHandler, Config
+                        .WHAT_REPEAT_CHECK_SCAN_ALWAYS),
                 Config.INTERVAL_CHECK_HALF_SECOND);
     }
 
@@ -60,7 +64,9 @@ public class StartupSettingsCheckActivity extends SystemSettingsActivityAbstract
 
     @Override
     protected void onContinueClicked() {
-        loadSavedWifiIntoDatabase();
+        if (!PrefUtils.isSavedWifiInsertComplete(this)) {
+            loadSavedWifiIntoDatabase();
+        }
         PrefUtils.markSettingsCorrectAtFirstLaunch(this);
     }
 
@@ -70,6 +76,10 @@ public class StartupSettingsCheckActivity extends SystemSettingsActivityAbstract
         setScanLayoutAccordingToSettings();
         setWifiLayoutAccordingToSettings();
         setHotspotLayoutAccordingToSettings();
+
+        if (Config.RUNNING_MARSHMALLOW) {
+            setLocationPermissionLayoutAccordingToSettings();
+        }
         checkContinueButtonListener();
     }
 
@@ -104,4 +114,18 @@ public class StartupSettingsCheckActivity extends SystemSettingsActivityAbstract
         startService(handleSavedWifiInsert);
     }
 
+    @Override
+    public void onConnected(Bundle bundle) {
+        Log.d(TAG, "onConnected");
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.d(TAG, "onConnectionSuspended");
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.d(TAG, "onConnectionFailed");
+    }
 }

@@ -43,4 +43,15 @@
 
     <string name="item_reverse_auto_toggle_title">Reverse AutoToggle</string>
 
+    <string name="location_explanation_dialog_title">Location Permission</string>
+    <string name="location_permission_explanation_dialog_content">In no instance does Wi-Fi
+        Toggler use your device\'s location. However, starting from Android 6.0 Marshmallow, one
+        of the core features of the app, which is nearby Wi-Fi scanning, requires the *Location*
+        permission. \nIn addition, in order to provide users with greater data protection, the new
+        privacy policy that
+        comes with Android M makes it mandatory to ask users this kind of permissions.
+        \n\nGo to app settings and grant
+      location permission ?</string>
+
+
 </resources>

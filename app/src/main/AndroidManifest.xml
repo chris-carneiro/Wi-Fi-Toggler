@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="net.opencurlybraces.android.projects.wifitoggler"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest
+    package="net.opencurlybraces.android.projects.wifitoggler"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
+    <uses-permission-sdk-23 android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
     <uses-feature
         android:name="android.hardware.wifi"
@@ -63,6 +66,11 @@
         <activity
             android:name="net.opencurlybraces.android.projects.wifitoggler.ui.SystemSettingsCheckActivity"
             android:label="@string/check_system_settings_title_activity">
+        </activity>
+        <activity
+            android:name=".ui.LocationPermissionActivityAsDialog"
+            android:label="Permission"
+            android:theme="@android:style/Theme.Holo.Dialog.NoActionBar">
         </activity>
     </application>
 

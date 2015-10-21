@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.net.wifi.SupplicantState;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Message;
@@ -77,15 +76,12 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
         switch (state) {
             case COMPLETED:
                 Log.d(TAG, "COMPLETED supplicant state received=");
-                WifiManager wifiManager = (WifiManager) context.getSystemService(Context
-                        .WIFI_SERVICE);
-                WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+                String currentSsid = NetworkUtils.getCurrentSsid(context);
 
-                String strippedSSID = wifiInfo.getSSID().replace("\"", "");
-
-                mDataAsyncQueryHandler.startQuery(1, strippedSSID, SavedWifi.CONTENT_URI,
+                mDataAsyncQueryHandler.startQuery(Config.TOKEN_QUERY, currentSsid, SavedWifi
+                                .CONTENT_URI,
                         PROJECTION_SSID,
-                        SavedWifi.SSID + "=?", new String[]{strippedSSID}, null);
+                        SavedWifi.SSID + "=?", new String[]{currentSsid}, null);
                 break;
             case DISCONNECTED:
                 Log.d(TAG, "DISCONNECTED supplicant state received=");

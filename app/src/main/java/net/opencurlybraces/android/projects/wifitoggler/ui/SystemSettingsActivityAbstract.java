@@ -1,9 +1,16 @@
 package net.opencurlybraces.android.projects.wifitoggler.ui;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -13,7 +20,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import com.squareup.leakcanary.RefWatcher;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
@@ -28,20 +35,24 @@ import java.util.Observer;
  * Created by chris on 24/07/15.
  */
 public abstract class SystemSettingsActivityAbstract extends AppCompatActivity implements View
-        .OnClickListener, Observer {
+        .OnClickListener, Observer, OnRequestPermissionsResultCallback,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "SystemSettingsAbstract";
-
 
     protected RelativeLayout mScanCheckLayout = null;
     protected RelativeLayout mAirplaneCheckLayout = null;
     protected RelativeLayout mHotspotCheckLayout = null;
     protected RelativeLayout mWifiCheckLayout = null;
+    protected RelativeLayout mLocationCheckLayout = null;
+
 
     protected ImageView mWifiNextIcon;
     protected ImageView mAirplaneNextIcon;
     protected ImageView mHotspotNextIcon;
     protected ImageView mScanNextIcon;
+    protected ImageView mLocationNextIcon;
+
 
     protected Button mContinueButton = null;
 
@@ -68,10 +79,8 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_system_settings_check);
-
         bindViews();
     }
-
 
     @Override
     protected void onStart() {
@@ -89,12 +98,38 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
         stopRepeatingCheck();
     }
 
+    @TargetApi (Build.VERSION_CODES.M)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[]
+            grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == Config.M_LOCATION_REQUEST_CODE) {
+            for (int i = 0, len = permissions.length; i < len; i++) {
+                String permission = permissions[i];
+                if (Manifest.permission.ACCESS_COARSE_LOCATION.equals(permission)) {
+
+                    WifiToggler.setSetting(Config.CHECK_LOCATION_PERMISSION_SETTINGS,
+                            grantResults[i] ==
+                                    PackageManager.PERMISSION_GRANTED);
+                }
+            }
+
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
         setLayoutAccordingToSettings();
+
+        if (Config.RUNNING_MARSHMALLOW) {
+            handleLocationPermissionCheck();
+        }
     }
+
+
 
     @Override
     protected void onPause() {
@@ -104,8 +139,6 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        RefWatcher refWatcher = WifiToggler.getRefWatcher(this);
-        refWatcher.watch(this);
     }
 
     @Override
@@ -133,11 +166,11 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        boolean isCorrect = resultCode == RESULT_OK;
 
         switch (requestCode) {
             case REQUEST_CODE_SCAN_ALWAYS_AVAILABLE:
                 Log.d(TAG, "resultCode" + resultCode);
-                boolean isCorrect = resultCode == RESULT_OK;
                 if (isCorrect) {
                     displaySettingsCorrectLayout(mScanCheckLayout, mScanNextIcon);
                 } else {
@@ -153,6 +186,9 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.startup_check_location_permission_settings_layout:
+                handleLocationPermissionRequest();
+                break;
             case R.id.startup_check_scan_always_available_layout:
 
                 handleScanSettingsDisplay();
@@ -162,7 +198,8 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
                 startActivity(enableWifi);
                 break;
             case R.id.startup_check_airplane_settings_layout:
-                Intent disableAirplane = new Intent(Settings.ACTION_AIRPLANE_MODE_SETTINGS);
+                Intent disableAirplane = new Intent(Settings
+                        .ACTION_AIRPLANE_MODE_SETTINGS);
                 startActivity(disableAirplane);
                 break;
             case R.id.startup_check_hotspot_settings_layout:
@@ -176,6 +213,18 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
                 break;
         }
 
+    }
+
+    public void handleLocationPermissionRequest() {
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            Intent showExplanation = new Intent(this, LocationPermissionActivityAsDialog
+                    .class);
+            startActivity(showExplanation);
+
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission
+                    .ACCESS_COARSE_LOCATION}, Config.M_LOCATION_REQUEST_CODE);
+        }
     }
 
     private void handleScanSettingsDisplay() {
@@ -247,6 +296,16 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
         }
     }
 
+    protected void setLocationPermissionLayoutAccordingToSettings() {
+        Log.d(TAG, "setLocationPermissionLayoutAccordingToSettings");
+
+        if (!WifiToggler.isCorrectSetting(Config.CHECK_LOCATION_PERMISSION_SETTINGS)) {
+            displayCheckSettingsLayout(mLocationCheckLayout, mLocationNextIcon);
+        } else {
+            displaySettingsCorrectLayout(mLocationCheckLayout, mLocationNextIcon);
+        }
+    }
+
     private void bindViews() {
         mScanCheckLayout = (RelativeLayout) findViewById(R.id
                 .startup_check_scan_always_available_layout);
@@ -269,8 +328,24 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
         mWifiNextIcon = (ImageView) mWifiCheckLayout.findViewById(R.id
                 .startup_check_wifi_settings_next_ic);
 
+        if (Config.RUNNING_MARSHMALLOW) {
+            mLocationCheckLayout = (RelativeLayout) findViewById(R.id
+                    .startup_check_location_permission_settings_layout);
+            mLocationCheckLayout.setVisibility(View.VISIBLE);
+            mLocationNextIcon = (ImageView) mLocationCheckLayout.findViewById(R.id
+                    .startup_check_location_permission_settings_next_ic);
+        }
+
     }
 
+
+    private void handleLocationPermissionCheck() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission
+                .ACCESS_COARSE_LOCATION) == PackageManager
+                .PERMISSION_GRANTED) {
+            WifiToggler.setSetting(Config.CHECK_LOCATION_PERMISSION_SETTINGS, true);
+        }
+    }
 
     /**
      * Simulates a system broadcast to check accurately the scan always available setting

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/dim_foreground_disabled_material_light"
+                android:orientation="vertical"
+                android:padding="@dimen/dialog_title_preferred_margin">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/system_settings_check_continue_button"
+        android:fillViewport="true"
+        >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <RelativeLayout
+                android:id="@+id/location_permission_explanation_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp">
+
+                <TextView
+                    android:id="@+id/permission_explanation_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="@dimen/dialog_title_preferred_margin"
+                    android:text="@string/location_explanation_dialog_title"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/dialog_title_preferred_text_size"/>
+
+
+                <TextView
+                    android:id="@+id/location_permission_explanation_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/permission_explanation_title"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center_horizontal"
+                    android:lineSpacingExtra="4dp"
+                    android:text="@string/location_permission_explanation_dialog_content"
+                    />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@id/location_permission_explanation_layout"
+                >
+
+
+                <TextView
+                    android:id="@+id/location_permission_negative_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:text="No, thanks"
+                    android:textColor="@color/material_orange_500"/>
+
+                <TextView
+                    android:id="@+id/location_permission_positive_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dialog_title_preferred_margin"
+                    android:layout_toEndOf="@+id/location_permission_negative_button"
+                    android:padding="5dp"
+                    android:text="Yes"
+                    android:textColor="@color/material_teal_400"/>
+
+
+            </RelativeLayout>
+        </RelativeLayout>
+    </ScrollView>
+</RelativeLayout>
