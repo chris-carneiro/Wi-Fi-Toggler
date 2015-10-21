@@ -51,7 +51,7 @@
         privacy policy that
         comes with Android M makes it mandatory to ask users this kind of permissions.
         \n\nGo to app settings and grant
-      location permission ?</string>
+      *Location* permission ?</string>
 
 
 </resources>

@@ -124,4 +124,15 @@
 
     <string name="wifi_list_info_no_disabled_known_wifi">"Vous n'avez désactivé aucun Wi-Fi"</string>
 
+
+    <string name="location_explanation_dialog_title">Autorisation</string>
+    <string name="location_permission_explanation_dialog_content">En aucun cas Wi-Fi Toggler
+        n\'utilise la position de votre appareil. Cependant, à partir de Android 6.0
+        Marshmallow , l\'une des caractéristiques fondamentales de l\'application, le scan de
+        Wi-Fis à proximité , nécessite la permission
+        *Position*. Aussi , afin de fournir aux utilisateurs une plus grande protection
+        des données , la nouvelle politique de confidentialité qui vient avec Android M rend
+        obligatoire ce genre d\'autorisations par l\'utilisateur.\n\nAller dans les préférences de
+        l\'application et autoriser la *Position* ?</string>
+
 </resources>
