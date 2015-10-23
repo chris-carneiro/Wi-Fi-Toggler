@@ -107,8 +107,8 @@
     <string name="startup_check_hotspot_settings_title">"Point d'accès"</string>
     <string name="startup_check_hotspot_settings_desc">"Le point d'accès doit être inactif"</string>
     <string name="startup_check_location_permission_settings_title">Position (Autorisation)</string>
-    <string name="startup_check_location_permission_settings_desc">Accès à la position doit être
-        autorisée</string>
+    <string name="startup_check_location_permission_settings_desc">L\'accès à la position doit être
+        autorisé</string>
 
     <string name="startup_check_settings_continue_button_text">Continuer</string>
 
@@ -134,5 +134,8 @@
         des données , la nouvelle politique de confidentialité qui vient avec Android M rend
         obligatoire ce genre d\'autorisations par l\'utilisateur.\n\nAller dans les préférences de
         l\'application et autoriser la *Position* ?</string>
+
+    <string name="location_permission_dialog_negative_answer">Non, merci</string>
+    <string name="location_permission_dialog_positive_answer">Oui</string>
 
 </resources>

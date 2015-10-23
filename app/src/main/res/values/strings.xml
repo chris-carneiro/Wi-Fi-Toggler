@@ -52,6 +52,8 @@
         comes with Android M makes it mandatory to ask users this kind of permissions.
         \n\nGo to app settings and grant
       *Location* permission ?</string>
+    <string name="location_permission_dialog_negative_answer">No, thanks</string>
+    <string name="location_permission_dialog_positive_answer">Yes</string>
 
 
 </resources>
