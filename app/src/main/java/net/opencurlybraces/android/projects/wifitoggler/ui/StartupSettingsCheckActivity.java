@@ -66,8 +66,10 @@ public class StartupSettingsCheckActivity extends SystemSettingsActivityAbstract
     protected void onContinueClicked() {
         if (!PrefUtils.isSavedWifiInsertComplete(this)) {
             loadSavedWifiIntoDatabase();
+            PrefUtils.markSettingsCorrectAtFirstLaunch(this);
+        } else {
+            this.finish(); // Fix issue #3 https://github.com/chris-carneiro/Wi-Fi-Toggler/issues/3
         }
-        PrefUtils.markSettingsCorrectAtFirstLaunch(this);
     }
 
     @Override
