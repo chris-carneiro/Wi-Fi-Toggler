@@ -32,16 +32,17 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
+import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
 import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifitoggler.data.model.Wifi;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.ui.SwipeDismissListViewTouchListener
         .DismissCallbacks;
+import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
 import java.lang.ref.WeakReference;
@@ -110,7 +111,8 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
             LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                     .addLocationRequest(mLocationRequest);
 
-            mLocationSettingsResult = LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder
+            mLocationSettingsResult = LocationServices.SettingsApi.checkLocationSettings
+                    (mGoogleApiClient, builder
                             .build());
 
             mLocationSettingsResult.setResultCallback(this);
@@ -128,8 +130,8 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     @Override
     public void onResult(LocationSettingsResult locationSettingsResult) {
         final Status status = locationSettingsResult.getStatus();
-//        final LocationSettingsStates locationStates = locationSettingsResult
-//                .getLocationSettingsStates();
+        //        final LocationSettingsStates locationStates = locationSettingsResult
+        //                .getLocationSettingsStates();
 
         switch (status.getStatusCode()) {
             case LocationSettingsStatusCodes.SUCCESS:
@@ -164,7 +166,11 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         super.onResume();
         setListAdapter();
         restoreListViewState();
+        if (NetworkUtils.isWifiEnabled(this)) {
+            WifiToggler.removeDeletedSavedWifiFromDB(this);
+        }
     }
+
 
     @Override
     protected void onDestroy() {

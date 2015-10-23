@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
+import android.os.Message;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
@@ -14,6 +15,7 @@ import net.opencurlybraces.android.projects.wifitoggler.util.DeletedSavedWifiHan
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.SavedWifiDBUtils;
+import net.opencurlybraces.android.projects.wifitoggler.util.ScheduleDisableWifi;
 
 import java.util.List;
 
@@ -34,15 +36,16 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
                 .checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED);
 
-        Log.d(TAG, "onReceive locationPermissionGranted=" + locationPermissionGranted);
         if (!NetworkUtils.isWifiConnected(context) && locationPermissionGranted) {
+
             new ScanResultAsyncHandler(context).execute();
         } else {
 
             int signalStrength = NetworkUtils.getSignalStrength(context);
-            Log.d(TAG, "already connected");
+            Log.d(TAG, "Already connected");
             if (signalStrength < PrefUtils.getWifiSignalStrengthThreshold
                     (context)) {
+                Log.d(TAG, "Signal Strength below threshold, disabling adapter");
                 NetworkUtils.disableWifiAdapter(context);
             }
         }
@@ -51,20 +54,23 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
 
 
     private static class ScanResultAsyncHandler extends DeletedSavedWifiHandlerTask {
-
+        private static final String TAG = "ScanResultAsyncHandler";
         private final Context mContext;
+        private ScheduleDisableWifi mScheduleDisableWifi = null;
 
         public ScanResultAsyncHandler(Context context) {
             super(context);
+            mScheduleDisableWifi = new ScheduleDisableWifi(context);
             mContext = context;
         }
 
 
         @Override
-        protected Boolean doInBackground(Object... params) {
+        protected Object doInBackground(Object... params) {
             //            android.os.Debug.waitForDebugger(); THIS IS EVIL
             List<Wifi> wifisFromDB = getSavedWifisFromDB();
             List<ScanResult> availableWifis = NetworkUtils.getAvailableWifi(mContext);
+
             Log.d(TAG, "available Wifis count=" + (availableWifis != null ? availableWifis.size()
                     : 0));
             if (availableWifis == null) {
@@ -74,22 +80,36 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
                     (mContext, availableWifis, wifisFromDB);
 
             handleWifiActivation(enableWifiAdapter);
-            removeUserUnwantedSavedWifi(wifisFromDB);
             return enableWifiAdapter;
         }
 
         @Override
         protected void onPostExecute(Object enableWifi) {
-            Log.d(TAG, "enableWifi=" + enableWifi);
+            Log.d(TAG, "onPostExecute enableWifi=" + enableWifi);
             super.onPostExecute(enableWifi);
+            // Fix issue https://github.com/chris-carneiro/Wi-Fi-Toggler/issues/2
+            if (!(Boolean) enableWifi) {
+                if (NetworkUtils.isWifiEnabled(mContext) && !PrefUtils.isWifiDisableWifiScheduled
+                        (mContext)) {
+                    scheduleDisableWifi();
+                }
+            }
         }
 
         private void handleWifiActivation(Boolean enableWifi) {
             Log.d(TAG, "handleWifiActivation");
             if (enableWifi) {
                 NetworkUtils.enableWifiAdapter(mContext);
-            } // else here in the future maybe schedule adapter deactivation as an open wifi
-            // workaround
+            }
+        }
+
+        private void scheduleDisableWifi() {
+            Log.d(TAG, "scheduleDisableWifi=" + mScheduleDisableWifi.obtainMessage(Config
+                    .WHAT_SCHEDULE_DISABLE_ADAPTER));
+            mScheduleDisableWifi.sendMessageDelayed(Message.obtain(mScheduleDisableWifi,
+                            Config.WHAT_SCHEDULE_DISABLE_ADAPTER),
+                    Config.INTERVAL_NINETY_SECONDS);
+            PrefUtils.setDisableWifiScheduled(mContext, true);
         }
     }
 }

@@ -1,10 +1,12 @@
 package net.opencurlybraces.android.projects.wifitoggler;
 
 import android.app.Application;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandler;
+import net.opencurlybraces.android.projects.wifitoggler.util.DeletedSavedWifiHandlerTask;
 import net.opencurlybraces.android.projects.wifitoggler.util.ObservableMap;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
@@ -20,6 +22,7 @@ public class WifiToggler extends Application {
 
     private static ObservableMap mObservableSystemSettings = null;
     private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -72,13 +75,22 @@ public class WifiToggler extends Application {
     }
 
     public static boolean isCorrectSetting(String key) {
-        Log.d(TAG, "isCorrectSetting");
         return mObservableSystemSettings.get(key);
     }
 
     public static void setSetting(String key, boolean isCorrect) {
-        Log.d(TAG, "put");
         mObservableSystemSettings.put(key, isCorrect);
     }
 
+    /**
+     * Aligns Wifi networks from Database with the system saved networks. For instance when the user
+     * deletes one or more system saved network, this will traverse all networks from System and DB,
+     * if there are more networks in DB, it finds which was/were deleted from system and remove it
+     * from DB
+     *
+     * @param context
+     */
+    public static void removeDeletedSavedWifiFromDB(final Context context) {
+        new DeletedSavedWifiHandlerTask(context).execute();
+    }
 }

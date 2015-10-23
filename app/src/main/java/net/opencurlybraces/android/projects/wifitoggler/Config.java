@@ -33,9 +33,7 @@ public class Config {
     public static final String CHECK_LOCATION_PERMISSION_SETTINGS =
             "CHECK_LOCATION_PERMISSION_SETTINGS";
 
-
     public static final String UNKNOWN_SSID = "<unknown ssid>";
-
 
     /**
      * Schedule intervals
@@ -46,7 +44,7 @@ public class Config {
                     .INTERVAL_HALF_DAY);
     public static final long INTERVAL_CHECK_HALF_SECOND = 500;
     public static final long INTERVAL_FIVE_SECOND = 1000 * 5;
-    public static final long INTERVAL_TWENTY_SECONDS = INTERVAL_FIVE_SECOND * 4;
+    public static final long INTERVAL_NINETY_SECONDS = INTERVAL_FIVE_SECOND * 18;
 
     /**
      * Async queries tokens

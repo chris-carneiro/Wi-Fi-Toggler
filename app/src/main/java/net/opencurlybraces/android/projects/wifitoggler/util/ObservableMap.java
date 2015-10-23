@@ -17,7 +17,6 @@ public class ObservableMap extends java.util.Observable {
     }
 
     public void put(String key, boolean isCorrect) {
-        Log.d(TAG, " ObservableMap put");
         if (mMap.get(key) == null || mMap.get(key) != isCorrect) {
             mMap.put(key, isCorrect);
             setChanged();
@@ -26,7 +25,6 @@ public class ObservableMap extends java.util.Observable {
     }
 
     public boolean get(String key) {
-        Log.d(TAG, " ObservableMap get");
         return (mMap.get(key) != null ? mMap.get(key) : false);
     }
 

@@ -72,17 +72,16 @@ public class SavedWifiDBUtils {
         if (savedWifisFromDb == null || availableWifiNetworks == null) {
             return false;
         }
+        int threshold = PrefUtils.getWifiSignalStrengthThreshold(context);
         for (ScanResult wifiNetwork : availableWifiNetworks) {
+
             for (Wifi savedWifi : savedWifisFromDb) {
-                if (wifiNetwork.SSID.equals(savedWifi.getSsid()) && savedWifi.isAutoToggle()) {
+                if (savedWifi.getSsid().equals(wifiNetwork.SSID) && savedWifi.isAutoToggle()) {
                     int signalStrength = WifiManager.calculateSignalLevel
                             (wifiNetwork.level, Config.WIFI_SIGNAL_STRENGTH_LEVELS);
                     Log.d(TAG, "signalStrength=" + signalStrength + " preferenceThreshold=" +
-                            PrefUtils
-                                    .getWifiSignalStrengthThreshold
-                                            (context));
-                    if (signalStrength >= PrefUtils.getWifiSignalStrengthThreshold
-                            (context)) {
+                            threshold);
+                    if (signalStrength >= threshold) {
                         return true;
                     }
                 }

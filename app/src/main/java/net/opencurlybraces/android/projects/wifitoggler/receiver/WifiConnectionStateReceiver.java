@@ -8,21 +8,18 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiManager;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
+import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
 import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.service.WifiTogglerService;
 import net.opencurlybraces.android.projects.wifitoggler.util.DeletedSavedWifiHandlerTask;
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
-
-import java.lang.ref.WeakReference;
 
 /**
  * Created by chris on 30/06/15.
@@ -37,7 +34,6 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
 
 
     private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
-    private ScheduleDisableWifi mScheduleDisableWifi = null;
     private static final String[] PROJECTION_SSID = new String[]{SavedWifi._ID, SavedWifi
             .SSID};
 
@@ -64,7 +60,6 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
                     this);
         }
 
-        mScheduleDisableWifi = new ScheduleDisableWifi(context);
         if (mContext == null) {
             mContext = context;
         }
@@ -82,6 +77,10 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
                                 .CONTENT_URI,
                         PROJECTION_SSID,
                         SavedWifi.SSID + "=?", new String[]{currentSsid}, null);
+
+
+                // abort wifi deactivation if scheduled
+                cancelWifiAdapterDeactivation(context);
                 break;
             case DISCONNECTED:
                 Log.d(TAG, "DISCONNECTED supplicant state received=");
@@ -92,8 +91,10 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
 
                 context.startService(disconnectSavedWifi);
 
-                new DeletedSavedWifiHandlerTask(context).execute();
-                scheduleDisableWifi();
+                if (NetworkUtils.isWifiEnabled(context)) {
+                    WifiToggler.removeDeletedSavedWifiFromDB(context);
+                    NetworkUtils.disableWifiAdapter(context);
+                }
                 break;
             default:
                 // Ignore other wifi states
@@ -102,12 +103,8 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
         }
     }
 
-
-    private void scheduleDisableWifi() {
-        Log.d(TAG, "Adapter deactivation scheduled");
-        mScheduleDisableWifi.sendMessageDelayed(Message.obtain(mScheduleDisableWifi,
-                        Config.WHAT_SCHEDULE_DISABLE_ADAPTER),
-                Config.INTERVAL_TWENTY_SECONDS);
+    private void cancelWifiAdapterDeactivation(Context context) {
+        PrefUtils.setDisableWifiScheduled(context, false);
     }
 
     @Override
@@ -200,22 +197,5 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
 
     }
 
-
-    public final class ScheduleDisableWifi extends Handler {
-        private final WeakReference<Context> mHost;
-
-
-        public ScheduleDisableWifi(Context host) {
-            mHost = new WeakReference<>(host);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            Context host = mHost.get();
-            if (host != null) {
-                NetworkUtils.disableWifiAdapter(host);
-            }
-        }
-    }
 
 }

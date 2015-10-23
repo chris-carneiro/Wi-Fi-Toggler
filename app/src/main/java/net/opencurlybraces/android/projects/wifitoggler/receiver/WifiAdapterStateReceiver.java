@@ -9,6 +9,7 @@ import android.util.Log;
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
 import net.opencurlybraces.android.projects.wifitoggler.service.WifiTogglerService;
+import net.opencurlybraces.android.projects.wifitoggler.util.DeletedSavedWifiHandlerTask;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 
 /**
@@ -24,7 +25,7 @@ public class WifiAdapterStateReceiver extends BroadcastReceiver {
             int wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, -1);
 
             if (WifiManager.WIFI_STATE_DISABLED == wifiState) {
-                
+
                 if (PrefUtils.isWifiTogglerActive(context)) {
                     Log.d(TAG, "WIFI_STATE_DISABLED Event received");
                     Intent updateSavedWifi = new Intent(context, WifiTogglerService
@@ -33,11 +34,14 @@ public class WifiAdapterStateReceiver extends BroadcastReceiver {
                             .ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT);
 
                     context.startService(updateSavedWifi);
+
+                    PrefUtils.setDisableWifiScheduled(context, false);
                 }
 
                 WifiToggler.setSetting(Config.STARTUP_CHECK_WIFI_SETTINGS, false);
             } else {
                 WifiToggler.setSetting(Config.STARTUP_CHECK_WIFI_SETTINGS, true);
+               WifiToggler.removeDeletedSavedWifiFromDB(context);
             }
         }
     }

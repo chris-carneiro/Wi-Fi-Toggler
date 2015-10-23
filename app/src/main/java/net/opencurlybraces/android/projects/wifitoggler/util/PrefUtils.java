@@ -35,6 +35,8 @@ public class PrefUtils {
     public static final String PREF_ALL_SETTINGS_CORRECT_AT_FIRST_LAUNCH = PREF_PREFIX +
             "settings_correct_at_first_launch";
 
+    public static final String PREF_DISABLE_WIFI_SCHEDULED = "disable_wifi_scheduled";
+
     private PrefUtils() {
     }
 
@@ -101,19 +103,6 @@ public class PrefUtils {
                 .DEFAULT_AUTO_TOGGLE_VALUE));
     }
 
-    /**
-     * Set wifi auto toggle default value for wifis the user connects to for the first time.
-     *
-     * @param context
-     * @param isAutoToggle
-     */
-    public static void setAutoToggleValueForNewWifi(final Context context, final boolean
-            isAutoToggle) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putString(PREF_AUTO_TOGGLE_DEFAULT_VALUE_FOR_NEW_WIFI, String.valueOf
-                (isAutoToggle)).apply();
-    }
-
     public static void setSavedWifiInsertComplete(final Context context, boolean completed) {
         Log.d(TAG, "setSavedWifiInsertComplete=" + completed);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
@@ -124,6 +113,20 @@ public class PrefUtils {
         Log.d(TAG, "isSavedWifiInsertComplete");
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getBoolean(PREF_SAVED_WIFI_INSERTED, false);
+    }
+
+
+    public static void setDisableWifiScheduled(final Context context, boolean isScheduled) {
+        Log.d(TAG, "setDisableWifiScheduled isScheduled=" + isScheduled);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().putBoolean(PREF_DISABLE_WIFI_SCHEDULED, isScheduled).apply();
+    }
+
+    public static boolean isWifiDisableWifiScheduled(final Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        Log.d(TAG, "isWifiDisableWifiScheduled=" + sp.getBoolean(PREF_DISABLE_WIFI_SCHEDULED,
+                false));
+        return sp.getBoolean(PREF_DISABLE_WIFI_SCHEDULED, false);
     }
 
 }

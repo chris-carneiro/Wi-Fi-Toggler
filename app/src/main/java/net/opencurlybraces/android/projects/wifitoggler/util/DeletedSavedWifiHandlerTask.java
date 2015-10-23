@@ -11,10 +11,12 @@ import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import java.util.List;
 
 /**
+ * Created to delete the saved wifis(from DB) that the user deliberately removed from the saved
+ * networks
  * Created by chris on 02/09/15.
  */
 public class DeletedSavedWifiHandlerTask extends AsyncTask<Object, Object, Object> {
-    public static final String TAG = "DeletedSavedWifiTask";
+    private static final String TAG = "DeletedSavedWifiTask";
     private static final String[] PROJECTION = new String[]{SavedWifi._ID, SavedWifi.SSID, SavedWifi
             .AUTO_TOGGLE};
 
@@ -44,7 +46,7 @@ public class DeletedSavedWifiHandlerTask extends AsyncTask<Object, Object, Objec
      *
      * @param wifisFromDB
      */
-    protected void removeUserUnwantedSavedWifi(List<Wifi> wifisFromDB) {
+    private void removeUserUnwantedSavedWifi(List<Wifi> wifisFromDB) {
         Log.d(TAG, "removeUserUnwantedSavedWifi");
         List<WifiConfiguration> savedWifis = NetworkUtils.getSavedWifiSync(mContext);
         Log.d(TAG, "System Saved Wifi=" + (savedWifis != null ? savedWifis.size() : null));
