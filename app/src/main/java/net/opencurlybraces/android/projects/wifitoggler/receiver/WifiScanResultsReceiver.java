@@ -11,11 +11,11 @@ import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.data.model.Wifi;
-import net.opencurlybraces.android.projects.wifitoggler.util.DeletedSavedWifiHandlerTask;
+import net.opencurlybraces.android.projects.wifitoggler.util.DeletedSavedWifiSweepingTask;
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.SavedWifiDBUtils;
-import net.opencurlybraces.android.projects.wifitoggler.util.ScheduleDisableWifi;
+import net.opencurlybraces.android.projects.wifitoggler.util.WifiDeactivationHandler;
 
 import java.util.List;
 
@@ -53,14 +53,14 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
     }
 
 
-    private static class ScanResultAsyncHandler extends DeletedSavedWifiHandlerTask {
+    private static class ScanResultAsyncHandler extends DeletedSavedWifiSweepingTask {
         private static final String TAG = "ScanResultAsyncHandler";
         private final Context mContext;
-        private ScheduleDisableWifi mScheduleDisableWifi = null;
+        private WifiDeactivationHandler mScheduleDisableWifi = null;
 
         public ScanResultAsyncHandler(Context context) {
             super(context);
-            mScheduleDisableWifi = new ScheduleDisableWifi(context);
+            mScheduleDisableWifi = new WifiDeactivationHandler(context);
             mContext = context;
         }
 
@@ -69,7 +69,7 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
         protected Object doInBackground(Object... params) {
             //            android.os.Debug.waitForDebugger(); THIS IS EVIL
             List<Wifi> wifisFromDB = getSavedWifisFromDB();
-            List<ScanResult> availableWifis = NetworkUtils.getAvailableWifi(mContext);
+            List<ScanResult> availableWifis = NetworkUtils.getNearbyWifi(mContext);
 
             Log.d(TAG, "available Wifis count=" + (availableWifis != null ? availableWifis.size()
                     : 0));

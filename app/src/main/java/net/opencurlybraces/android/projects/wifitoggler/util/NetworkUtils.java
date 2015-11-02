@@ -107,8 +107,8 @@ public class NetworkUtils {
         return wifiManager.getConfiguredNetworks();
     }
 
-    public static List<ScanResult> getAvailableWifi(final Context context) {
-        Log.d(TAG, "getAvailableWifi");
+    public static List<ScanResult> getNearbyWifi(final Context context) {
+        Log.d(TAG, "getNearbyWifi");
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         return wifiManager.getScanResults();
     }

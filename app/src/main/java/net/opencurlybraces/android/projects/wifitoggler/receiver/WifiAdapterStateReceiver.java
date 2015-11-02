@@ -9,7 +9,6 @@ import android.util.Log;
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
 import net.opencurlybraces.android.projects.wifitoggler.service.WifiTogglerService;
-import net.opencurlybraces.android.projects.wifitoggler.util.DeletedSavedWifiHandlerTask;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 
 /**

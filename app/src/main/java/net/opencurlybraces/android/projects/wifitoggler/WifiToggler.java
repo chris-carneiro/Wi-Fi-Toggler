@@ -6,7 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandler;
-import net.opencurlybraces.android.projects.wifitoggler.util.DeletedSavedWifiHandlerTask;
+import net.opencurlybraces.android.projects.wifitoggler.util.DeletedSavedWifiSweepingTask;
 import net.opencurlybraces.android.projects.wifitoggler.util.ObservableMap;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
@@ -21,16 +21,16 @@ public class WifiToggler extends Application {
     private static final String TAG = "WifiTogglerApp";
 
     private static ObservableMap mObservableSystemSettings = null;
-    private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
+//    private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate");
-        if (mDataAsyncQueryHandler == null) {
-            mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(), null);
-        }
         firstStartCheck.execute();
+//        if (mDataAsyncQueryHandler == null) {
+//            mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(), null);
+//        }
     }
 
     private AsyncTask<Void, Void, Void> firstStartCheck = new AsyncTask<Void, Void, Void>() {
@@ -91,6 +91,6 @@ public class WifiToggler extends Application {
      * @param context
      */
     public static void removeDeletedSavedWifiFromDB(final Context context) {
-        new DeletedSavedWifiHandlerTask(context).execute();
+        new DeletedSavedWifiSweepingTask(context).execute();
     }
 }

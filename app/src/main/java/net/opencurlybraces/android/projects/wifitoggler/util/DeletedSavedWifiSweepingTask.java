@@ -15,7 +15,7 @@ import java.util.List;
  * networks
  * Created by chris on 02/09/15.
  */
-public class DeletedSavedWifiHandlerTask extends AsyncTask<Object, Object, Object> {
+public class DeletedSavedWifiSweepingTask extends AsyncTask<Object, Object, Object> {
     private static final String TAG = "DeletedSavedWifiTask";
     private static final String[] PROJECTION = new String[]{SavedWifi._ID, SavedWifi.SSID, SavedWifi
             .AUTO_TOGGLE};
@@ -23,7 +23,7 @@ public class DeletedSavedWifiHandlerTask extends AsyncTask<Object, Object, Objec
     private final Context mContext;
 
 
-    public DeletedSavedWifiHandlerTask(final Context context) {
+    public DeletedSavedWifiSweepingTask(final Context context) {
         mContext = context;
     }
 

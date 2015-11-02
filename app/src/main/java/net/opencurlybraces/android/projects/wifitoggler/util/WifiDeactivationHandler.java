@@ -10,11 +10,11 @@ import java.lang.ref.WeakReference;
 /**
  * Created by chris on 22/10/15.
  */
-public class ScheduleDisableWifi extends Handler {
-    private static final String TAG = "ScheduleDisableWifi";
+public class WifiDeactivationHandler extends Handler {
+    private static final String TAG = "WifiDeactivationHandler";
     private final WeakReference<Context> mHost;
 
-    public ScheduleDisableWifi(Context host) {
+    public WifiDeactivationHandler(Context host) {
         mHost = new WeakReference<>(host);
     }
 
