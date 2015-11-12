@@ -192,7 +192,9 @@ public class SavedWifi implements BaseColumns {
 
     private static ContentValues buildDefaultWifiContentValues(WifiConfiguration wifi) {
         ContentValues values = new ContentValues();
-        String ssid = (wifi.SSID != null ? wifi.SSID.replace("\"", "") : Config.UNKNOWN_SSID);
+        // Fix for issue #1: NPE at startup settings check
+        String ssid = (!TextUtils.isEmpty(wifi.SSID) ? wifi.SSID.replace("\"", "") : Config
+                .UNKNOWN_SSID);
         values.put(SavedWifi.SSID, ssid);
         values.put(SavedWifi.AUTO_TOGGLE, 1);
         values.put(SavedWifi.OPEN_WIFI, 0);
