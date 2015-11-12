@@ -1,6 +1,5 @@
 package net.opencurlybraces.android.projects.wifitoggler.ui;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -118,6 +117,7 @@ public class PreferencesActivity extends PreferenceActivity {
         addPreferencesFromResource(R.xml.pref_general);
         addPreferencesFromResource(R.xml.pref_notification);
 
+        bindPreferenceSummaryToValue(findPreference(PrefUtils.PREF_WIFI_DEACTIVATION_TIMER));
         bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_RUN_AT_STARTUP));
         bindPreferenceSummaryToValue(findPreference(PrefUtils.PREF_SIGNAL_STRENGTH_THRESHOLD));
         bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_WARNING_NOTIFICATIONS));
@@ -239,48 +239,6 @@ public class PreferencesActivity extends PreferenceActivity {
                 PreferenceManager
                         .getDefaultSharedPreferences(preference.getContext())
                         .getBoolean(preference.getKey(), true));
-    }
-
-    /**
-     * This fragment shows general preferences only. It is used when the activity is showing a
-     * two-pane settings UI.
-     */
-    @TargetApi (Build.VERSION_CODES.HONEYCOMB)
-    public static class GeneralPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_general);
-
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_RUN_AT_STARTUP));
-            bindPreferenceSummaryToValue(findPreference(PrefUtils.PREF_SIGNAL_STRENGTH_THRESHOLD));
-            bindPreferenceSummaryToValue(findPreference(PrefUtils
-                    .PREF_AUTO_TOGGLE_DEFAULT_VALUE_FOR_NEW_WIFI));
-        }
-    }
-
-    /**
-     * This fragment shows notification preferences only. It is used when the activity is showing a
-     * two-pane settings UI.
-     */
-    @TargetApi (Build.VERSION_CODES.HONEYCOMB)
-    public static class NotificationPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_notification);
-
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_WARNING_NOTIFICATIONS));
-
-        }
     }
 
 }

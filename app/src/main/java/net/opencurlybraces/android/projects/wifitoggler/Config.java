@@ -22,6 +22,7 @@ public class Config {
      */
     public static final int WIFI_SIGNAL_STRENGTH_LEVELS = 11;
     public static final String DEFAULT_SIGNAL_STRENGTH_THRESHOLD = "4"; // fair
+    public static final String DEFAULT_DEACTIVATION_TIMER = "180000"; // 3 Minutes
     public static final String DEFAULT_AUTO_TOGGLE_VALUE = PreferencesActivity
             .AUTO_TOGGLE_ACTIVE_BY_DEFAULT;
     public static final int SYSTEM_SETTINGS_CHECKS = (RUNNING_MARSHMALLOW ? 5 : 4);
@@ -47,7 +48,6 @@ public class Config {
                     .INTERVAL_HALF_DAY);
     public static final long INTERVAL_CHECK_HALF_SECOND = 500;
     public static final long INTERVAL_FIVE_SECOND = 1000 * 5;
-    public static final long INTERVAL_NINETY_SECONDS = INTERVAL_FIVE_SECOND * 18;
 
     /**
      * Async queries tokens

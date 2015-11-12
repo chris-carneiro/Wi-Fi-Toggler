@@ -22,6 +22,7 @@ public class PrefUtils {
     public static final String PREF_WARNING_NOTIFICATIONS = "warning_notifications";
     public static final String PREF_AUTO_TOGGLE_DEFAULT_VALUE_FOR_NEW_WIFI =
             "auto_toggle_default_value_for_new_wifi";
+    public static final String PREF_WIFI_DEACTIVATION_TIMER = "wifi_deactivation_timer_value";
 
     public static final String PREF_SIGNAL_STRENGTH_THRESHOLD = "signal_strength_threshold";
     public static final String PREF_SAVED_WIFI_INSERTED = PREF_PREFIX + "saved_wifi_completed";
@@ -82,6 +83,18 @@ public class PrefUtils {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return Integer.parseInt(sp.getString(PREF_SIGNAL_STRENGTH_THRESHOLD, Config
                 .DEFAULT_SIGNAL_STRENGTH_THRESHOLD));
+    }
+
+    /**
+     * Gets Timer value for wifi deactivation the user defined in app settings ²
+     *
+     * @param context
+     * @return int
+     */
+    public static int getWifiDeactivationTimerValue(final Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return Integer.parseInt(sp.getString(PREF_WIFI_DEACTIVATION_TIMER, Config
+                .DEFAULT_DEACTIVATION_TIMER));
     }
 
     /**

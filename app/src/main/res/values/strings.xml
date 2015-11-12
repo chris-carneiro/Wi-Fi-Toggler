@@ -41,8 +41,6 @@
     <string name="tag_key_row_index">tag_key_auto_toggle_index</string>
     <string name="tag_key_row_id_value">tag_key_row_id_value</string>
 
-    <string name="item_reverse_auto_toggle_title">Reverse AutoToggle</string>
-
     <string name="location_explanation_dialog_title">Location Permission</string>
     <string name="location_permission_explanation_dialog_content">In no instance does Wi-Fi
         Toggler use your device\'s location. However, starting from Android 6.0 Marshmallow, one

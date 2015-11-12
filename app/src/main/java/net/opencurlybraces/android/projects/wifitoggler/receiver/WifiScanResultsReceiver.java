@@ -106,9 +106,10 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
         private void scheduleDisableWifi() {
             Log.d(TAG, "scheduleDisableWifi=" + mScheduleDisableWifi.obtainMessage(Config
                     .WHAT_SCHEDULE_DISABLE_ADAPTER));
+            int deactivationTimer = PrefUtils.getWifiDeactivationTimerValue(mContext);
             mScheduleDisableWifi.sendMessageDelayed(Message.obtain(mScheduleDisableWifi,
                             Config.WHAT_SCHEDULE_DISABLE_ADAPTER),
-                    Config.INTERVAL_NINETY_SECONDS);
+                    deactivationTimer);
             PrefUtils.setDisableWifiScheduled(mContext, true);
         }
     }

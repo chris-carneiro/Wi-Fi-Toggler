@@ -2,9 +2,6 @@
     <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Settings -->
-
-    <string name="pref_header_general">General</string>
-    <string name="pref_header_notifications">Notifications</string>
     <string name="pref_title_run_at_startup">Launch Mode</string>
     <string name="pref_description_run_at_startup">Run Wi-Fi Toggler when my
         phone starts up
@@ -48,6 +45,25 @@
     <string name="pref_description_warning_notifications">Notify me when auto-toggle is not
         available
     </string>
+
+
+    <string name="pref_title_timer_for_deactivation">Disable Wi-Fi after</string>
+    <string-array name="pref_timer_for_deactivation_list_values">
+        <item>600000</item>
+        <item>300000</item>
+        <item>180000</item>
+        <item>60000</item>
+        <item>15000</item>
+    </string-array>
+
+    <string-array name="pref_timer_for_deactivation_list_titles">
+        <item>10 Minutes</item>
+        <item>5 Minutes</item>
+        <item>3 Minutes (Recommended)</item>
+        <item>1 Minute</item>
+        <item>15 Seconds</item>
+    </string-array>
+
 
     <string
         name="key_pref_warning_notifications">net.opencurlybraces.android.projects.wifitoggler.prefs
