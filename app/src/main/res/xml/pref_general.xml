@@ -20,7 +20,7 @@
         android:title="@string/pref_title_signal_strength_threshold"/>
 
     <ListPreference
-        android:defaultValue="true"
+        android:defaultValue="Active"
         android:entries="@array/pref_auto_toggle_default_value_for_new_wifi_list_titles"
         android:entryValues="@array/pref_auto_toggle_default_value_for_new_wifi_list_values"
         android:key="auto_toggle_default_value_for_new_wifi"

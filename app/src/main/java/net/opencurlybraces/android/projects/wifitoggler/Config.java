@@ -3,6 +3,8 @@ package net.opencurlybraces.android.projects.wifitoggler;
 import android.app.AlarmManager;
 import android.os.Build;
 
+import net.opencurlybraces.android.projects.wifitoggler.ui.PreferencesActivity;
+
 /**
  * Created by chris on 03/07/15.
  */
@@ -20,7 +22,8 @@ public class Config {
      */
     public static final int WIFI_SIGNAL_STRENGTH_LEVELS = 11;
     public static final String DEFAULT_SIGNAL_STRENGTH_THRESHOLD = "4"; // fair
-    public static final String DEFAULT_AUTO_TOGGLE_VALUE = "true";
+    public static final String DEFAULT_AUTO_TOGGLE_VALUE = PreferencesActivity
+            .AUTO_TOGGLE_ACTIVE_BY_DEFAULT;
     public static final int SYSTEM_SETTINGS_CHECKS = (RUNNING_MARSHMALLOW ? 5 : 4);
 
     /**

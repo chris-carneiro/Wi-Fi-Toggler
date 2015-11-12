@@ -181,9 +181,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     }
 
     protected abstract void setListAdapter();
-
     protected abstract void handleUndoAction();
-
     protected abstract void bindViews();
 
     protected void bindListView() {
@@ -192,7 +190,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     }
 
     protected void displaySettingsActivity() {
-        Intent preferencesIntent = new Intent(this, SettingsActivity.class);
+        Intent preferencesIntent = new Intent(this, PreferencesActivity.class);
         startActivity(preferencesIntent);
     }
 

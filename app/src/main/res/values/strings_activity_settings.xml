@@ -4,12 +4,13 @@
     <!-- Strings related to Settings -->
 
     <string name="pref_header_general">General</string>
-    <string name="pref_title_run_at_startup">Run Wi-Fi Toggler at startup</string>
-    <string name="pref_description_run_at_startup">Automatically run Wi-Fi Toggler when your
+    <string name="pref_header_notifications">Notifications</string>
+    <string name="pref_title_run_at_startup">Launch Mode</string>
+    <string name="pref_description_run_at_startup">Run Wi-Fi Toggler when my
         phone starts up
     </string>
 
-    <string name="pref_title_signal_strength_threshold">Signal strength for auto-toggle</string>
+    <string name="pref_title_signal_strength_threshold">Auto-toggle</string>
     <string-array name="pref_wifi_signal_strength_list_values">
         <item>8</item>
         <item>6</item>
@@ -19,36 +20,33 @@
     </string-array>
 
     <string-array name="pref_wifi_signal_strength_list_titles">
-        <item>Excellent</item>
-        <item>Good</item>
-        <item>Fair</item>
-        <item>Poor</item>
-        <item>Always</item>
+        <item>When Wi-Fi signal is Excellent</item>
+        <item>When Wi-Fi signal is Good</item>
+        <item>When Wi-Fi signal is Fair</item>
+        <item>When Wi-Fi signal is Poor</item>
+        <item>Whenever possible</item>
     </string-array>
 
-    <string name="pref_title_auto_toggle_default_value_for_new_wifi">Auto toggle new
-    Wi-Fis ?</string>
+    <string name="pref_title_auto_toggle_default_value_for_new_wifi">New Saved
+    Wi-Fi</string>
 
     <string-array name="pref_auto_toggle_default_value_for_new_wifi_list_values">
-        <item>true</item> <!-- Auto toggle On(default)-->
-        <item>false</item>
+        <!-- Is auto-toggled by default-->
+        <item>Active</item>
+        <item>Disabled</item>
+        <item>Ask</item>
     </string-array>
 
     <string-array name="pref_auto_toggle_default_value_for_new_wifi_list_titles">
-        <item>Auto toggle On (default)</item>
-        <item>Auto toggle Off</item>
+        <item>Is auto-toggled by default</item>
+        <item>Is disabled by default</item>
+        <item>Ask for each new Wi-Fi</item>
     </string-array>
 
-    <string name="pref_header_notifications">Notifications</string>
 
     <string name="pref_title_warning_notifications">Warning notifications</string>
-    <string name="pref_description_warning_notifications">Get notified when system settings
-        prevent Wi-Fi Toggler from working properly
-    </string>
-
-    <string name="pref_title_auto_toggle_notifications">Auto toggle notifications</string>
-    <string name="pref_description_auto_toggle_notifications">Get notified to choose whether a
-        new saved Wi-Fi is auto toggle
+    <string name="pref_description_warning_notifications">Notify me when auto-toggle is not
+        available
     </string>
 
     <string

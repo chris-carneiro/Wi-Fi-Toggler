@@ -35,18 +35,17 @@
     <string name="tag_key_row_index">tag_key_auto_toggle_index</string>
     <string name="tag_key_row_id_value">tag_key_row_id_value</string>
 
-    <string name="item_reverse_auto_toggle_title">"Inverser l'auto activation"</string>
-
     <string name="title_activity_settings">Préférences</string>
 
     <!-- Strings related to Settings -->
 
     <string name="pref_header_general">Général</string>
-    <string name="pref_title_run_at_startup">Lancer Wi-Fi Toggler au démarrage</string>
-    <string name="pref_description_run_at_startup">Lance Wi-Fi Toggler au démarrage de votre
+    <string name="pref_header_notifications">Notifications</string>
+    <string name="pref_title_run_at_startup">Démarrage</string>
+    <string name="pref_description_run_at_startup">Lancer Wi-Fi Toggler au démarrage de mon
         téléphone</string>
 
-    <string name="pref_title_signal_strength_threshold">"Force du signal pour l'auto activation"</string>
+    <string name="pref_title_signal_strength_threshold">"Auto activer"</string>
     <string-array name="pref_wifi_signal_strength_list_values">
         <item>8</item>
         <item>6</item>
@@ -56,34 +55,32 @@
     </string-array>
 
     <string-array name="pref_wifi_signal_strength_list_titles">
-        <item>Excellent</item>
-        <item>Très bon</item>
-        <item>Bon</item>
-        <item>Faible</item>
-        <item>Toujours</item>
+        <item>Lorsque le signal est Excellent</item>
+        <item>Lorsque le signal est Très bon</item>
+        <item>Lorsque le signal est Bon</item>
+        <item>Lorsque le signal est Faible</item>
+        <item>Dès que possible</item>
     </string-array>
 
-    <string name="pref_title_auto_toggle_default_value_for_new_wifi">Auto activer nouveaux Wi-Fis ?</string>
+    <string name="pref_title_auto_toggle_default_value_for_new_wifi">Nouveau Wi-Fi</string>
 
     <string-array name="pref_auto_toggle_default_value_for_new_wifi_list_values">
-        <item>true</item>
-        <!-- Auto toggle On(default)-->
-        <item>false</item>
+        <item>Active</item>
+        <item>Disabled</item>
+        <item>Ask</item>
     </string-array>
 
     <string-array name="pref_auto_toggle_default_value_for_new_wifi_list_titles">
-        <item>Auto toggle On (défaut)</item>
-        <item>Auto toggle Off</item>
+        <item>Est auto activé par défault</item>
+        <item>Est désactivé par défaut</item>
+        <item>Demander à chaque nouveau Wi-Fi</item>
     </string-array>
 
-    <string name="pref_header_notifications">Notifications</string>
+
 
     <string name="pref_title_warning_notifications">"Notifications d'avertissement"</string>
-    <string name="pref_description_warning_notifications">"Etre notifé lorsque les préférences système empêchent l'auto activation des Wi-Fis"</string>
-
-    <string name="pref_title_auto_toggle_notifications">"Notifications d'auto activation"</string>
-    <string name="pref_description_auto_toggle_notifications">"Etre notifié à la sauvegarde d'un nouveau Wi-Fi et choisir son auto activation."
-    </string>
+    <string name="pref_description_warning_notifications">"M\'avertire lorsque l\'auto
+        activation n\'est pas disponible"</string>
 
     <string
         name="key_pref_warning_notifications">net.opencurlybraces.android.projects.wifitoggler.prefs
@@ -113,8 +110,8 @@
     <string name="startup_check_settings_continue_button_text">Continuer</string>
 
     <string name="wifi_disabled_confirmation_bottom_overlay_content">Auto activation
-        off pour %1$s</string>
-    <string name="wifi_enabled_confirmation_bottom_overlay_content">Auto activation on
+        active pour %1$s</string>
+    <string name="wifi_enabled_confirmation_bottom_overlay_content">Auto activation désactivée
     pour %1$s</string>
     <string name="wifi_undo_action_text">Annuler</string>
 

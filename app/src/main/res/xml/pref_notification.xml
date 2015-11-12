@@ -8,10 +8,4 @@
         android:summary="@string/pref_description_warning_notifications"
         android:title="@string/pref_title_warning_notifications"/>
 
-    <SwitchPreference
-        android:defaultValue="false"
-        android:key="auto_toggle_notifications"
-        android:summary="@string/pref_description_auto_toggle_notifications"
-        android:title="@string/pref_title_auto_toggle_notifications"/>
-
 </PreferenceScreen>

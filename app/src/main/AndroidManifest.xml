@@ -59,7 +59,7 @@
         </activity>
 
         <activity
-            android:name="net.opencurlybraces.android.projects.wifitoggler.ui.SettingsActivity"
+            android:name=".ui.PreferencesActivity"
             android:label="@string/title_activity_settings">
         </activity>
         <activity

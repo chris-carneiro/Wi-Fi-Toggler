@@ -6,6 +6,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
+import net.opencurlybraces.android.projects.wifitoggler.ui.PreferencesActivity;
 
 /**
  * Created by chris on 12/06/15.
@@ -16,25 +17,16 @@ public class PrefUtils {
 
     private static final String PREF_PREFIX = "net.opencurlybraces.android.projects.wifitoggler" +
             ".prefs.";
-
     private static final String PREF_WIFI_HANDLER_ACTIVE = PREF_PREFIX + "wifi_handler_active";
-
     public static final String PREF_RUN_AT_STARTUP = "run_at_startup";
-
     public static final String PREF_WARNING_NOTIFICATIONS = "warning_notifications";
-
-    public static final String PREF_AUTO_TOGGLE_NOTIFICATIONS = "auto_toggle_notifications";
-
     public static final String PREF_AUTO_TOGGLE_DEFAULT_VALUE_FOR_NEW_WIFI =
             "auto_toggle_default_value_for_new_wifi";
 
     public static final String PREF_SIGNAL_STRENGTH_THRESHOLD = "signal_strength_threshold";
-
     public static final String PREF_SAVED_WIFI_INSERTED = PREF_PREFIX + "saved_wifi_completed";
-
     public static final String PREF_ALL_SETTINGS_CORRECT_AT_FIRST_LAUNCH = PREF_PREFIX +
             "settings_correct_at_first_launch";
-
     public static final String PREF_DISABLE_WIFI_SCHEDULED = "disable_wifi_scheduled";
 
     private PrefUtils() {
@@ -62,9 +54,10 @@ public class PrefUtils {
         return sp.getBoolean(PREF_WARNING_NOTIFICATIONS, true);
     }
 
-    public static boolean areAutoToggleNotificationsEnabled(final Context context) {
+    public static boolean isAutoToggleModeAlwaysAskOnNewWifi(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getBoolean(PREF_AUTO_TOGGLE_NOTIFICATIONS, true);
+        return (sp.getString(PREF_AUTO_TOGGLE_DEFAULT_VALUE_FOR_NEW_WIFI, Config
+                .DEFAULT_AUTO_TOGGLE_VALUE).equals(PreferencesActivity.AUTO_TOGGLE_ALWAYS_ASK));
     }
 
     public static void markSettingsCorrectAtFirstLaunch(final Context context) {
@@ -92,15 +85,16 @@ public class PrefUtils {
     }
 
     /**
-     * Gets wifi auto toggle default value for wifis the user connects to for the first time.
+     * Gets wifi auto toggle value for wifis the user connects to for the first time.
      *
      * @param context
-     * @return boolean
+     * @return String
      */
-    public static boolean isAutoToggleOnByDefaultOnNewWifi(final Context context) {
+    public static String getAutoToggleModeOnNewWifi(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return Boolean.parseBoolean(sp.getString(PREF_AUTO_TOGGLE_DEFAULT_VALUE_FOR_NEW_WIFI, Config
-                .DEFAULT_AUTO_TOGGLE_VALUE));
+
+        return sp.getString(PREF_AUTO_TOGGLE_DEFAULT_VALUE_FOR_NEW_WIFI, Config
+                .DEFAULT_AUTO_TOGGLE_VALUE);
     }
 
     public static void setSavedWifiInsertComplete(final Context context, boolean completed) {

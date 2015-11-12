@@ -19,9 +19,13 @@
         <item name="background">@color/material_blue_500</item>
     </style>
 
-    <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+    <style name="Toolbar.Title" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textSize">18sp</item>
         <item name="android:textColor">@android:color/white</item>
+
     </style>
 
-
+    <style name="Toolbar.Theme" parent="ThemeOverlay.AppCompat.Dark">
+        <item name="android:homeAsUpIndicator">@android:color/white</item>
+    </style>
 </resources>

@@ -9,10 +9,8 @@ import android.os.PersistableBundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.preference.SwitchPreference;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -26,8 +24,6 @@ import net.opencurlybraces.android.projects.wifitoggler.util.NotifUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
-import java.util.List;
-
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On handset devices,
  * settings are presented as a single list. On tablets, settings are split by category, with
@@ -38,17 +34,18 @@ import java.util.List;
  * .com/guide/topics/ui/settings.html">Settings API Guide</a> for more information on developing a
  * Settings UI.
  */
-public class SettingsActivity extends PreferenceActivity {
+public class PreferencesActivity extends PreferenceActivity {
     /**
      * Determines whether to always show the simplified settings UI, where settings are presented in
      * a single list. When false, settings are shown as a master/detail two-pane view on tablets.
      * When true, a single pane is shown on tablets.
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
-    private static final String TAG = "SettingsActivity";
+    private static final String TAG = "PreferencesActivity";
 
-    private static ListPreference sAutoToggleDefaultValuePref = null;
-    private static SwitchPreference sAutoToggleNotificationPref = null;
+    public static final String AUTO_TOGGLE_ACTIVE_BY_DEFAULT = "Active";
+    public static final String AUTO_TOGGLE_DISABLED_BY_DEFAULT = "Disabled";
+    public static final String AUTO_TOGGLE_ALWAYS_ASK = "Ask";
 
 
     @Override
@@ -63,9 +60,6 @@ public class SettingsActivity extends PreferenceActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (sAutoToggleNotificationPref.isChecked()) {
-            sAutoToggleDefaultValuePref.setEnabled(false);
-        }
     }
 
     @Override
@@ -121,31 +115,14 @@ public class SettingsActivity extends PreferenceActivity {
         // In the simplified UI, fragments are not used at all and we instead
         // use the older PreferenceActivity APIs.
 
-        // Add container
-        addPreferencesFromResource(R.xml.pref_container);
-
-
-        // Add 'general' preferences.
-        PreferenceCategory generalHeader = new PreferenceCategory(this);
-        generalHeader.setTitle(R.string.pref_header_general);
-        getPreferenceScreen().addPreference(generalHeader);
         addPreferencesFromResource(R.xml.pref_general);
-
-        // Add 'notifications' preferences, and a corresponding header.
-        PreferenceCategory notificationHeader = new PreferenceCategory(this);
-        notificationHeader.setTitle(R.string.pref_header_notifications);
-        getPreferenceScreen().addPreference(notificationHeader);
         addPreferencesFromResource(R.xml.pref_notification);
 
         bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_RUN_AT_STARTUP));
         bindPreferenceSummaryToValue(findPreference(PrefUtils.PREF_SIGNAL_STRENGTH_THRESHOLD));
         bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_WARNING_NOTIFICATIONS));
-        bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_AUTO_TOGGLE_NOTIFICATIONS));
-        sAutoToggleDefaultValuePref = (ListPreference) findPreference(PrefUtils
-                .PREF_AUTO_TOGGLE_DEFAULT_VALUE_FOR_NEW_WIFI);
-        sAutoToggleNotificationPref = (SwitchPreference) findPreference(PrefUtils
-                .PREF_AUTO_TOGGLE_NOTIFICATIONS);
-        bindPreferenceSummaryToValue(sAutoToggleDefaultValuePref);
+        bindPreferenceSummaryToValue(findPreference(PrefUtils
+                .PREF_AUTO_TOGGLE_DEFAULT_VALUE_FOR_NEW_WIFI));
 
     }
 
@@ -178,17 +155,6 @@ public class SettingsActivity extends PreferenceActivity {
                 || !isXLargeTablet(context);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @TargetApi (Build.VERSION_CODES.HONEYCOMB)
-    public void onBuildHeaders(List<Header> target) {
-        if (!isSimplePreferences(this)) {
-            loadHeadersFromResource(R.xml.pref_headers, target);
-        }
-    }
-
 
     private static Preference.OnPreferenceChangeListener sOnCheckChangedListener =
             new Preference.OnPreferenceChangeListener() {
@@ -197,32 +163,14 @@ public class SettingsActivity extends PreferenceActivity {
                     Log.d(TAG, "onPreferenceBooleanChange=" + preference.getKey() + " value=" +
                             value);
                     Log.d(TAG, "AutoToggleDefaultvalue=" + PrefUtils
-                            .isAutoToggleOnByDefaultOnNewWifi
+                            .getAutoToggleModeOnNewWifi
                                     (preference.getContext()));
                     if (PrefUtils.PREF_WARNING_NOTIFICATIONS.equals(preference.getKey())) {
                         if (!(Boolean) value) {
                             NotifUtils.dismissNotification(preference.getContext(), NotifUtils
                                     .NOTIFICATION_ID_WARNING);
                         }
-                    } else if (PrefUtils.PREF_AUTO_TOGGLE_NOTIFICATIONS.equals(preference.getKey
-                            ())) {
-
-                        if ((Boolean) value) {
-                            sAutoToggleDefaultValuePref.setEnabled(false);
-                            Log.d(TAG, "AutoToggleDefaultvalue set to false, current value=" +
-                                    PrefUtils
-                                            .isAutoToggleOnByDefaultOnNewWifi
-                                                    (preference.getContext()));
-
-                        } else {
-                            sAutoToggleDefaultValuePref.setEnabled(true);
-                            Log.d(TAG, "AutoToggleDefaultvalue left to false, current value=" +
-                                    PrefUtils
-                                            .isAutoToggleOnByDefaultOnNewWifi
-                                                    (preference.getContext()));
-                        }
                     }
-
                     return true;
                 }
             };
@@ -331,7 +279,7 @@ public class SettingsActivity extends PreferenceActivity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_WARNING_NOTIFICATIONS));
-            bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_AUTO_TOGGLE_NOTIFICATIONS));
+
         }
     }
 

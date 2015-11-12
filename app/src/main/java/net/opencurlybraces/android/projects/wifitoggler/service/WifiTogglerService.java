@@ -29,6 +29,7 @@ import net.opencurlybraces.android.projects.wifitoggler.receiver.ScanAlwaysAvail
 import net.opencurlybraces.android.projects.wifitoggler.receiver.WifiAdapterStateReceiver;
 import net.opencurlybraces.android.projects.wifitoggler.receiver.WifiConnectionStateReceiver;
 import net.opencurlybraces.android.projects.wifitoggler.receiver.WifiScanResultsReceiver;
+import net.opencurlybraces.android.projects.wifitoggler.ui.PreferencesActivity;
 import net.opencurlybraces.android.projects.wifitoggler.util.CheckPassiveScanHandler;
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.NotifUtils;
@@ -48,7 +49,6 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         .AsyncQueryListener {
 
     private static final String TAG = "WifiTogglerService";
-
     private static final String SERVICE_ACTION_PREFIX = "net.opencurlybraces.android" +
             ".projects.wifitoggler.service.action.";
 
@@ -57,7 +57,6 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
      */
     public static final String ACTION_HANDLE_PAUSE_WIFI_HANDLER = SERVICE_ACTION_PREFIX +
             "action.ACTION_HANDLE_PAUSE_WIFI_HANDLER";
-
     public static final String ACTION_HANDLE_ACTIVATE_WIFI_HANDLER =
             SERVICE_ACTION_PREFIX + "ACTION_HANDLE_ACTIVATE_WIFI_HANDLER";
 
@@ -66,13 +65,10 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
      */
     public static final String ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE = SERVICE_ACTION_PREFIX
             + "ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE";
-
     public static final String ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE = SERVICE_ACTION_PREFIX +
             "ACTION_HANDLE_NOTIFICATION_ACTION_PAUSE";
-
     public static final String ACTION_HANDLE_NOTIFICATION_ACTION_AUTO_TOGGLE_ON
             = SERVICE_ACTION_PREFIX + "ACTION_HANDLE_NOTIFICATION_ACTION_AUTO_TOGGLE_ON";
-
     public static final String ACTION_HANDLE_NOTIFICATION_ACTION_AUTO_TOGGLE_OFF
             = SERVICE_ACTION_PREFIX + "ACTION_HANDLE_NOTIFICATION_ACTION_AUTO_TOGGLE_OFF";
 
@@ -82,13 +78,10 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
 
     public static final String ACTION_HANDLE_SAVED_WIFI_INSERT = SERVICE_ACTION_PREFIX +
             "ACTION_HANDLE_SAVED_WIFI_INSERT";
-
     public static final String ACTION_HANDLE_SAVED_WIFI_UPDATE_CONNECT = SERVICE_ACTION_PREFIX +
             "ACTION_HANDLE_SAVED_WIFI_UPDATE_CONNECT";
-
     public static final String ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT = SERVICE_ACTION_PREFIX +
             "ACTION_HANDLE_SAVED_WIFI_UPDATE_DISCONNECT";
-
     public static final String ACTION_HANDLE_INSERT_NEW_CONNECTED_WIFI = SERVICE_ACTION_PREFIX +
             "ACTION_HANDLE_INSERT_NEW_CONNECTED_WIFI";
 
@@ -118,8 +111,6 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         if (Config.DEBUG_MODE)
             Toast.makeText(this, "service created", Toast.LENGTH_LONG).show();
         initFields();
-
-
         registerReceivers();
         schedulePassiveScanCheck();
     }
@@ -293,7 +284,8 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         ContentValues values = new ContentValues();
         values.put(SavedWifi.SSID, ssidToInsert);
         values.put(SavedWifi.STATUS, NetworkUtils.WifiAdapterStatus.CONNECTED);
-        if (!PrefUtils.isAutoToggleOnByDefaultOnNewWifi(this)) {
+        String autoToggleModeOnNewWifi = PrefUtils.getAutoToggleModeOnNewWifi(this);
+        if (PreferencesActivity.AUTO_TOGGLE_DISABLED_BY_DEFAULT.equals(autoToggleModeOnNewWifi)) {
             values.put(SavedWifi.AUTO_TOGGLE, false);
         }
         mDataAsyncQueryHandler.startInsert(Config.TOKEN_INSERT, ssidToInsert, SavedWifi.CONTENT_URI,
@@ -399,7 +391,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
 
     @Override
     public void onInsertComplete(int token, Object insertedWifi, Uri uri) {
-        if (PrefUtils.areAutoToggleNotificationsEnabled(this)) {
+        if (PrefUtils.isAutoToggleModeAlwaysAskOnNewWifi(this)) {
             NotifUtils.buildSetAutoToggleChooserNotification(this, (String) insertedWifi);
         }
     }
