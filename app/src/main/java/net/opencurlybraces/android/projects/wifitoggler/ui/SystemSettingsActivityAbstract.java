@@ -40,6 +40,10 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
 
     private static final String TAG = "SystemSettingsAbstract";
 
+    private static final int REQUEST_CODE_SCAN_ALWAYS_AVAILABLE = 1;
+    private static final String TETHER_SETTINGS_ACTION = "com.android.settings.TetherSettings";
+    private static final String TETHER_SETTINGS_CLASSNAME = "com.android.settings";
+
     protected RelativeLayout mScanCheckLayout = null;
     protected RelativeLayout mAirplaneCheckLayout = null;
     protected RelativeLayout mHotspotCheckLayout = null;
@@ -52,21 +56,18 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
     protected ImageView mHotspotNextIcon;
     protected ImageView mScanNextIcon;
     protected ImageView mLocationNextIcon;
-
-
     protected Button mContinueButton = null;
 
-    private static final int REQUEST_CODE_SCAN_ALWAYS_AVAILABLE = 1;
-    private static final String TETHER_SETTINGS_ACTION = "com.android.settings.TetherSettings";
-    private static final String TETHER_SETTINGS_CLASSNAME = "com.android.settings";
 
     protected final CheckPassiveScanHandler mCheckPassiveHandler = new CheckPassiveScanHandler
             (this, Config.WHAT_REPEAT_CHECK_SCAN_ALWAYS, Config.DELAY_CHECK_HALF_SECOND);
 
     protected abstract void onContinueClicked();
-
     protected abstract void setLayoutAccordingToSettings();
-
+    /**
+     * Simulates a system broadcast to check accurately the scan always available setting
+     */
+    protected abstract void startRepeatingCheck();
     /**
      * Called each time a setting is changed
      */
@@ -216,7 +217,8 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
     }
 
     public void handleLocationPermissionRequest() {
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_COARSE_LOCATION)) {
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission
+                .ACCESS_COARSE_LOCATION)) {
             Intent showExplanation = new Intent(this, LocationPermissionActivityAsDialog
                     .class);
             startActivity(showExplanation);
@@ -346,11 +348,6 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
             WifiToggler.setSetting(Config.CHECK_LOCATION_PERMISSION_SETTINGS, true);
         }
     }
-
-    /**
-     * Simulates a system broadcast to check accurately the scan always available setting
-     */
-    protected abstract void startRepeatingCheck();
 
     protected void stopRepeatingCheck() {
         mCheckPassiveHandler.removeMessages(Config.WHAT_REPEAT_CHECK_SCAN_ALWAYS);

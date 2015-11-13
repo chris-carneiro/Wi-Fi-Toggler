@@ -33,9 +33,7 @@ public class SavedWifi implements BaseColumns {
     }
 
     public static final String TABLE = "configured_wifis";
-
     public static final String PATH_CONFIGURED_WIFIS = "configured_wifis";
-
     public static final Uri CONTENT_URI =
             WifiTogglerContract.BASE_CONTENT_URI.buildUpon().appendEncodedPath
                     (PATH_CONFIGURED_WIFIS)

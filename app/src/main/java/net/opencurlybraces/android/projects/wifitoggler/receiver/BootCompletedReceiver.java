@@ -12,6 +12,7 @@ import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
  * Created by chris on 12/07/15.
  */
 public class BootCompletedReceiver extends BroadcastReceiver {
+
     private static final String TAG = "BootCompletedReceiver";
 
     @Override

@@ -68,7 +68,8 @@ public class StartupSettingsCheckActivity extends SystemSettingsActivityAbstract
             loadSavedWifiIntoDatabase();
             PrefUtils.markSettingsCorrectAtFirstLaunch(this);
         } else {
-            this.finish(); // Fix issue #3 https://github.com/chris-carneiro/Wi-Fi-Toggler/issues/3
+            // Fix issue #3 https://github.com/chris-carneiro/Wi-Fi-Toggler/issues/3
+            this.finish();
         }
     }
 

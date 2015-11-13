@@ -16,12 +16,12 @@ import java.util.List;
  * Created by chris on 02/09/15.
  */
 public class DeletedSavedWifiSweepingTask extends AsyncTask<Object, Object, Object> {
+
     private static final String TAG = "DeletedSavedWifiTask";
     private static final String[] PROJECTION = new String[]{SavedWifi._ID, SavedWifi.SSID, SavedWifi
             .AUTO_TOGGLE};
 
     private final Context mContext;
-
 
     public DeletedSavedWifiSweepingTask(final Context context) {
         mContext = context;
@@ -38,6 +38,10 @@ public class DeletedSavedWifiSweepingTask extends AsyncTask<Object, Object, Obje
     @Override
     protected void onPostExecute(Object o) {
         super.onPostExecute(o);
+    }
+
+    protected List<Wifi> getSavedWifisFromDB() {
+        return SavedWifiDBUtils.getSavedWifisFromDB(mContext, PROJECTION);
     }
 
     /**
@@ -61,10 +65,4 @@ public class DeletedSavedWifiSweepingTask extends AsyncTask<Object, Object, Obje
             }
         }
     }
-
-    protected List<Wifi> getSavedWifisFromDB() {
-        return SavedWifiDBUtils.getSavedWifisFromDB(mContext, PROJECTION);
-    }
-
-
 }

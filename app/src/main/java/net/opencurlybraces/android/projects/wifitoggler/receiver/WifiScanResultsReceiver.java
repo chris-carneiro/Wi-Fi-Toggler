@@ -53,6 +53,7 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
 
 
     private static class ScanResultAsyncHandler extends DeletedSavedWifiSweepingTask {
+
         private static final String TAG = "ScanResultAsyncHandler";
         private final Context mContext;
 
@@ -60,7 +61,6 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             super(context);
             mContext = context;
         }
-
 
         @Override
         protected Object doInBackground(Object... params) {

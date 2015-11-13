@@ -18,7 +18,6 @@ public class HotspotModeStateReceiver extends BroadcastReceiver {
     public static final String HOTSPOT_STATE_CHANGED_ACTION = "android.net.wifi" +
             ".WIFI_AP_STATE_CHANGED";
 
-
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "Hotspot receiver");

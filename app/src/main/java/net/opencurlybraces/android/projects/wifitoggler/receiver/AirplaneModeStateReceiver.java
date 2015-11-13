@@ -16,9 +16,8 @@ import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
  * Created by chris on 03/07/15.
  */
 public class AirplaneModeStateReceiver extends BroadcastReceiver {
-    private static final String TAG = "AirplaneModeReceiver";
 
-    public static final String EXTRAS_AIRPLANE_MODE_STATE = "state";
+    private static final String TAG = "AirplaneModeReceiver";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -52,7 +51,6 @@ public class AirplaneModeStateReceiver extends BroadcastReceiver {
         context.sendBroadcast(new Intent(ScanAlwaysAvailableReceiver
                 .CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_ACTION));
     }
-
 
     private void setAirplaneSettingsCorrect(boolean isCorrect) {
         WifiToggler.setSetting(Config.AIRPLANE_SETTINGS, isCorrect);

@@ -9,6 +9,7 @@ import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
  * Created by chris on 01/09/15.
  */
 public class Wifi {
+
     private long _id;
     private String ssid;
     private int status;
@@ -51,6 +52,32 @@ public class Wifi {
         return wifi;
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Wifi wifi = (Wifi) o;
+        return _id == wifi._id;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) _id;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Wifi{");
+        sb.append("_id=").append(_id);
+        sb.append(", ssid='").append(ssid).append('\'');
+        sb.append(", status=").append(status);
+        sb.append(", isAutoToggle=").append(isAutoToggle);
+        sb.append('}');
+        return sb.toString();
+    }
+
     public static class WifiBuilder {
 
         private long _id;
@@ -81,31 +108,5 @@ public class Wifi {
         public Wifi build() {
             return new Wifi(this);
         }
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Wifi wifi = (Wifi) o;
-        return _id == wifi._id;
-    }
-
-    @Override
-    public int hashCode() {
-        return (int) _id;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Wifi{");
-        sb.append("_id=").append(_id);
-        sb.append(", ssid='").append(ssid).append('\'');
-        sb.append(", status=").append(status);
-        sb.append(", isAutoToggle=").append(isAutoToggle);
-        sb.append('}');
-        return sb.toString();
     }
 }

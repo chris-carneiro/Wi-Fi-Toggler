@@ -20,7 +20,6 @@ import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
  */
 public class ScanAlwaysAvailableReceiver extends BroadcastReceiver {
 
-
     private static final String TAG = "ScanAvailableReceiver";
     public static final String CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_ACTION =
             "CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST";

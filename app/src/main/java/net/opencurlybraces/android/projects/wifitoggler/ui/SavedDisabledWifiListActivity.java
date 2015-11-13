@@ -43,13 +43,8 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
     }
 
     @Override
-    protected void bindViews() {
-        mDismissConfirmationText = (TextView) findViewById(R.id.tv_confirmation_message_wifi);
-        mDismissConfirmationBanner = (RelativeLayout) findViewById(R.id
-                .saved_wifi_confirmation_banner);
-        mEmptyView.setText(getString(R.string.wifi_list_info_no_disabled_known_wifi));
-        mUndoButton = (TextView) findViewById(R.id.undo_action_wifi_button);
-        mUndoButton.setOnClickListener(this);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -65,11 +60,6 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
     }
 
     @Override
-    protected void setListAdapter() {
-        mWifiTogglerWifiList.setAdapter(mSavedWifiCursorAdapter);
-    }
-
-    @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String[] projection = {SavedWifi._ID, SavedWifi.SSID, SavedWifi.STATUS, SavedWifi
                 .AUTO_TOGGLE};
@@ -78,12 +68,6 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
                 null);
         return cursorLoader;
     }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        return super.onCreateOptionsMenu(menu);
-    }
-
 
     @Override
     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
@@ -100,7 +84,6 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
         }
     }
 
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -109,6 +92,24 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
                 break;
         }
     }
+
+    @Override
+    protected void bindViews() {
+        mDismissConfirmationText = (TextView) findViewById(R.id.tv_confirmation_message_wifi);
+        mDismissConfirmationBanner = (RelativeLayout) findViewById(R.id
+                .saved_wifi_confirmation_banner);
+        mEmptyView.setText(getString(R.string.wifi_list_info_no_disabled_known_wifi));
+        mUndoButton = (TextView) findViewById(R.id.undo_action_wifi_button);
+        mUndoButton.setOnClickListener(this);
+    }
+
+
+    @Override
+    protected void setListAdapter() {
+        mWifiTogglerWifiList.setAdapter(mSavedWifiCursorAdapter);
+    }
+
+
 
     @Override
     public void handleUndoAction() {
@@ -123,14 +124,11 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
     }
 
     @Override
-    public void onConnected(Bundle bundle) {
-    }
+    public void onConnected(Bundle bundle) {}
 
     @Override
-    public void onConnectionSuspended(int i) {
-    }
+    public void onConnectionSuspended(int i) {}
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-    }
+    public void onConnectionFailed(ConnectionResult connectionResult) {}
 }

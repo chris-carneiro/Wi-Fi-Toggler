@@ -55,7 +55,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         ResultCallback<LocationSettingsResult> {
 
     private static final String TAG = "BaseListActivity";
-
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1002;
     private static final String[] PROJECTION_SSID_AUTO_TOGGLE = new String[]{SavedWifi._ID,
             SavedWifi
                     .SSID, SavedWifi.AUTO_TOGGLE};
@@ -63,25 +63,24 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     protected static final String INSTANCE_KEY_FIRST_VISIBLE_POSITION = "firstVisiblePosition";
     protected static final String INSTANCE_KEY_OFFSET_FROM_TOP = "offsetFromTop";
 
-    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1002;
-    private int REQUEST_CHECK_SETTINGS = 1003;
-
     protected SavedWifiListAdapter mSavedWifiCursorAdapter = null;
     protected DataAsyncQueryHandler mDataAsyncQueryHandler = null;
-
     protected ListView mWifiTogglerWifiList = null;
     protected TextView mEmptyView = null;
     protected RelativeLayout mDismissConfirmationBanner = null;
     protected TextView mDismissConfirmationText = null;
-    private Bundle mSavedInstanceState = null;
-
-    private SwipeDismissListViewTouchListener mTouchListener = null;
-
     protected ViewAutoHideHandler mAutoHideHandler = null;
 
+    private int REQUEST_CHECK_SETTINGS = 1003;
+    private Bundle mSavedInstanceState = null;
+    private SwipeDismissListViewTouchListener mTouchListener = null;
     private GoogleApiClient mGoogleApiClient = null;
     private LocationRequest mLocationRequest = null;
     private PendingResult<LocationSettingsResult> mLocationSettingsResult = null;
+
+    protected abstract void setListAdapter();
+    protected abstract void handleUndoAction();
+    protected abstract void bindViews();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,18 +119,26 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         }
     }
 
-    private void buildLocationRequest() {
-        mLocationRequest = new LocationRequest()
-                .setInterval(Config.DELAY_FIVE_SECONDS)
-                .setFastestInterval(1000)
-                .setPriority(LocationRequest.PRIORITY_LOW_POWER);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setListAdapter();
+        restoreListViewState();
+        if (NetworkUtils.isWifiEnabled(this)) {
+            WifiToggler.removeDeletedSavedWifiFromDB(this);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mWifiTogglerWifiList.setOnTouchListener(null);
+        mWifiTogglerWifiList.setOnScrollListener(null);
     }
 
     @Override
     public void onResult(LocationSettingsResult locationSettingsResult) {
         final Status status = locationSettingsResult.getStatus();
-        //        final LocationSettingsStates locationStates = locationSettingsResult
-        //                .getLocationSettingsStates();
 
         switch (status.getStatusCode()) {
             case LocationSettingsStatusCodes.SUCCESS:
@@ -162,61 +169,6 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        setListAdapter();
-        restoreListViewState();
-        if (NetworkUtils.isWifiEnabled(this)) {
-            WifiToggler.removeDeletedSavedWifiFromDB(this);
-        }
-    }
-
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        mWifiTogglerWifiList.setOnTouchListener(null);
-        mWifiTogglerWifiList.setOnScrollListener(null);
-    }
-
-    protected abstract void setListAdapter();
-    protected abstract void handleUndoAction();
-    protected abstract void bindViews();
-
-    protected void bindListView() {
-        mWifiTogglerWifiList = (ListView) findViewById(android.R.id.list);
-        mEmptyView = (TextView) findViewById(android.R.id.empty);
-    }
-
-    protected void displaySettingsActivity() {
-        Intent preferencesIntent = new Intent(this, PreferencesActivity.class);
-        startActivity(preferencesIntent);
-    }
-
-    protected void initCursorLoader() {
-        getLoaderManager().initLoader(0, null, this);
-    }
-
-
-    protected CursorAdapter initCursorAdapter() {
-        Log.d(TAG, "initCursorAdapter");
-        if (mSavedWifiCursorAdapter == null) {
-            mSavedWifiCursorAdapter = new SavedWifiListAdapter(this, null, 0);
-        }
-        return mSavedWifiCursorAdapter;
-    }
-
-    protected void handleSavedWifiListLoading(boolean isChecked) {
-        Log.d(TAG, "handleSavedWifiListLoading=" + isChecked);
-        if (isChecked) {
-            mWifiTogglerWifiList.setAdapter(mSavedWifiCursorAdapter);
-        } else {
-            mWifiTogglerWifiList.setAdapter(null);
-        }
-    }
-
-    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
@@ -236,19 +188,6 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         super.onRestoreInstanceState(savedInstanceState);
         mSavedInstanceState = savedInstanceState;
     }
-
-    protected void restoreListViewState() {
-        Log.d(TAG, "restoreListViewState ");
-
-        if (mSavedInstanceState != null) {
-            int firstVisiblePosition = mSavedInstanceState.getInt
-                    (INSTANCE_KEY_FIRST_VISIBLE_POSITION);
-            int offsetTop = mSavedInstanceState.getInt(INSTANCE_KEY_OFFSET_FROM_TOP);
-            // restore ListView scroll position
-            mWifiTogglerWifiList.setSelectionFromTop(firstVisiblePosition, offsetTop);
-        }
-    }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -292,6 +231,87 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
 
     }
 
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mSavedWifiCursorAdapter.swapCursor(null);
+    }
+
+    @Override
+    public void onUpdateComplete(int token, Object cookie, int result) {
+        if (cookie != null) {
+            cacheItemIdForUndo((long) cookie);
+        }
+    }
+
+    @Override
+    public void onBatchInsertComplete(int token, Object cookie, ContentProviderResult[] results) {}
+
+    @Override
+    public void onInsertComplete(int token, Object cookie, Uri uri) {}
+
+    @Override
+    public void onBatchUpdateComplete(int token, Object cookie, ContentProviderResult[] results) {
+        if (Config.DEBUG_MODE) {
+            queryWifiData();
+        }
+    }
+
+    @Override
+    public void onQueryComplete(int token, Object cookie, Cursor cursor) {
+        if (Config.DEBUG_MODE) {
+            logCursorData(cursor);
+        }
+    }
+
+    private void buildLocationRequest() {
+        mLocationRequest = new LocationRequest()
+                .setInterval(Config.DELAY_FIVE_SECONDS)
+                .setFastestInterval(1000)
+                .setPriority(LocationRequest.PRIORITY_LOW_POWER);
+    }
+
+    protected void bindListView() {
+        mWifiTogglerWifiList = (ListView) findViewById(android.R.id.list);
+        mEmptyView = (TextView) findViewById(android.R.id.empty);
+    }
+
+    protected void displaySettingsActivity() {
+        Intent preferencesIntent = new Intent(this, PreferencesActivity.class);
+        startActivity(preferencesIntent);
+    }
+
+    protected void initCursorLoader() {
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    protected CursorAdapter initCursorAdapter() {
+        Log.d(TAG, "initCursorAdapter");
+        if (mSavedWifiCursorAdapter == null) {
+            mSavedWifiCursorAdapter = new SavedWifiListAdapter(this, null, 0);
+        }
+        return mSavedWifiCursorAdapter;
+    }
+
+    protected void handleSavedWifiListLoading(boolean isChecked) {
+        Log.d(TAG, "handleSavedWifiListLoading=" + isChecked);
+        if (isChecked) {
+            mWifiTogglerWifiList.setAdapter(mSavedWifiCursorAdapter);
+        } else {
+            mWifiTogglerWifiList.setAdapter(null);
+        }
+    }
+
+    protected void restoreListViewState() {
+        Log.d(TAG, "restoreListViewState ");
+
+        if (mSavedInstanceState != null) {
+            int firstVisiblePosition = mSavedInstanceState.getInt
+                    (INSTANCE_KEY_FIRST_VISIBLE_POSITION);
+            int offsetTop = mSavedInstanceState.getInt(INSTANCE_KEY_OFFSET_FROM_TOP);
+            // restore ListView scroll position
+            mWifiTogglerWifiList.setSelectionFromTop(firstVisiblePosition, offsetTop);
+        }
+    }
 
     public ContentValues buildContentValuesForUpdate(int position) {
         Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem
@@ -315,45 +335,10 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
                         (itemId)});
     }
 
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mSavedWifiCursorAdapter.swapCursor(null);
-    }
-
-    @Override
-    public void onUpdateComplete(int token, Object cookie, int result) {
-        if (cookie != null) {
-            cacheItemIdForUndo((long) cookie);
-        }
-    }
-
-    @Override
-    public void onBatchInsertComplete(int token, Object cookie, ContentProviderResult[] results) {
-    }
-
-    @Override
-    public void onInsertComplete(int token, Object cookie, Uri uri) {
-    }
-
-    @Override
-    public void onBatchUpdateComplete(int token, Object cookie, ContentProviderResult[] results) {
-        if (Config.DEBUG_MODE) {
-            queryWifiData();
-        }
-    }
-
     private void queryWifiData() {
         mDataAsyncQueryHandler.startQuery(1, null, SavedWifi.CONTENT_URI,
                 PROJECTION_SSID_AUTO_TOGGLE,
                 null, null, null);
-    }
-
-    @Override
-    public void onQueryComplete(int token, Object cookie, Cursor cursor) {
-        if (Config.DEBUG_MODE) {
-            logCursorData(cursor);
-        }
-
     }
 
     private void logCursorData(final Cursor cursor) {
@@ -403,31 +388,12 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         mDismissConfirmationBanner.animate().alpha(1.0f).setDuration(300);
     }
 
-    protected static class ViewAutoHideHandler extends Handler {
-        private final WeakReference<RelativeLayout> mViewToHide;
-
-        public ViewAutoHideHandler(RelativeLayout viewToHide) {
-            mViewToHide = new WeakReference<>(viewToHide);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            Log.d(TAG, "handleMessage");
-            RelativeLayout viewToHide = mViewToHide.get();
-            if (viewToHide != null) {
-                Log.d(TAG, "Message received alpha =" + viewToHide.getAlpha());
-                viewToHide.animate().alpha(0.0f).setDuration(300);
-            }
-        }
-    }
-
     private synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API).build();
     }
-
 
     private boolean checkPlayServices() {
         int resultCode = GooglePlayServicesUtil
@@ -447,4 +413,21 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         return true;
     }
 
+    protected static class ViewAutoHideHandler extends Handler {
+        private final WeakReference<RelativeLayout> mViewToHide;
+
+        public ViewAutoHideHandler(RelativeLayout viewToHide) {
+            mViewToHide = new WeakReference<>(viewToHide);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            Log.d(TAG, "handleMessage");
+            RelativeLayout viewToHide = mViewToHide.get();
+            if (viewToHide != null) {
+                Log.d(TAG, "Message received alpha =" + viewToHide.getAlpha());
+                viewToHide.animate().alpha(0.0f).setDuration(300);
+            }
+        }
+    }
 }

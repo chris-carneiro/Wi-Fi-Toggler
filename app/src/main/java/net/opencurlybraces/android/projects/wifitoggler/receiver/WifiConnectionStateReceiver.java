@@ -25,22 +25,18 @@ import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
  */
 public class WifiConnectionStateReceiver extends BroadcastReceiver implements
         DataAsyncQueryHandler.AsyncQueryListener {
+
     private static final String TAG = "WifiConnectionReceiver";
-
-
     public static final String EXTRA_CURRENT_SSID = "net.opencurlybraces.android" +
             ".projects.wifitoggler.receiver.current_ssid";
-
-
-    private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
     private static final String[] PROJECTION_SSID = new String[]{SavedWifi._ID, SavedWifi
             .SSID};
 
+    private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
     private Context mContext = null;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-
         if (PrefUtils.isSavedWifiInsertComplete(context)) {
             if (PrefUtils.isWifiTogglerActive(context)) {
                 lazyInit(context);
@@ -119,9 +115,7 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
     }
 
     @Override
-    public void onBatchInsertComplete(int token, Object cookie, ContentProviderResult[] results) {
-
-    }
+    public void onBatchInsertComplete(int token, Object cookie, ContentProviderResult[] results) {}
 
     @Override
     public void onQueryComplete(int token, Object availableSsid, Cursor cursor) {
@@ -194,19 +188,11 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
     }
 
     @Override
-    public void onUpdateComplete(int token, Object cookie, int result) {
-
-    }
+    public void onUpdateComplete(int token, Object cookie, int result) {}
 
     @Override
-    public void onInsertComplete(int token, Object cookie, Uri uri) {
-
-    }
+    public void onInsertComplete(int token, Object cookie, Uri uri) {}
 
     @Override
-    public void onBatchUpdateComplete(int token, Object cookie, ContentProviderResult[] results) {
-
-    }
-
-
+    public void onBatchUpdateComplete(int token, Object cookie, ContentProviderResult[] results) {}
 }

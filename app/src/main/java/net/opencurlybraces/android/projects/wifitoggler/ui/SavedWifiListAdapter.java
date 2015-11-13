@@ -24,17 +24,14 @@ public class SavedWifiListAdapter extends CursorAdapter {
 
 
     final LayoutInflater mLayoutInflater;
-
+    protected long mItemIdUndo;
 
     public long getItemIdToUndo() {
         return mItemIdUndo;
     }
-
     public void setItemIdToUndo(long itemIdToUndo) {
         this.mItemIdUndo = itemIdToUndo;
     }
-
-    protected long mItemIdUndo;
 
     public SavedWifiListAdapter(Context context, Cursor c, int flag) {
         super(context, c, flag);
@@ -171,7 +168,6 @@ public class SavedWifiListAdapter extends CursorAdapter {
         /**
          * the row's background changes according to autotoggle value
          */
-
         view.setTag(R.string.tag_key_row_index, autoToggleIndex);
 
 

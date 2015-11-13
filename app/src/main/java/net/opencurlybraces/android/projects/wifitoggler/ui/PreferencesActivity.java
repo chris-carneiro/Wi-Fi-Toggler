@@ -55,7 +55,6 @@ public class PreferencesActivity extends PreferenceActivity {
         super.onCreate(savedInstanceState, persistentState);
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();

@@ -55,9 +55,7 @@ public class WifiTogglerProvider extends ContentProvider {
                         String sortOrder) {
 
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
-
         SavedWifi.checkColumns(projection);
-
         queryBuilder.setTables(SavedWifi.TABLE);
 
         switch (sURIMatcher.match(uri)) {

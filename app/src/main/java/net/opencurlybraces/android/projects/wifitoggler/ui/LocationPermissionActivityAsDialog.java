@@ -16,6 +16,7 @@ import net.opencurlybraces.android.projects.wifitoggler.R;
  * chris on 19/10/15.
  */
 public class LocationPermissionActivityAsDialog extends Activity implements View.OnClickListener {
+
     private TextView mPositiveButton = null;
     private TextView mNegativeButton = null;
 
@@ -28,7 +29,6 @@ public class LocationPermissionActivityAsDialog extends Activity implements View
         mPositiveButton.setOnClickListener(this);
         mNegativeButton.setOnClickListener(this);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -45,9 +45,7 @@ public class LocationPermissionActivityAsDialog extends Activity implements View
             case R.id.location_permission_negative_button:
                 finish();
                 break;
-
         }
-
     }
 
     public void displayApplicationSettings() {

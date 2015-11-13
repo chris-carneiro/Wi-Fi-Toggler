@@ -111,11 +111,6 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
         return super.onOptionsItemSelected(item);
     }
 
-    protected void displayDisabledWifiListActivity() {
-        Intent showDisabledWifis = new Intent(this, SavedDisabledWifiListActivity.class);
-        startActivity(showDisabledWifis);
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -134,6 +129,37 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
                 break;
         }
 
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.wifi_toggler_message_banner:
+                launchSystemSettingsCheckActivity();
+                break;
+            case R.id.undo_action_wifi_button:
+                handleUndoAction();
+                break;
+        }
+    }
+
+    @Override
+    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+        super.onDismiss(listView, reverseSortedPositions);
+        for (int position : reverseSortedPositions) {
+            int itemId = (int) mSavedWifiCursorAdapter.getItemId(position);
+
+            updateAutoToggleValue(itemId, position);
+            displayConfirmationBannerWithUndo(position, R.string
+                    .wifi_disabled_confirmation_bottom_overlay_content);
+            mSavedWifiCursorAdapter
+                    .notifyDataSetChanged();
+        }
+    }
+
+    protected void displayDisabledWifiListActivity() {
+        Intent showDisabledWifis = new Intent(this, SavedDisabledWifiListActivity.class);
+        startActivity(showDisabledWifis);
     }
 
     private void handleContentViewMessage(boolean isChecked) {
@@ -169,7 +195,6 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
         mUndoButton.setOnClickListener(this);
     }
 
-
     private void startupCheck() {
         int startupMode = StartupUtils.appStartMode(this);
 
@@ -183,7 +208,6 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
                 break;
         }
     }
-
 
     private void handleFirstLaunch() {
         Log.d(TAG, "handleFirstLaunch");
@@ -313,18 +337,6 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
     };
 
     @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.wifi_toggler_message_banner:
-                launchSystemSettingsCheckActivity();
-                break;
-            case R.id.undo_action_wifi_button:
-                handleUndoAction();
-                break;
-        }
-    }
-
-    @Override
     public void handleUndoAction() {
         ContentValues cv = new ContentValues();
         cv.put(SavedWifi.AUTO_TOGGLE, true);
@@ -354,28 +366,11 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
     }
 
     @Override
-    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
-        super.onDismiss(listView, reverseSortedPositions);
-        for (int position : reverseSortedPositions) {
-            int itemId = (int) mSavedWifiCursorAdapter.getItemId(position);
-
-            updateAutoToggleValue(itemId, position);
-            displayConfirmationBannerWithUndo(position, R.string
-                    .wifi_disabled_confirmation_bottom_overlay_content);
-            mSavedWifiCursorAdapter
-                    .notifyDataSetChanged();
-        }
-    }
+    public void onConnected(Bundle bundle) {}
 
     @Override
-    public void onConnected(Bundle bundle) {
-    }
+    public void onConnectionSuspended(int i) {}
 
     @Override
-    public void onConnectionSuspended(int i) {
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-    }
+    public void onConnectionFailed(ConnectionResult connectionResult) {}
 }

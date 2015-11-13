@@ -21,6 +21,7 @@ import java.lang.ref.WeakReference;
  * WifiToggler's process Created by chris on 28/07/15.
  */
 public final class CheckPassiveScanHandler extends Handler {
+
     private final WeakReference<Context> mHost;
     private final int mWhat;
     private final long mDelay;

@@ -21,15 +21,13 @@ import java.util.List;
  */
 public class NetworkUtils {
 
-    private NetworkUtils() {
-    }
+    private NetworkUtils() {}
 
     /**
      * Gathers the wifi adapter's states to use in receivers' #onReceive() callback.
      */
     public static class WifiAdapterStatus {
-        private WifiAdapterStatus() {
-        }
+        private WifiAdapterStatus() {}
 
         public static final int CONNECTED = 0;
         public static final int DISABLED = 1;

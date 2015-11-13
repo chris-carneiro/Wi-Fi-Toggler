@@ -100,8 +100,6 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
     private ScanAlwaysAvailableReceiver mScanAlwaysAvailableReceiver = null;
     private AirplaneModeStateReceiver mAirplaneModeStateReceiver = null;
     private HotspotModeStateReceiver mHotspotModeStateReceiver = null;
-
-
     private CheckPassiveScanHandler mCheckPassiveScanHandler;
 
     @Override
@@ -113,71 +111,6 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         initFields();
         registerReceivers();
         schedulePassiveScanCheck();
-    }
-
-
-    private void registerReceivers() {
-        registerReceiver(mWifiScanResultsReceiver, WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        registerReceiver(mWifiAdapterStateReceiver, WifiManager.WIFI_STATE_CHANGED_ACTION);
-        registerReceiver(mWifiConnectionStateReceiver, WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
-        registerReceiver(mScanAlwaysAvailableReceiver, ScanAlwaysAvailableReceiver
-                .CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_ACTION);
-        registerReceiver(mAirplaneModeStateReceiver, Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        registerReceiver(mHotspotModeStateReceiver, HotspotModeStateReceiver
-                .HOTSPOT_STATE_CHANGED_ACTION);
-    }
-
-    private void schedulePassiveScanCheck() {
-        mCheckPassiveScanHandler.sendMessageDelayed(Message.obtain(mCheckPassiveScanHandler,
-                        Config.WHAT_CHECK_SCAN_ALWAYS_AVAILABLE),
-                Config.CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL);
-    }
-
-    private void initFields() {
-        mCheckPassiveScanHandler = new CheckPassiveScanHandler(this,
-                Config.WHAT_CHECK_SCAN_ALWAYS_AVAILABLE, Config
-                .CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL);
-
-        mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(), this);
-
-        initReceivers();
-    }
-
-    private void initReceivers() {
-        mWifiAdapterStateReceiver = new WifiAdapterStateReceiver();
-        mWifiConnectionStateReceiver = new WifiConnectionStateReceiver();
-        mWifiScanResultsReceiver = new WifiScanResultsReceiver();
-        mScanAlwaysAvailableReceiver = new ScanAlwaysAvailableReceiver();
-        mHotspotModeStateReceiver = new HotspotModeStateReceiver();
-        mAirplaneModeStateReceiver = new AirplaneModeStateReceiver();
-    }
-
-    @Override
-    public void onDestroy() {
-        Log.d(TAG, "OnDestroy");
-        if (Config.DEBUG_MODE)
-            Toast.makeText(this, "service destroyed", Toast.LENGTH_LONG).show();
-
-        pauseWifiToggler();
-        NotifUtils.buildWifiTogglerPausedNotification(this);
-        stopForeground(false);
-        mCheckPassiveScanHandler.removeMessages(Config.WHAT_CHECK_SCAN_ALWAYS_AVAILABLE);
-        unregisterReceivers();
-        NotifUtils.dismissNotification(this, NotifUtils.NOTIFICATION_ID_WARNING);
-    }
-
-    private void unregisterReceivers() {
-        unregisterReceiver(mWifiScanResultsReceiver);
-        unregisterReceiver(mWifiAdapterStateReceiver);
-        unregisterReceiver(mWifiConnectionStateReceiver);
-        unregisterReceiver(mScanAlwaysAvailableReceiver);
-        unregisterReceiver(mAirplaneModeStateReceiver);
-        unregisterReceiver(mHotspotModeStateReceiver);
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
     }
 
     @Override
@@ -229,9 +162,113 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
                 handleAutoToggleValueUpdate(intent, false, "Auto Toggle set to false");
                 break;
         }
-
         return START_NOT_STICKY;
+    }
 
+    @Override
+    public void onBatchInsertComplete(int token, Object cookie, ContentProviderResult[] results) {
+        Log.d(TAG, "onBatchInsertComplete: Async Batch Insert complete, stopping service");
+
+        PrefUtils.setSavedWifiInsertComplete(this, (results != null && results.length > 0));
+
+        Intent handleActivateWifiHandler = new Intent(this, WifiTogglerService.class);
+        handleActivateWifiHandler.setAction(WifiTogglerService.ACTION_HANDLE_ACTIVATE_WIFI_HANDLER);
+        startService(handleActivateWifiHandler);
+        sendLocalBroadcastAction(ACTION_FINISH_STARTUP_CHECK_ACTIVITY);
+        /**
+         * In rare cases and for unknown reason(for now) the current wifi state is not updated in DB
+         * right after first Launch.
+         * This makes sure the current wifi is updated to connected state when it is the case...
+         * TODO this should not be necessary and might hide a deeper issue that must be further
+         * investigated...
+         */
+        if (NetworkUtils.isWifiConnected(this)) {
+            Log.d(TAG, "CurrentSSid=" + NetworkUtils.getCurrentSsid(this));
+            makeSureWifiStateIsUpdatedInDB();
+        }
+    }
+
+    @Override
+    public void onQueryComplete(int token, Object cookie, Cursor cursor) {
+        Log.d(TAG, "onQueryComplete: Query Complete token=" + token + " cookie=" + cookie);
+    }
+
+    @Override
+    public void onUpdateComplete(int token, Object cookie, int result) {
+        Log.d(TAG, "onUpdateComplete: Async Update complete");
+    }
+
+    @Override
+    public void onInsertComplete(int token, Object insertedWifi, Uri uri) {
+        if (PrefUtils.isAutoToggleModeAlwaysAskOnNewWifi(this)) {
+            NotifUtils.buildSetAutoToggleChooserNotification(this, (String) insertedWifi);
+        }
+    }
+
+    @Override
+    public void onBatchUpdateComplete(int token, Object cookie, ContentProviderResult[] results) {}
+    @Override
+    public void onDestroy() {
+        Log.d(TAG, "OnDestroy");
+        if (Config.DEBUG_MODE)
+            Toast.makeText(this, "service destroyed", Toast.LENGTH_LONG).show();
+
+        pauseWifiToggler();
+        NotifUtils.buildWifiTogglerPausedNotification(this);
+        stopForeground(false);
+        mCheckPassiveScanHandler.removeMessages(Config.WHAT_CHECK_SCAN_ALWAYS_AVAILABLE);
+        unregisterReceivers();
+        NotifUtils.dismissNotification(this, NotifUtils.NOTIFICATION_ID_WARNING);
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    private void registerReceivers() {
+        registerReceiver(mWifiScanResultsReceiver, WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        registerReceiver(mWifiAdapterStateReceiver, WifiManager.WIFI_STATE_CHANGED_ACTION);
+        registerReceiver(mWifiConnectionStateReceiver, WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+        registerReceiver(mScanAlwaysAvailableReceiver, ScanAlwaysAvailableReceiver
+                .CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_ACTION);
+        registerReceiver(mAirplaneModeStateReceiver, Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        registerReceiver(mHotspotModeStateReceiver, HotspotModeStateReceiver
+                .HOTSPOT_STATE_CHANGED_ACTION);
+    }
+
+    private void schedulePassiveScanCheck() {
+        mCheckPassiveScanHandler.sendMessageDelayed(Message.obtain(mCheckPassiveScanHandler,
+                        Config.WHAT_CHECK_SCAN_ALWAYS_AVAILABLE),
+                Config.CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL);
+    }
+
+    private void initFields() {
+        mCheckPassiveScanHandler = new CheckPassiveScanHandler(this,
+                Config.WHAT_CHECK_SCAN_ALWAYS_AVAILABLE, Config
+                .CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL);
+
+        mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(), this);
+
+        initReceivers();
+    }
+
+    private void initReceivers() {
+        mWifiAdapterStateReceiver = new WifiAdapterStateReceiver();
+        mWifiConnectionStateReceiver = new WifiConnectionStateReceiver();
+        mWifiScanResultsReceiver = new WifiScanResultsReceiver();
+        mScanAlwaysAvailableReceiver = new ScanAlwaysAvailableReceiver();
+        mHotspotModeStateReceiver = new HotspotModeStateReceiver();
+        mAirplaneModeStateReceiver = new AirplaneModeStateReceiver();
+    }
+
+    private void unregisterReceivers() {
+        unregisterReceiver(mWifiScanResultsReceiver);
+        unregisterReceiver(mWifiAdapterStateReceiver);
+        unregisterReceiver(mWifiConnectionStateReceiver);
+        unregisterReceiver(mScanAlwaysAvailableReceiver);
+        unregisterReceiver(mAirplaneModeStateReceiver);
+        unregisterReceiver(mHotspotModeStateReceiver);
     }
 
     private void handleWifiDisconnectionUpdate() {
@@ -319,7 +356,6 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         mDataAsyncQueryHandler.startBatchOperations(Config.TOKEN_INSERT_BATCH, null,
                 WifiTogglerContract
                         .AUTHORITY, batch);
-
     }
 
     private void registerReceiver(BroadcastReceiver receiver, final String action) {
@@ -336,35 +372,13 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
     }
 
     private void pauseWifiToggler() {
+
         PrefUtils.setWifiTogglerActive(this, false);
     }
 
-
     private void activateWifiToggler() {
+
         PrefUtils.setWifiTogglerActive(this, true);
-    }
-
-    @Override
-    public void onBatchInsertComplete(int token, Object cookie, ContentProviderResult[] results) {
-        Log.d(TAG, "onBatchInsertComplete: Async Batch Insert complete, stopping service");
-
-        PrefUtils.setSavedWifiInsertComplete(this, (results != null && results.length > 0));
-
-        Intent handleActivateWifiHandler = new Intent(this, WifiTogglerService.class);
-        handleActivateWifiHandler.setAction(WifiTogglerService.ACTION_HANDLE_ACTIVATE_WIFI_HANDLER);
-        startService(handleActivateWifiHandler);
-        sendLocalBroadcastAction(ACTION_FINISH_STARTUP_CHECK_ACTIVITY);
-        /**
-         * In rare cases and for unknown reason(for now) the current wifi state is not updated in DB
-         * right after first Launch.
-         * This makes sure the current wifi is updated to connected state when it is the case...
-         * TODO this should not be necessary and might hide a deeper issue that must be further
-         * investigated...
-         */
-        if (NetworkUtils.isWifiConnected(this)) {
-            Log.d(TAG, "CurrentSSid=" + NetworkUtils.getCurrentSsid(this));
-            makeSureWifiStateIsUpdatedInDB();
-        }
     }
 
     public void makeSureWifiStateIsUpdatedInDB() {
@@ -376,27 +390,5 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
 
         updateWifiStatus.setAction(WifiTogglerService
                 .ACTION_HANDLE_SAVED_WIFI_UPDATE_CONNECT);
-    }
-
-    @Override
-    public void onQueryComplete(int token, Object cookie, Cursor cursor) {
-        Log.d(TAG, "onQueryComplete: Query Complete token=" + token + " cookie=" + cookie);
-
-    }
-
-    @Override
-    public void onUpdateComplete(int token, Object cookie, int result) {
-        Log.d(TAG, "onUpdateComplete: Async Update complete");
-    }
-
-    @Override
-    public void onInsertComplete(int token, Object insertedWifi, Uri uri) {
-        if (PrefUtils.isAutoToggleModeAlwaysAskOnNewWifi(this)) {
-            NotifUtils.buildSetAutoToggleChooserNotification(this, (String) insertedWifi);
-        }
-    }
-
-    @Override
-    public void onBatchUpdateComplete(int token, Object cookie, ContentProviderResult[] results) {
     }
 }

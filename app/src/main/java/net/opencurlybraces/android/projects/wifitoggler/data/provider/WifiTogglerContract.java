@@ -11,7 +11,6 @@ public class WifiTogglerContract {
             ".wifitoggler.data.provider";
 
     public static final String SCHEME = "content://";
-
     public static final Uri BASE_CONTENT_URI = Uri.parse(SCHEME + AUTHORITY);
 
 }

@@ -59,7 +59,6 @@ public class SystemSettingsCheckActivity extends SystemSettingsActivityAbstract 
             setLocationPermissionLayoutAccordingToSettings();
         }
         checkContinueButtonListener();
-
     }
 
     @Override

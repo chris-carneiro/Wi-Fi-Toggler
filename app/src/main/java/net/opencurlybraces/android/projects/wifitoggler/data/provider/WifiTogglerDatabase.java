@@ -12,9 +12,7 @@ import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 public class WifiTogglerDatabase extends SQLiteOpenHelper {
 
     private static final String TAG = "WifiTogglerDatabase";
-
     private static final String DATABASE_NAME = "wifitoggler.db";
-
     private static final int DATABASE_VERSION = 3;
 
     private final Context mContext;

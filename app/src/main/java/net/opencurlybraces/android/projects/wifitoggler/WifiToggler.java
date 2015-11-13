@@ -21,16 +21,16 @@ public class WifiToggler extends Application {
     private static final String TAG = "WifiTogglerApp";
 
     private static ObservableMap mObservableSystemSettings = null;
-//    private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate");
+        performDeviceSettingsCheck();
+    }
+
+    private void performDeviceSettingsCheck() {
         firstStartCheck.execute();
-//        if (mDataAsyncQueryHandler == null) {
-//            mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(), null);
-//        }
     }
 
     private AsyncTask<Void, Void, Void> firstStartCheck = new AsyncTask<Void, Void, Void>() {

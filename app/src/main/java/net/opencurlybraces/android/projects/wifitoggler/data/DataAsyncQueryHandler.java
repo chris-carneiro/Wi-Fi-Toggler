@@ -29,13 +29,14 @@ import java.util.ArrayList;
 public class DataAsyncQueryHandler extends AsyncQueryHandler {
 
     private static final String TAG = "DataAsyncQuery";
+    private static final int EVENT_ARG_INSERT_BATCH = 5;
+    private static final int EVENT_ARG_UPDATE_BATCH = 6;
+    private static Looper sLooper = null;
 
     private WeakReference<AsyncQueryListener> mListener;
     private Handler mWorkerThreadHandler = null;
-    private static final int EVENT_ARG_INSERT_BATCH = 5;
-    private static final int EVENT_ARG_UPDATE_BATCH = 6;
+
     final WeakReference<ContentResolver> mResolver;
-    private static Looper sLooper = null;
 
     public DataAsyncQueryHandler(ContentResolver cr, AsyncQueryListener listener) {
         super(cr);

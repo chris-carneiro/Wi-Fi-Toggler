@@ -27,8 +27,7 @@ public class NotifUtils {
     public static final int NOTIFICATION_ID_SET_AUTO_TOGGLE_STATE = 102;
 
 
-    private NotifUtils() {
-    }
+    private NotifUtils() {}
 
 
     public static void buildSetAutoToggleChooserNotification(final Context context, String
