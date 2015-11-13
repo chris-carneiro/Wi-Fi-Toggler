@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
-import android.os.Message;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
@@ -56,11 +55,9 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
     private static class ScanResultAsyncHandler extends DeletedSavedWifiSweepingTask {
         private static final String TAG = "ScanResultAsyncHandler";
         private final Context mContext;
-        private WifiDeactivationHandler mScheduleDisableWifi = null;
 
         public ScanResultAsyncHandler(Context context) {
             super(context);
-            mScheduleDisableWifi = new WifiDeactivationHandler(context);
             mContext = context;
         }
 
@@ -91,7 +88,8 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             if (!(Boolean) enableWifi) {
                 if (NetworkUtils.isWifiEnabled(mContext) && !PrefUtils.isWifiDisableWifiScheduled
                         (mContext)) {
-                    scheduleDisableWifi();
+                    int delay = PrefUtils.getWifiDeactivationDelay(mContext);
+                    NetworkUtils.scheduleDisableWifi(mContext, delay);
                 }
             }
         }
@@ -101,16 +99,6 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
             if (enableWifi) {
                 NetworkUtils.enableWifiAdapter(mContext);
             }
-        }
-
-        private void scheduleDisableWifi() {
-            Log.d(TAG, "scheduleDisableWifi=" + mScheduleDisableWifi.obtainMessage(Config
-                    .WHAT_SCHEDULE_DISABLE_ADAPTER));
-            int deactivationTimer = PrefUtils.getWifiDeactivationTimerValue(mContext);
-            mScheduleDisableWifi.sendMessageDelayed(Message.obtain(mScheduleDisableWifi,
-                            Config.WHAT_SCHEDULE_DISABLE_ADAPTER),
-                    deactivationTimer);
-            PrefUtils.setDisableWifiScheduled(mContext, true);
         }
     }
 }

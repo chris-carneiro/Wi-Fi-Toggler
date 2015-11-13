@@ -22,7 +22,7 @@ public class Config {
      */
     public static final int WIFI_SIGNAL_STRENGTH_LEVELS = 11;
     public static final String DEFAULT_SIGNAL_STRENGTH_THRESHOLD = "4"; // fair
-    public static final String DEFAULT_DEACTIVATION_TIMER = "180000"; // 3 Minutes
+    public static final String DEFAULT_DEACTIVATION_DELAY = "180000"; // 3 Minutes
     public static final String DEFAULT_AUTO_TOGGLE_VALUE = PreferencesActivity
             .AUTO_TOGGLE_ACTIVE_BY_DEFAULT;
     public static final int SYSTEM_SETTINGS_CHECKS = (RUNNING_MARSHMALLOW ? 5 : 4);
@@ -40,14 +40,15 @@ public class Config {
     public static final String UNKNOWN_SSID = "<unknown ssid>";
 
     /**
-     * Schedule intervals
+     * Schedule delays
      */
     public static final long CHECK_SCAN_ALWAYS_AVAILABLE_REQUEST_INTERVAL = (DEBUG_MODE ? 1000 *
             60 :
             AlarmManager
                     .INTERVAL_HALF_DAY);
-    public static final long INTERVAL_CHECK_HALF_SECOND = 500;
-    public static final long INTERVAL_FIVE_SECOND = 1000 * 5;
+    public static final long DELAY_CHECK_HALF_SECOND = 500;
+    public static final long DELAY_FIVE_SECONDS = 1000 * 5;
+    public static final long DELAY_TEN_SECONDS = 1000 * 10;
 
     /**
      * Async queries tokens

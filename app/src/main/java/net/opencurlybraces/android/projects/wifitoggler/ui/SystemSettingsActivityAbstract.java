@@ -61,7 +61,7 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
     private static final String TETHER_SETTINGS_CLASSNAME = "com.android.settings";
 
     protected final CheckPassiveScanHandler mCheckPassiveHandler = new CheckPassiveScanHandler
-            (this, Config.WHAT_REPEAT_CHECK_SCAN_ALWAYS, Config.INTERVAL_CHECK_HALF_SECOND);
+            (this, Config.WHAT_REPEAT_CHECK_SCAN_ALWAYS, Config.DELAY_CHECK_HALF_SECOND);
 
     protected abstract void onContinueClicked();
 

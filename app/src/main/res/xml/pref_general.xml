@@ -4,7 +4,7 @@
         android:defaultValue="180000"
         android:entries="@array/pref_timer_for_deactivation_list_titles"
         android:entryValues="@array/pref_timer_for_deactivation_list_values"
-        android:key="wifi_deactivation_timer_value"
+        android:key="wifi_deactivation_delay"
         android:negativeButtonText="@null"
         android:positiveButtonText="@null"
         android:title="@string/pref_title_timer_for_deactivation"/>

@@ -92,7 +92,19 @@ public class WifiConnectionStateReceiver extends BroadcastReceiver implements
 
                 if (NetworkUtils.isWifiEnabled(context)) {
                     WifiToggler.removeDeletedSavedWifiFromDB(context);
-                    NetworkUtils.disableWifiAdapter(context);
+                    Log.d(TAG, "Wifi adapter will be disabled. Connection state receiver");
+                    /**
+                     * Sometimes, the supplicant was stuck on the "associating" state and
+                     * connection
+                     * eventually failed when it shouldn't have.A "DISCONNECTED" event was then
+                     * received.
+                     * The adapter was then immediately disabled here. The thing is when a the
+                     * user wanted to connect to a new wifi, after the pass key was inserted, the
+                     * adapter was disabled even if the key was correct which is obviously not
+                     * what we want... So this delay added here gives the adapter enough time to
+                     * rescan and eventually associate to an known AP.
+                     */
+                    NetworkUtils.scheduleDisableWifi(mContext, Config.DELAY_TEN_SECONDS);
                 }
                 break;
             default:

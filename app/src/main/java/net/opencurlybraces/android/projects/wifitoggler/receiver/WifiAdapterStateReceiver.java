@@ -39,6 +39,7 @@ public class WifiAdapterStateReceiver extends BroadcastReceiver {
 
                 WifiToggler.setSetting(Config.STARTUP_CHECK_WIFI_SETTINGS, false);
             } else {
+                Log.d(TAG, "WIFI_STATE_CHANGED_ACTION Received=" + wifiState);
                 WifiToggler.setSetting(Config.STARTUP_CHECK_WIFI_SETTINGS, true);
                WifiToggler.removeDeletedSavedWifiFromDB(context);
             }

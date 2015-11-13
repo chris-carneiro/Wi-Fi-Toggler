@@ -122,7 +122,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
 
     private void buildLocationRequest() {
         mLocationRequest = new LocationRequest()
-                .setInterval(Config.INTERVAL_FIVE_SECOND)
+                .setInterval(Config.DELAY_FIVE_SECONDS)
                 .setFastestInterval(1000)
                 .setPriority(LocationRequest.PRIORITY_LOW_POWER);
     }
@@ -384,7 +384,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         mAutoHideHandler = new ViewAutoHideHandler(mDismissConfirmationBanner);
         mAutoHideHandler.sendMessageDelayed(Message.obtain(mAutoHideHandler,
                         Config.WHAT_AUTO_HIDE),
-                Config.INTERVAL_FIVE_SECOND);
+                Config.DELAY_FIVE_SECONDS);
 
     }
 

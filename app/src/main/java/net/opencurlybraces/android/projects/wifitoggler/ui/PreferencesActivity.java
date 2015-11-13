@@ -117,7 +117,7 @@ public class PreferencesActivity extends PreferenceActivity {
         addPreferencesFromResource(R.xml.pref_general);
         addPreferencesFromResource(R.xml.pref_notification);
 
-        bindPreferenceSummaryToValue(findPreference(PrefUtils.PREF_WIFI_DEACTIVATION_TIMER));
+        bindPreferenceSummaryToValue(findPreference(PrefUtils.PREF_WIFI_DEACTIVATION_DELAY));
         bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_RUN_AT_STARTUP));
         bindPreferenceSummaryToValue(findPreference(PrefUtils.PREF_SIGNAL_STRENGTH_THRESHOLD));
         bindPreferenceBooleanValue(findPreference(PrefUtils.PREF_WARNING_NOTIFICATIONS));

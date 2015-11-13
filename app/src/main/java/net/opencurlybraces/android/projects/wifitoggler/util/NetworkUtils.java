@@ -6,6 +6,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Message;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -146,6 +147,18 @@ public class NetworkUtils {
                 .getWifiSignalStrengthThreshold
                         (context) + " rssi=" + rssi);
         return signalStrength;
+    }
+
+
+    public static void scheduleDisableWifi(final Context context, long delay) {
+        WifiDeactivationHandler scheduledDisableWifi = new WifiDeactivationHandler(context);
+        Log.d(TAG, "scheduleDisableWifi=" + scheduledDisableWifi.obtainMessage(Config
+                .WHAT_SCHEDULE_DISABLE_ADAPTER));
+
+        scheduledDisableWifi.sendMessageDelayed(Message.obtain(scheduledDisableWifi,
+                        Config.WHAT_SCHEDULE_DISABLE_ADAPTER),
+                delay);
+        PrefUtils.setDisableWifiScheduled(context, true);
     }
 }
 
