@@ -65,7 +65,7 @@ public class Config {
     public static final int WHAT_REPEAT_CHECK_SCAN_ALWAYS = 2;
     public static final int WHAT_CHECK_SCAN_ALWAYS_AVAILABLE = 3;
     public static final int WHAT_SCHEDULE_DISABLE_ADAPTER = 4;
-    public static final int WHAT_AUTO_HIDE = 5;
+
 
     /**
      * Android M Permission Requests codes

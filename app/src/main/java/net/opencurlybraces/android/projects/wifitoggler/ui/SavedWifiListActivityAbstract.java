@@ -61,7 +61,6 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     protected static final String INSTANCE_KEY_OFFSET_FROM_TOP = "offsetFromTop";
 
     protected SavedWifiListAdapter mSavedWifiCursorAdapter = null;
-    protected DataAsyncQueryHandler mDataAsyncQueryHandler = null;
     protected ListView mWifiTogglerWifiList = null;
     protected TextView mEmptyView = null;
     protected RelativeLayout mDismissConfirmationBanner = null;
@@ -73,6 +72,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     private SwipeDismissListViewTouchListener mTouchListener = null;
     private GoogleApiClient mGoogleApiClient = null;
     private LocationRequest mLocationRequest = null;
+    private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
 
     protected abstract void setListAdapter();
     protected abstract void handleUndoAction();
@@ -367,8 +367,8 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
 
     private void scheduleUndoBannerAutoHide() {
         // Fix for issue #4
-        mAutoHideHandler.removeCallbacks(mRunnable);
-        mAutoHideHandler.postDelayed(mRunnable, Config.DELAY_FIVE_SECONDS);
+        mAutoHideHandler.removeCallbacks(mHideBannerRunnable);
+        mAutoHideHandler.postDelayed(mHideBannerRunnable, Config.DELAY_FIVE_SECONDS);
     }
 
     public void cacheItemIdForUndo(long itemId) {
@@ -414,7 +414,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
      * Created to fix Issue #4 as a simple {@link Handler#removeCallbacksAndMessages(Object)} or
      * {@link Handler#removeMessages(int)} wouldn't work to cancel the delayed scheduled message.
      */
-    private Runnable mRunnable = new Runnable() {
+    protected Runnable mHideBannerRunnable = new Runnable() {
         public void run() {
             Log.d(TAG, "Runnable run");
             mDismissConfirmationBanner.animate().alpha(0.0f).setDuration(300);
@@ -428,5 +428,20 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
                 buildLocationRequest();
             }
         }
+    }
+
+    protected void hideBanner() {
+        // hides undo banner immediately
+        mAutoHideHandler.post(mHideBannerRunnable);
+    }
+
+    protected void updateAutoToggleValue(ContentValues cv) {
+        mDataAsyncQueryHandler.startUpdate(Config.TOKEN_UPDATE, mSavedWifiCursorAdapter
+                        .getItemIdToUndo(),
+                SavedWifi
+                        .CONTENT_URI, cv, SavedWifi
+                        .whereID, new String[]{String.valueOf(mSavedWifiCursorAdapter
+                        .getItemIdToUndo())});
+
     }
 }

@@ -5,7 +5,6 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Message;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.view.Menu;
@@ -17,7 +16,6 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 
-import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 
@@ -38,7 +36,7 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
         bindListView();
         bindViews();
         ActionBar actionBar = getSupportActionBar();
-        if(actionBar != null)
+        if (actionBar != null)
             actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
@@ -75,7 +73,7 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
 
         for (int position : reverseSortedPositions) {
 
-            long itemId =  mSavedWifiCursorAdapter.getItemId(position);
+            long itemId = mSavedWifiCursorAdapter.getItemId(position);
             updateAutoToggleValue(itemId, position);
             displayConfirmationBannerWithUndo(position, R.string
                     .wifi_enabled_confirmation_bottom_overlay_content);
@@ -110,25 +108,23 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
     }
 
 
-
     @Override
-    public void handleUndoAction() {
+    protected void handleUndoAction() {
+        hideBanner();
         ContentValues cv = new ContentValues();
         cv.put(SavedWifi.AUTO_TOGGLE, false);
-        mDataAsyncQueryHandler.startUpdate(Config.TOKEN_UPDATE, null, SavedWifi
-                .CONTENT_URI, cv, SavedWifi
-                .whereID, new String[]{String.valueOf(mSavedWifiCursorAdapter.getItemIdToUndo()
-        )});
-        mAutoHideHandler.removeMessages(Config.WHAT_AUTO_HIDE);
-        mAutoHideHandler.sendMessage(Message.obtain(mAutoHideHandler));
+        updateAutoToggleValue(cv);
     }
 
     @Override
-    public void onConnected(Bundle bundle) {}
+    public void onConnected(Bundle bundle) {
+    }
 
     @Override
-    public void onConnectionSuspended(int i) {}
+    public void onConnectionSuspended(int i) {
+    }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {}
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+    }
 }

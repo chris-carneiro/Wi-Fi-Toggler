@@ -7,10 +7,8 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -25,7 +23,6 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 
-import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
@@ -337,19 +334,11 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
     };
 
     @Override
-    public void handleUndoAction() {
+    protected void handleUndoAction() {
+        hideBanner();
         ContentValues cv = new ContentValues();
         cv.put(SavedWifi.AUTO_TOGGLE, true);
-
-        mDataAsyncQueryHandler.startUpdate(Config.TOKEN_UPDATE, mSavedWifiCursorAdapter
-                        .getItemIdToUndo(),
-                SavedWifi
-                        .CONTENT_URI, cv, SavedWifi
-                        .whereID, new String[]{String.valueOf(mSavedWifiCursorAdapter
-                        .getItemIdToUndo())});
-
-        mAutoHideHandler.removeMessages(Config.WHAT_AUTO_HIDE);
-        mAutoHideHandler.sendMessage(Message.obtain(mAutoHideHandler));
+        updateAutoToggleValue(cv);
     }
 
     @Override
@@ -366,11 +355,14 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
     }
 
     @Override
-    public void onConnected(Bundle bundle) {}
+    public void onConnected(Bundle bundle) {
+    }
 
     @Override
-    public void onConnectionSuspended(int i) {}
+    public void onConnectionSuspended(int i) {
+    }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {}
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+    }
 }
