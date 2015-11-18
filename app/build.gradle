@@ -8,8 +8,8 @@ android {
         applicationId "net.opencurlybraces.android.projects.wifitoggler"
         minSdkVersion 18
         targetSdkVersion 23
-        versionCode 6
-        versionName "v1.2.3"
+        versionCode 7
+        versionName "v1.2.4"
     }
 
     allprojects {
