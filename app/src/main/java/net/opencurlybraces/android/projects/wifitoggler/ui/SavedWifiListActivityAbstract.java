@@ -10,7 +10,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -45,8 +44,6 @@ import net.opencurlybraces.android.projects.wifitoggler.ui.SwipeDismissListViewT
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
-import java.lang.ref.WeakReference;
-
 
 public abstract class SavedWifiListActivityAbstract extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>,
@@ -69,14 +66,13 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     protected TextView mEmptyView = null;
     protected RelativeLayout mDismissConfirmationBanner = null;
     protected TextView mDismissConfirmationText = null;
-    protected ViewAutoHideHandler mAutoHideHandler = null;
+    protected Handler mAutoHideHandler = null;
 
     private int REQUEST_CHECK_SETTINGS = 1003;
     private Bundle mSavedInstanceState = null;
     private SwipeDismissListViewTouchListener mTouchListener = null;
     private GoogleApiClient mGoogleApiClient = null;
     private LocationRequest mLocationRequest = null;
-    private PendingResult<LocationSettingsResult> mLocationSettingsResult = null;
 
     protected abstract void setListAdapter();
     protected abstract void handleUndoAction();
@@ -92,13 +88,10 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(), this);
         initCursorLoader();
         mSavedWifiCursorAdapter = (SavedWifiListAdapter) initCursorAdapter();
+        mAutoHideHandler = new Handler();
 
-        if (Config.RUNNING_MARSHMALLOW) {
-            if (checkPlayServices()) {
-                buildGoogleApiClient();
-                buildLocationRequest();
-            }
-        }
+        handlePostLollipopRequirements();
+
     }
 
     @Override
@@ -110,9 +103,10 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
             LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                     .addLocationRequest(mLocationRequest);
 
-            mLocationSettingsResult = LocationServices.SettingsApi.checkLocationSettings
-                    (mGoogleApiClient, builder
-                            .build());
+            PendingResult<LocationSettingsResult> mLocationSettingsResult = LocationServices
+                    .SettingsApi.checkLocationSettings
+                            (mGoogleApiClient, builder
+                                    .build());
 
             mLocationSettingsResult.setResultCallback(this);
 
@@ -244,10 +238,12 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     }
 
     @Override
-    public void onBatchInsertComplete(int token, Object cookie, ContentProviderResult[] results) {}
+    public void onBatchInsertComplete(int token, Object cookie, ContentProviderResult[] results) {
+    }
 
     @Override
-    public void onInsertComplete(int token, Object cookie, Uri uri) {}
+    public void onInsertComplete(int token, Object cookie, Uri uri) {
+    }
 
     @Override
     public void onBatchUpdateComplete(int token, Object cookie, ContentProviderResult[] results) {
@@ -366,13 +362,14 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
         Log.d(TAG, "onDismiss");
 
-        mAutoHideHandler = new ViewAutoHideHandler(mDismissConfirmationBanner);
-        mAutoHideHandler.sendMessageDelayed(Message.obtain(mAutoHideHandler,
-                        Config.WHAT_AUTO_HIDE),
-                Config.DELAY_FIVE_SECONDS);
-
+        scheduleUndoBannerAutoHide();
     }
 
+    private void scheduleUndoBannerAutoHide() {
+        // Fix for issue #4
+        mAutoHideHandler.removeCallbacks(mRunnable);
+        mAutoHideHandler.postDelayed(mRunnable, Config.DELAY_FIVE_SECONDS);
+    }
 
     public void cacheItemIdForUndo(long itemId) {
         mSavedWifiCursorAdapter.setItemIdToUndo(itemId);
@@ -413,20 +410,22 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         return true;
     }
 
-    protected static class ViewAutoHideHandler extends Handler {
-        private final WeakReference<RelativeLayout> mViewToHide;
-
-        public ViewAutoHideHandler(RelativeLayout viewToHide) {
-            mViewToHide = new WeakReference<>(viewToHide);
+    /**
+     * Created to fix Issue #4 as a simple {@link Handler#removeCallbacksAndMessages(Object)} or
+     * {@link Handler#removeMessages(int)} wouldn't work to cancel the delayed scheduled message.
+     */
+    private Runnable mRunnable = new Runnable() {
+        public void run() {
+            Log.d(TAG, "Runnable run");
+            mDismissConfirmationBanner.animate().alpha(0.0f).setDuration(300);
         }
+    };
 
-        @Override
-        public void handleMessage(Message msg) {
-            Log.d(TAG, "handleMessage");
-            RelativeLayout viewToHide = mViewToHide.get();
-            if (viewToHide != null) {
-                Log.d(TAG, "Message received alpha =" + viewToHide.getAlpha());
-                viewToHide.animate().alpha(0.0f).setDuration(300);
+    private void handlePostLollipopRequirements() {
+        if (Config.RUNNING_MARSHMALLOW) {
+            if (checkPlayServices()) {
+                buildGoogleApiClient();
+                buildLocationRequest();
             }
         }
     }
