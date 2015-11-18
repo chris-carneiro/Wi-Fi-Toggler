@@ -388,7 +388,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         mDismissConfirmationBanner.animate().alpha(1.0f).setDuration(300);
     }
 
-    private synchronized void buildGoogleApiClient() {
+    private void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)

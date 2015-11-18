@@ -28,7 +28,6 @@
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="@dimen/wifi_list_row_margin_left"
-            android:layout_toEndOf="@id/wifi_toggler_switch_label"
             android:checked="true"/>
 
     </RelativeLayout>
