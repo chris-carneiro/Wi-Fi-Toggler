@@ -3,13 +3,12 @@
     <string name="app_name">Wi-Fi Toggler</string>
     <string name="action_settings">Préférences</string>
     <string name="action_settings_select_all">Tout Sélectionner</string>
-    <string name="off_wifi_toggler_switch_label_value">En pause</string>
+    <string name="off_wifi_toggler_switch_label_value">Désactivé</string>
     <string name="on_wifi_toggler_switch_label_value">Actif</string>
     <string name="wifi_list_info_when_wifi_toggler_off">"Activez Wi-Fi Toggler pour voir vos réseaux sauvegardés et profiter de l'activation automatique du Wi-Fi"</string>
     <string name="wifi_list_info_no_known_wifi">Aucun Wi-Fi sauvegardé disponible pour auto activation.</string>
-    <string name="paused_wifi_toggler_notification_context_title">Wi-Fi Toggler
-        en pause</string>
-    <string name="active_wifi_toggler_notification_context_title">Wi-Fi Toggler activé</string>
+    <string name="paused_wifi_toggler_notification_context_title">Désactivé</string>
+    <string name="active_wifi_toggler_notification_context_title">Actif</string>
     <string name="new_wifi_inserted_wifi_toggler_notification_context_title">"Activer
         l'auto activation ?"</string>
     <string name="activate_auto_toggle_for_new_wifi_notification_content">Auto activation pour %1$s ?</string>
@@ -17,8 +16,8 @@
     <string name="pause_action_title">Désactiver Wi-Fi Toggler</string>
     <string name="positive_answer_action">Oui</string>
     <string name="negative_answer_action">Non</string>
-    <string name="pause_notification_ticker_content">Wi-Fi Toggler en pause</string>
-    <string name="enable_notification_ticker_content">Wi-Fi Toggler actif</string>
+    <string name="pause_notification_ticker_content">Désactivé</string>
+    <string name="enable_notification_ticker_content">Actif</string>
     <string name="connected_saved_wifi_status">Connected</string>
     <string name="system_settings_warning_notification_context_title">Conflit avec les préférences
         système</string>
@@ -116,9 +115,9 @@
     <string name="startup_check_settings_continue_button_text">Continuer</string>
 
     <string name="wifi_disabled_confirmation_bottom_overlay_content">Auto activation
-        active pour %1$s</string>
-    <string name="wifi_enabled_confirmation_bottom_overlay_content">Auto activation désactivée
-    pour %1$s</string>
+        désactivée pour %1$s</string>
+    <string name="wifi_enabled_confirmation_bottom_overlay_content">Auto activation activée pour
+        %1$s</string>
     <string name="wifi_undo_action_text">Annuler</string>
 
     <string name="title_activity_disabled_wifi_list">Wi-Fis désactivés</string>
