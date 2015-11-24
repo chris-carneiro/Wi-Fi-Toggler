@@ -25,6 +25,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
+import net.opencurlybraces.android.projects.wifitoggler.data.model.Wifi;
+import net.opencurlybraces.android.projects.wifitoggler.service.WifiTogglerService;
 import net.opencurlybraces.android.projects.wifitoggler.util.CheckPassiveScanHandler;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
@@ -63,11 +65,14 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
             (this, Config.WHAT_REPEAT_CHECK_SCAN_ALWAYS, Config.DELAY_CHECK_HALF_SECOND);
 
     protected abstract void onContinueClicked();
+
     protected abstract void setLayoutAccordingToSettings();
+
     /**
      * Simulates a system broadcast to check accurately the scan always available setting
      */
     protected abstract void startRepeatingCheck();
+
     /**
      * Called each time a setting is changed
      */
@@ -94,7 +99,7 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d(TAG, "onStart");
+        Log.d(TAG, "onStop");
         WifiToggler.unRegisterSettingObserver(this);
         stopRepeatingCheck();
     }
@@ -104,7 +109,6 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[]
             grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
         if (requestCode == Config.M_LOCATION_REQUEST_CODE) {
             for (int i = 0, len = permissions.length; i < len; i++) {
                 String permission = permissions[i];
@@ -127,9 +131,18 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
 
         if (Config.RUNNING_MARSHMALLOW) {
             handleLocationPermissionCheck();
+            forceRegisterSettingsReceivers();
         }
     }
 
+    /**
+     * Request {@link WifiTogglerService} to register all Broadcast Receivers.
+     */
+    private void forceRegisterSettingsReceivers() {
+        Intent forceRegister = new Intent(this, WifiTogglerService.class);
+        forceRegister.setAction(WifiTogglerService.ACTION_FORCE_REGISTER_BROADCAST_RECEIVERS);
+        startService(forceRegister);
+    }
 
 
     @Override

@@ -24,7 +24,6 @@ public class SystemSettingsCheckActivity extends SystemSettingsActivityAbstract 
     @Override
     protected void onResume() {
         super.onResume();
-        setLayoutAccordingToSettings();
     }
 
     @Override

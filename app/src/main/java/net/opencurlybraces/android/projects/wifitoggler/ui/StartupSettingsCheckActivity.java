@@ -49,10 +49,10 @@ public class StartupSettingsCheckActivity extends SystemSettingsActivityAbstract
 
     @Override
     protected void onResume() {
-        super.onResume();
         mWifiCheckLayout.setVisibility(View.VISIBLE);
-        setLayoutAccordingToSettings();
         registerFinishActivityReceiver();
+        super.onResume();
+
     }
 
     @Override

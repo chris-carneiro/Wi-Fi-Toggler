@@ -93,6 +93,10 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
     public static final String ACTION_STARTUP_SETTINGS_PRECHECK = SERVICE_ACTION_PREFIX + ""
             + "ACTION_STARTUP_SETTINGS_PRECHECK";
 
+    public static final String ACTION_FORCE_REGISTER_BROADCAST_RECEIVERS =
+            "ACTION_FORCE_REGISTER_BROADCAST_RECEIVERS";
+
+
     private WifiScanResultsReceiver mWifiScanResultsReceiver = null;
     private WifiAdapterStateReceiver mWifiAdapterStateReceiver = null;
     private WifiConnectionStateReceiver mWifiConnectionStateReceiver = null;
@@ -101,6 +105,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
     private AirplaneModeStateReceiver mAirplaneModeStateReceiver = null;
     private HotspotModeStateReceiver mHotspotModeStateReceiver = null;
     private CheckPassiveScanHandler mCheckPassiveScanHandler;
+
 
     @Override
     public void onCreate() {
@@ -161,6 +166,15 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
             case ACTION_HANDLE_NOTIFICATION_ACTION_AUTO_TOGGLE_OFF:
                 handleAutoToggleValueUpdate(intent, false, "Auto Toggle set to false");
                 break;
+            case ACTION_FORCE_REGISTER_BROADCAST_RECEIVERS:
+                /**
+                 * Fix Issue #6 for some reason receivers are unregistered by the system when
+                 * location permission is switched on and off (wtf?) in the system app settings.
+                 * This is a workaround to this issue (#6)
+                 *
+                 */
+                registerReceivers();
+                break;
         }
         return START_NOT_STICKY;
     }
@@ -206,7 +220,9 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
     }
 
     @Override
-    public void onBatchUpdateComplete(int token, Object cookie, ContentProviderResult[] results) {}
+    public void onBatchUpdateComplete(int token, Object cookie, ContentProviderResult[] results) {
+    }
+
     @Override
     public void onDestroy() {
         Log.d(TAG, "OnDestroy");
