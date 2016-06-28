@@ -123,7 +123,7 @@ public class StartupUtils {
         WifiToggler.setSetting(Config.STARTUP_CHECK_WIFI_SETTINGS, NetworkUtils
                 .isWifiEnabled(context));
 
-        if (Config.RUNNING_MARSHMALLOW) {
+        if (Config.RUNNING_POST_LOLLIPOP) {
             WifiToggler.setSetting(Config.CHECK_LOCATION_PERMISSION_SETTINGS, ContextCompat
                     .checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
                     PackageManager.PERMISSION_GRANTED);

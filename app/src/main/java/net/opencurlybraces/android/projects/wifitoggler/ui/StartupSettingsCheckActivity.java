@@ -80,7 +80,7 @@ public class StartupSettingsCheckActivity extends SystemSettingsActivityAbstract
         setWifiLayoutAccordingToSettings();
         setHotspotLayoutAccordingToSettings();
 
-        if (Config.RUNNING_MARSHMALLOW) {
+        if (Config.RUNNING_POST_LOLLIPOP) {
             setLocationPermissionLayoutAccordingToSettings();
         }
         checkContinueButtonListener();

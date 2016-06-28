@@ -175,6 +175,8 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
                  */
                 registerReceivers();
                 break;
+            default:
+                break;
         }
         return START_NOT_STICKY;
     }

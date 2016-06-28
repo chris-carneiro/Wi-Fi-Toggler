@@ -83,6 +83,8 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
                 cv.put(SavedWifi.AUTO_TOGGLE, false);
                 handleUndoAction(cv);
                 break;
+            default:
+                break;
         }
     }
 

@@ -14,7 +14,6 @@ import net.opencurlybraces.android.projects.wifitoggler.util.DeletedSavedWifiSwe
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.SavedWifiDBUtils;
-import net.opencurlybraces.android.projects.wifitoggler.util.WifiDeactivationHandler;
 
 import java.util.List;
 
@@ -31,7 +30,7 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        boolean locationPermissionGranted = !Config.RUNNING_MARSHMALLOW || (ContextCompat
+        boolean locationPermissionGranted = !Config.RUNNING_POST_LOLLIPOP || (ContextCompat
                 .checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED);
 

@@ -14,7 +14,7 @@ public class Config {
     }
 
     public static final boolean DEBUG_MODE = false;
-    public static final boolean RUNNING_MARSHMALLOW = Build.VERSION.SDK_INT >= Build
+    public static final boolean RUNNING_POST_LOLLIPOP = Build.VERSION.SDK_INT >= Build
             .VERSION_CODES.M;
 
     /**
@@ -25,7 +25,7 @@ public class Config {
     public static final String DEFAULT_DEACTIVATION_DELAY = "180000"; // 3 Minutes
     public static final String DEFAULT_AUTO_TOGGLE_VALUE = PreferencesActivity
             .AUTO_TOGGLE_ACTIVE_BY_DEFAULT;
-    public static final int SYSTEM_SETTINGS_CHECKS = (RUNNING_MARSHMALLOW ? 5 : 4);
+    public static final int SYSTEM_SETTINGS_CHECKS = (RUNNING_POST_LOLLIPOP ? 5 : 4);
 
     /**
      * Settings cache keys

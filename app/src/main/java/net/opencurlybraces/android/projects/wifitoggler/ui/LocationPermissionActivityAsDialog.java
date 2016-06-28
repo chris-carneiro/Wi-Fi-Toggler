@@ -45,6 +45,8 @@ public class LocationPermissionActivityAsDialog extends Activity implements View
             case R.id.location_permission_negative_button:
                 finish();
                 break;
+            default:
+                break;
         }
     }
 

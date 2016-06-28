@@ -122,6 +122,8 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
                 handleSavedWifiListLoading(isChecked);
                 handleNotification(isChecked);
                 break;
+            default:
+                break;
         }
 
     }
@@ -136,6 +138,8 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
                 ContentValues cv = new ContentValues();
                 cv.put(SavedWifi.AUTO_TOGGLE, true);
                 handleUndoAction(cv);
+                break;
+            default:
                 break;
         }
     }
@@ -198,6 +202,8 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
                 break;
             case StartupUtils.NORMAL:
                 handleNormalStartup();
+                break;
+            default:
                 break;
         }
     }

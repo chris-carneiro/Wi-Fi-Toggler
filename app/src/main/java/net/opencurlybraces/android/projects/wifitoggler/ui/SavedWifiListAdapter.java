@@ -150,6 +150,8 @@ public class SavedWifiListAdapter extends CursorAdapter implements DataAsyncQuer
             case NetworkUtils.WifiAdapterStatus.CONNECTED:
                 wifiStatus = context.getString(R.string.connected_saved_wifi_status);
                 break;
+            default:
+                break;
         }
         return wifiStatus;
     }

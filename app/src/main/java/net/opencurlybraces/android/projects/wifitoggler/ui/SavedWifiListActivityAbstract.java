@@ -155,6 +155,8 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
                 Log.d(TAG, "LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
                 //TODO in the future warn the user
                 break;
+            default:
+                break;
         }
     }
 
@@ -361,7 +363,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     };
 
     private void handlePostLollipopRequirements() {
-        if (Config.RUNNING_MARSHMALLOW) {
+        if (Config.RUNNING_POST_LOLLIPOP) {
             if (checkPlayServices()) {
                 buildGoogleApiClient();
                 buildLocationRequest();

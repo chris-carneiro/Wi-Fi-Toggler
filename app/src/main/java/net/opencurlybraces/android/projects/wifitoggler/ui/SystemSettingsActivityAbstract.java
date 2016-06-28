@@ -25,7 +25,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
-import net.opencurlybraces.android.projects.wifitoggler.data.model.Wifi;
 import net.opencurlybraces.android.projects.wifitoggler.service.WifiTogglerService;
 import net.opencurlybraces.android.projects.wifitoggler.util.CheckPassiveScanHandler;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
@@ -129,7 +128,7 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
         Log.d(TAG, "onResume");
         setLayoutAccordingToSettings();
 
-        if (Config.RUNNING_MARSHMALLOW) {
+        if (Config.RUNNING_POST_LOLLIPOP) {
             handleLocationPermissionCheck();
             forceRegisterSettingsReceivers();
         }
@@ -194,6 +193,8 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
 
                 checkContinueButtonListener();
                 break;
+            default:
+                break;
         }
     }
 
@@ -224,6 +225,8 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
             case R.id.system_settings_check_continue_button:
                 onContinueClicked();
                 stopRepeatingCheck();
+                break;
+            default:
                 break;
         }
 
@@ -343,7 +346,7 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
         mWifiNextIcon = (ImageView) mWifiCheckLayout.findViewById(R.id
                 .startup_check_wifi_settings_next_ic);
 
-        if (Config.RUNNING_MARSHMALLOW) {
+        if (Config.RUNNING_POST_LOLLIPOP) {
             mLocationCheckLayout = (RelativeLayout) findViewById(R.id
                     .startup_check_location_permission_settings_layout);
             mLocationCheckLayout.setVisibility(View.VISIBLE);

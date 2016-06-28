@@ -54,7 +54,7 @@ public class SystemSettingsCheckActivity extends SystemSettingsActivityAbstract 
         setHotspotLayoutAccordingToSettings();
         setScanLayoutAccordingToSettings();
         setAirplaneLayoutAccordingToSettings();
-        if (Config.RUNNING_MARSHMALLOW) {
+        if (Config.RUNNING_POST_LOLLIPOP) {
             setLocationPermissionLayoutAccordingToSettings();
         }
         checkContinueButtonListener();
