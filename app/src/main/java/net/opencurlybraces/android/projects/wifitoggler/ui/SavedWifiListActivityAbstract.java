@@ -320,9 +320,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         return cv;
     }
 
-    public void updateAutoToggleValue(long itemId, int position) {
-        ContentValues cv = buildContentValuesForUpdate(position);
-
+    protected void updateAutoToggleValue(long itemId, ContentValues cv) {
         mDataAsyncQueryHandler.startUpdate(Config.TOKEN_UPDATE,
                 itemId,
                 SavedWifi.CONTENT_URI,
@@ -361,7 +359,6 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     @Override
     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
         Log.d(TAG, "onDismiss");
-
         scheduleUndoBannerAutoHide();
     }
 
@@ -435,13 +432,4 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         mAutoHideHandler.post(mHideBannerRunnable);
     }
 
-    protected void updateAutoToggleValue(ContentValues cv) {
-        mDataAsyncQueryHandler.startUpdate(Config.TOKEN_UPDATE, mSavedWifiCursorAdapter
-                        .getItemIdToUndo(),
-                SavedWifi
-                        .CONTENT_URI, cv, SavedWifi
-                        .whereID, new String[]{String.valueOf(mSavedWifiCursorAdapter
-                        .getItemIdToUndo())});
-
-    }
 }

@@ -74,7 +74,8 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
         for (int position : reverseSortedPositions) {
 
             long itemId = mSavedWifiCursorAdapter.getItemId(position);
-            updateAutoToggleValue(itemId, position);
+           ContentValues cv = buildContentValuesForUpdate(position);
+            updateAutoToggleValue(itemId, cv);
             displayConfirmationBannerWithUndo(position, R.string
                     .wifi_enabled_confirmation_bottom_overlay_content);
             mSavedWifiCursorAdapter
@@ -113,7 +114,7 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
         hideBanner();
         ContentValues cv = new ContentValues();
         cv.put(SavedWifi.AUTO_TOGGLE, false);
-        updateAutoToggleValue(cv);
+        updateAutoToggleValue(mSavedWifiCursorAdapter.getItemIdToUndo(),cv);
     }
 
     @Override
