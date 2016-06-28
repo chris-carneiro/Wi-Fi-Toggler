@@ -1,13 +1,11 @@
 package net.opencurlybraces.android.projects.wifitoggler.ui;
 
 import android.app.LoaderManager;
-import android.content.ContentProviderResult;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.Loader;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -37,11 +35,11 @@ import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
 import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandler;
-import net.opencurlybraces.android.projects.wifitoggler.data.model.Wifi;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.ui.SwipeDismissListViewTouchListener
         .DismissCallbacks;
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
+import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.SavedWifiDBUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
@@ -74,8 +72,6 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     private LocationRequest mLocationRequest = null;
     private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
 
-    protected abstract void setListAdapter();
-//    protected abstract void handleUndoAction(ContentValues cv);
     protected abstract void bindViews();
 
     @Override
@@ -116,7 +112,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     @Override
     protected void onResume() {
         super.onResume();
-        setListAdapter();
+        setAdapter();
         restoreListViewState();
         if (NetworkUtils.isWifiEnabled(this)) {
             WifiToggler.removeDeletedSavedWifiFromDB(this);
@@ -230,7 +226,12 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         mSavedWifiCursorAdapter.swapCursor(null);
     }
 
-
+    private void setAdapter() {
+        Log.d(TAG, "setAdapter");
+        if (PrefUtils.isWifiTogglerActive(this)) {
+            mWifiTogglerWifiList.setAdapter(mSavedWifiCursorAdapter);
+        }
+    }
 
     private void buildLocationRequest() {
         mLocationRequest = new LocationRequest()
@@ -244,16 +245,16 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         mEmptyView = (TextView) findViewById(android.R.id.empty);
     }
 
-    protected void displaySettingsActivity() {
+    private void displaySettingsActivity() {
         Intent preferencesIntent = new Intent(this, PreferencesActivity.class);
         startActivity(preferencesIntent);
     }
 
-    protected void initCursorLoader() {
+    private void initCursorLoader() {
         getLoaderManager().initLoader(0, null, this);
     }
 
-    protected CursorAdapter initCursorAdapter() {
+    private CursorAdapter initCursorAdapter() {
         Log.d(TAG, "initCursorAdapter");
         if (mSavedWifiCursorAdapter == null) {
             mSavedWifiCursorAdapter = new SavedWifiListAdapter(this, null, 0);
@@ -261,16 +262,8 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         return mSavedWifiCursorAdapter;
     }
 
-    protected void handleSavedWifiListLoading(boolean isChecked) {
-        Log.d(TAG, "handleSavedWifiListLoading=" + isChecked);
-        if (isChecked) {
-            mWifiTogglerWifiList.setAdapter(mSavedWifiCursorAdapter);
-        } else {
-            mWifiTogglerWifiList.setAdapter(null);
-        }
-    }
 
-    protected void restoreListViewState() {
+    private void restoreListViewState() {
         Log.d(TAG, "restoreListViewState ");
 
         if (mSavedInstanceState != null) {
@@ -287,7 +280,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         updateAutoToggleValueWithId(mSavedWifiCursorAdapter.getItemIdToUndo(), cv);
     }
 
-    protected void updateAutoToggleValueWithId(long itemId, ContentValues cv) {
+    private void updateAutoToggleValueWithId(long itemId, ContentValues cv) {
         mDataAsyncQueryHandler.startUpdate(Config.TOKEN_UPDATE,
                 itemId,
                 SavedWifi.CONTENT_URI,
@@ -295,13 +288,6 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
                 SavedWifi.whereID, new String[]{String.valueOf
                         (itemId)});
     }
-
-//    private void queryWifiData() {
-//        mDataAsyncQueryHandler.startQuery(1, null, SavedWifi.CONTENT_URI,
-//                PROJECTION_SSID_AUTO_TOGGLE,
-//                null, null, null);
-//    }
-
 
 
     @Override
@@ -313,6 +299,13 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
         Log.d(TAG, "onDismiss");
         scheduleUndoBannerAutoHide();
+
+        Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem(reverseSortedPositions[0]);
+        ContentValues cv = SavedWifiDBUtils.getReversedItemAutoToggleValue(cursor);
+
+        int itemId = (int) mSavedWifiCursorAdapter.getItemId(reverseSortedPositions[0]);
+        updateAutoToggleValueWithId(itemId, cv);
+        mSavedWifiCursorAdapter.notifyDataSetChanged();
     }
 
     private void scheduleUndoBannerAutoHide() {
@@ -321,11 +314,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         mAutoHideHandler.postDelayed(mHideBannerRunnable, Config.DELAY_FIVE_SECONDS);
     }
 
-//    public void cacheItemIdForUndo(long itemId) {
-//        mSavedWifiCursorAdapter.setItemIdToUndo(itemId);
-//    }
-
-    public void showUndoSnackBar(final Cursor cursor, int
+    protected void showUndoSnackBar(final Cursor cursor, int
             messageResourceId) {
 
         String confirmation = getResources().getString(messageResourceId);
@@ -364,7 +353,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
      * Created to fix Issue #4 as a simple {@link Handler#removeCallbacksAndMessages(Object)} or
      * {@link Handler#removeMessages(int)} wouldn't work to cancel the delayed scheduled message.
      */
-    protected Runnable mHideBannerRunnable = new Runnable() {
+    private Runnable mHideBannerRunnable = new Runnable() {
         public void run() {
             Log.d(TAG, "Runnable run");
             mDismissConfirmationBanner.animate().alpha(0.0f).setDuration(300);
@@ -380,7 +369,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         }
     }
 
-    protected void hideBanner() {
+    private void hideBanner() {
         // hides undo banner immediately
         mAutoHideHandler.post(mHideBannerRunnable);
     }

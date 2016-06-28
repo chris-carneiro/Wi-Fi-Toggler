@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,7 +19,6 @@ import com.google.android.gms.common.ConnectionResult;
 
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
-import net.opencurlybraces.android.projects.wifitoggler.util.SavedWifiDBUtils;
 
 /**
  * Created by chris on 28/09/15.
@@ -66,24 +66,13 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
         return cursorLoader;
     }
 
-    //TODO let the cursoradapter handle this pass the message as a new argument
     @Override
     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
         super.onDismiss(listView, reverseSortedPositions);
+        Log.d(TAG, "OnDismiss Position=" + reverseSortedPositions[0]);
 
-        for (int position : reverseSortedPositions) {
-
-            Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem(position);
-            ContentValues cv = SavedWifiDBUtils.getReversedItemAutoToggleValue(cursor);
-
-            int itemId = (int) mSavedWifiCursorAdapter.getItemId(position);
-            updateAutoToggleValueWithId(itemId, cv);
-
-            showUndoSnackBar(cursor, R.string
-                    .wifi_enabled_confirmation_bottom_overlay_content);
-            mSavedWifiCursorAdapter
-                    .notifyDataSetChanged();
-        }
+        Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem(reverseSortedPositions[0]);
+        showUndoSnackBar(cursor, R.string.wifi_enabled_confirmation_bottom_overlay_content);
     }
 
     @Override
@@ -107,20 +96,6 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
         mUndoButton.setOnClickListener(this);
     }
 
-
-    @Override
-    protected void setListAdapter() {
-        mWifiTogglerWifiList.setAdapter(mSavedWifiCursorAdapter);
-    }
-
-    // TODO pass a contentValues to factorize
-//    @Override
-//    protected void handleUndoAction() {
-//        hideBanner();
-//        ContentValues cv = new ContentValues();
-//        cv.put(SavedWifi.AUTO_TOGGLE, false);
-//        updateAutoToggleValueWithId(mSavedWifiCursorAdapter.getItemIdToUndo(),cv);
-//    }
 
     @Override
     public void onConnected(Bundle bundle) {

@@ -28,7 +28,6 @@ import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.service.WifiTogglerService;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
-import net.opencurlybraces.android.projects.wifitoggler.util.SavedWifiDBUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
 import java.util.Observable;
@@ -74,6 +73,7 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
         handleBannerDisplay();
         doSystemSettingsCheck();
         registerReceivers();
+        switchActivation();
     }
 
     @Override
@@ -98,10 +98,7 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
-            displaySettingsActivity();
-            return true;
-        } else if (id == R.id.action_disabled_wifi) {
+        if (id == R.id.action_disabled_wifi) {
             displayDisabledWifiListActivity();
             return true;
         }
@@ -146,19 +143,9 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
     @Override
     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
         super.onDismiss(listView, reverseSortedPositions);
-        for (int position : reverseSortedPositions) {
-
-            Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem(position);
-            ContentValues cv = SavedWifiDBUtils.getReversedItemAutoToggleValue(cursor);
-
-            int itemId = (int) mSavedWifiCursorAdapter.getItemId(position);
-            updateAutoToggleValueWithId(itemId, cv);
-
+            Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem(reverseSortedPositions[0]);
             showUndoSnackBar(cursor, R.string
                     .wifi_disabled_confirmation_bottom_overlay_content);
-
-            mSavedWifiCursorAdapter.notifyDataSetChanged();
-        }
     }
 
 
@@ -290,12 +277,11 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
         }
     }
 
-    @Override
-    protected void setListAdapter() {
-        Log.d(TAG, "setListAdapter");
+
+    private void switchActivation() {
+        Log.d(TAG, "switchActivation");
         if (PrefUtils.isWifiTogglerActive(this)) {
             mWifiTogglerActivationSwitch.setChecked(true);
-            mWifiTogglerWifiList.setAdapter(mSavedWifiCursorAdapter);
         } else {
             mWifiTogglerActivationSwitch.setChecked(false);
         }
@@ -328,6 +314,15 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
                 intentFilter);
     }
 
+    private void handleSavedWifiListLoading(boolean isChecked) {
+        Log.d(TAG, "handleSavedWifiListLoading=" + isChecked);
+        if (isChecked) {
+            mWifiTogglerWifiList.setAdapter(mSavedWifiCursorAdapter);
+        } else {
+            mWifiTogglerWifiList.setAdapter(null);
+        }
+    }
+
     private BroadcastReceiver mNotificationActionsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -341,12 +336,6 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
             }
         }
     };
-
-//    @Override
-//    protected void handleUndoAction(ContentValues cv) {
-//        hideBanner();
-//        updateAutoToggleValueWithId(mSavedWifiCursorAdapter.getItemIdToUndo(), cv);
-//    }
 
     @Override
     public void update(Observable observable, Object data) {
