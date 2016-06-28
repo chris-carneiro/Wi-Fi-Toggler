@@ -28,6 +28,7 @@ import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.service.WifiTogglerService;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
+import net.opencurlybraces.android.projects.wifitoggler.util.SavedWifiDBUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
 import java.util.Observable;
@@ -135,7 +136,9 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
                 launchSystemSettingsCheckActivity();
                 break;
             case R.id.undo_action_wifi_button:
-                handleUndoAction();
+                ContentValues cv = new ContentValues();
+                cv.put(SavedWifi.AUTO_TOGGLE, true);
+                handleUndoAction(cv);
                 break;
         }
     }
@@ -144,15 +147,21 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
         super.onDismiss(listView, reverseSortedPositions);
         for (int position : reverseSortedPositions) {
+
+            Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem(position);
+            ContentValues cv = SavedWifiDBUtils.getReversedItemAutoToggleValue(cursor);
+
             int itemId = (int) mSavedWifiCursorAdapter.getItemId(position);
-            ContentValues cv = buildContentValuesForUpdate(position);
-            updateAutoToggleValue(itemId, cv);
-            displayConfirmationBannerWithUndo(position, R.string
+            updateAutoToggleValueWithId(itemId, cv);
+
+            showUndoSnackBar(cursor, R.string
                     .wifi_disabled_confirmation_bottom_overlay_content);
-            mSavedWifiCursorAdapter
-                    .notifyDataSetChanged();
+
+            mSavedWifiCursorAdapter.notifyDataSetChanged();
         }
     }
+
+
 
     protected void displayDisabledWifiListActivity() {
         Intent showDisabledWifis = new Intent(this, SavedDisabledWifiListActivity.class);
@@ -333,13 +342,11 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
         }
     };
 
-    @Override
-    protected void handleUndoAction() {
-        hideBanner();
-        ContentValues cv = new ContentValues();
-        cv.put(SavedWifi.AUTO_TOGGLE, true);
-        updateAutoToggleValue(mSavedWifiCursorAdapter.getItemIdToUndo(), cv);
-    }
+//    @Override
+//    protected void handleUndoAction(ContentValues cv) {
+//        hideBanner();
+//        updateAutoToggleValueWithId(mSavedWifiCursorAdapter.getItemIdToUndo(), cv);
+//    }
 
     @Override
     public void update(Observable observable, Object data) {

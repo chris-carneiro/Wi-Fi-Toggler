@@ -18,6 +18,7 @@ import com.google.android.gms.common.ConnectionResult;
 
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
+import net.opencurlybraces.android.projects.wifitoggler.util.SavedWifiDBUtils;
 
 /**
  * Created by chris on 28/09/15.
@@ -25,8 +26,6 @@ import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract {
 
     private static final String TAG = "SavedDisabledWifiList";
-
-
     private TextView mUndoButton = null;
 
     @Override
@@ -67,16 +66,20 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
         return cursorLoader;
     }
 
+    //TODO let the cursoradapter handle this pass the message as a new argument
     @Override
     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
         super.onDismiss(listView, reverseSortedPositions);
 
         for (int position : reverseSortedPositions) {
 
-            long itemId = mSavedWifiCursorAdapter.getItemId(position);
-           ContentValues cv = buildContentValuesForUpdate(position);
-            updateAutoToggleValue(itemId, cv);
-            displayConfirmationBannerWithUndo(position, R.string
+            Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem(position);
+            ContentValues cv = SavedWifiDBUtils.getReversedItemAutoToggleValue(cursor);
+
+            int itemId = (int) mSavedWifiCursorAdapter.getItemId(position);
+            updateAutoToggleValueWithId(itemId, cv);
+
+            showUndoSnackBar(cursor, R.string
                     .wifi_enabled_confirmation_bottom_overlay_content);
             mSavedWifiCursorAdapter
                     .notifyDataSetChanged();
@@ -87,7 +90,9 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.undo_action_wifi_button:
-                handleUndoAction();
+                ContentValues cv = new ContentValues();
+                cv.put(SavedWifi.AUTO_TOGGLE, false);
+                handleUndoAction(cv);
                 break;
         }
     }
@@ -108,14 +113,14 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
         mWifiTogglerWifiList.setAdapter(mSavedWifiCursorAdapter);
     }
 
-
-    @Override
-    protected void handleUndoAction() {
-        hideBanner();
-        ContentValues cv = new ContentValues();
-        cv.put(SavedWifi.AUTO_TOGGLE, false);
-        updateAutoToggleValue(mSavedWifiCursorAdapter.getItemIdToUndo(),cv);
-    }
+    // TODO pass a contentValues to factorize
+//    @Override
+//    protected void handleUndoAction() {
+//        hideBanner();
+//        ContentValues cv = new ContentValues();
+//        cv.put(SavedWifi.AUTO_TOGGLE, false);
+//        updateAutoToggleValueWithId(mSavedWifiCursorAdapter.getItemIdToUndo(),cv);
+//    }
 
     @Override
     public void onConnected(Bundle bundle) {

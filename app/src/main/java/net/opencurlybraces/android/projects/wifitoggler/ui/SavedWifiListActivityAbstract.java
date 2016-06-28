@@ -42,12 +42,12 @@ import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.ui.SwipeDismissListViewTouchListener
         .DismissCallbacks;
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
+import net.opencurlybraces.android.projects.wifitoggler.util.SavedWifiDBUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
 
 public abstract class SavedWifiListActivityAbstract extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks<Cursor>,
-        DataAsyncQueryHandler.AsyncQueryListener, DismissCallbacks, View.OnClickListener,
+        LoaderManager.LoaderCallbacks<Cursor>, DismissCallbacks, View.OnClickListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         ResultCallback<LocationSettingsResult> {
 
@@ -75,7 +75,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
 
     protected abstract void setListAdapter();
-    protected abstract void handleUndoAction();
+//    protected abstract void handleUndoAction(ContentValues cv);
     protected abstract void bindViews();
 
     @Override
@@ -85,11 +85,11 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         }
         super.onCreate(savedInstanceState);
 
-        mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(), this);
+
         initCursorLoader();
         mSavedWifiCursorAdapter = (SavedWifiListAdapter) initCursorAdapter();
         mAutoHideHandler = new Handler();
-
+        mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(), mSavedWifiCursorAdapter);
         handlePostLollipopRequirements();
 
     }
@@ -230,34 +230,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         mSavedWifiCursorAdapter.swapCursor(null);
     }
 
-    @Override
-    public void onUpdateComplete(int token, Object cookie, int result) {
-        if (cookie != null) {
-            cacheItemIdForUndo((long) cookie);
-        }
-    }
 
-    @Override
-    public void onBatchInsertComplete(int token, Object cookie, ContentProviderResult[] results) {
-    }
-
-    @Override
-    public void onInsertComplete(int token, Object cookie, Uri uri) {
-    }
-
-    @Override
-    public void onBatchUpdateComplete(int token, Object cookie, ContentProviderResult[] results) {
-        if (Config.DEBUG_MODE) {
-            queryWifiData();
-        }
-    }
-
-    @Override
-    public void onQueryComplete(int token, Object cookie, Cursor cursor) {
-        if (Config.DEBUG_MODE) {
-            logCursorData(cursor);
-        }
-    }
 
     private void buildLocationRequest() {
         mLocationRequest = new LocationRequest()
@@ -309,18 +282,12 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         }
     }
 
-    public ContentValues buildContentValuesForUpdate(int position) {
-        Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem
-                (position);
-        boolean isAutoToggle = (cursor.getInt(cursor
-                .getColumnIndexOrThrow
-                        (SavedWifi.AUTO_TOGGLE)) > 0);
-        ContentValues cv = new ContentValues();
-        cv.put(SavedWifi.AUTO_TOGGLE, !isAutoToggle);
-        return cv;
+    protected void handleUndoAction(ContentValues cv) {
+        hideBanner();
+        updateAutoToggleValueWithId(mSavedWifiCursorAdapter.getItemIdToUndo(), cv);
     }
 
-    protected void updateAutoToggleValue(long itemId, ContentValues cv) {
+    protected void updateAutoToggleValueWithId(long itemId, ContentValues cv) {
         mDataAsyncQueryHandler.startUpdate(Config.TOKEN_UPDATE,
                 itemId,
                 SavedWifi.CONTENT_URI,
@@ -329,27 +296,13 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
                         (itemId)});
     }
 
-    private void queryWifiData() {
-        mDataAsyncQueryHandler.startQuery(1, null, SavedWifi.CONTENT_URI,
-                PROJECTION_SSID_AUTO_TOGGLE,
-                null, null, null);
-    }
+//    private void queryWifiData() {
+//        mDataAsyncQueryHandler.startQuery(1, null, SavedWifi.CONTENT_URI,
+//                PROJECTION_SSID_AUTO_TOGGLE,
+//                null, null, null);
+//    }
 
-    private void logCursorData(final Cursor cursor) {
-        try {
-            Log.d(TAG, "Wifi count=" + cursor.getCount());
-            while (cursor.moveToNext()) {
-                Wifi wifi = Wifi.buildForCursor(cursor);
-                Log.d(TAG, "Ssid=" + wifi.getSsid() + " id=" + wifi.get_id() + " isAutoToggle=" +
-                        wifi.isAutoToggle());
-            }
-            cursor.close();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
+
 
     @Override
     public boolean canDismiss(int position) {
@@ -368,13 +321,13 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         mAutoHideHandler.postDelayed(mHideBannerRunnable, Config.DELAY_FIVE_SECONDS);
     }
 
-    public void cacheItemIdForUndo(long itemId) {
-        mSavedWifiCursorAdapter.setItemIdToUndo(itemId);
-    }
+//    public void cacheItemIdForUndo(long itemId) {
+//        mSavedWifiCursorAdapter.setItemIdToUndo(itemId);
+//    }
 
-    public void displayConfirmationBannerWithUndo(int position, int messageResourceId) {
-        Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem
-                (position);
+    public void showUndoSnackBar(final Cursor cursor, int
+            messageResourceId) {
+
         String confirmation = getResources().getString(messageResourceId);
         String ssid = cursor.getString(cursor.getColumnIndexOrThrow(SavedWifi.SSID));
         String confirmationMessage = String.format(confirmation, ssid);

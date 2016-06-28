@@ -1,10 +1,12 @@
 package net.opencurlybraces.android.projects.wifitoggler.util;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
@@ -88,6 +90,34 @@ public class SavedWifiDBUtils {
             }
         }
         return false;
+    }
+
+
+    public static void logCursorData(final Cursor cursor) {
+        try {
+            Log.d(TAG, "Wifi count=" + cursor.getCount());
+            while (cursor.moveToNext()) {
+                Wifi wifi = Wifi.buildForCursor(cursor);
+                Log.d(TAG, "Ssid=" + wifi.getSsid() + " id=" + wifi.get_id() + " isAutoToggle=" +
+                        wifi.isAutoToggle());
+            }
+            cursor.close();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+
+    @NonNull
+    public static ContentValues getReversedItemAutoToggleValue(final Cursor cursor) {
+        boolean isAutoToggle = (cursor.getInt(cursor
+                .getColumnIndexOrThrow
+                        (SavedWifi.AUTO_TOGGLE)) > 0);
+        ContentValues cv = new ContentValues();
+        cv.put(SavedWifi.AUTO_TOGGLE, !isAutoToggle);
+        return cv;
     }
 
 }

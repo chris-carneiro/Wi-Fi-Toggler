@@ -1,8 +1,10 @@
 package net.opencurlybraces.android.projects.wifitoggler.ui;
 
 import android.animation.Animator;
+import android.content.ContentProviderResult;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,14 +14,18 @@ import android.widget.CursorAdapter;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
+import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
+import net.opencurlybraces.android.projects.wifitoggler.util.SavedWifiDBUtils;
 
 /**
  * Created by chris on 13/06/15.
  */
-public class SavedWifiListAdapter extends CursorAdapter {
+public class SavedWifiListAdapter extends CursorAdapter implements DataAsyncQueryHandler
+.AsyncQueryListener {
     private static final String TAG = "SavedWifiListAdapter";
 
 
@@ -164,7 +170,6 @@ public class SavedWifiListAdapter extends CursorAdapter {
         view.setTag(R.string.tag_key_ssid_index, ssidIndex);
         view.setTag(R.string.tag_key_status_index, statusIndex);
 
-
         /**
          * the row's background changes according to autotoggle value
          */
@@ -172,6 +177,33 @@ public class SavedWifiListAdapter extends CursorAdapter {
 
 
         return view;
+    }
+
+
+    @Override
+    public void onUpdateComplete(int token, Object cookie, int result) {
+        if (cookie != null) {
+            setItemIdToUndo((long) cookie);
+        }
+    }
+
+    @Override
+    public void onBatchInsertComplete(int token, Object cookie, ContentProviderResult[] results) {
+    }
+
+    @Override
+    public void onInsertComplete(int token, Object cookie, Uri uri) {
+    }
+
+    @Override
+    public void onBatchUpdateComplete(int token, Object cookie, ContentProviderResult[] results) {
+    }
+
+    @Override
+    public void onQueryComplete(int token, Object cookie, Cursor cursor) {
+        if (Config.DEBUG_MODE) {
+            SavedWifiDBUtils.logCursorData(cursor);
+        }
     }
 
 }
