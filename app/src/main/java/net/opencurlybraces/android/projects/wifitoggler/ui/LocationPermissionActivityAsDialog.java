@@ -1,13 +1,14 @@
 package net.opencurlybraces.android.projects.wifitoggler.ui;
 
+import android.Manifest;
 import android.app.Activity;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
 
+import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 
 /**
@@ -39,7 +40,7 @@ public class LocationPermissionActivityAsDialog extends Activity implements View
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.location_permission_positive_button:
-                displayApplicationSettings();
+                requestLocationPermission();
                 finish();
                 break;
             case R.id.location_permission_negative_button:
@@ -50,11 +51,8 @@ public class LocationPermissionActivityAsDialog extends Activity implements View
         }
     }
 
-    public void displayApplicationSettings() {
-        Intent intent = new Intent(android.provider.Settings
-                .ACTION_APPLICATION_DETAILS_SETTINGS);
-        intent.setData(Uri.parse("package:" +
-                getPackageName()));
-        startActivity(intent);
+    public void requestLocationPermission() {
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission
+                .ACCESS_COARSE_LOCATION}, Config.M_LOCATION_REQUEST_CODE);
     }
 }
