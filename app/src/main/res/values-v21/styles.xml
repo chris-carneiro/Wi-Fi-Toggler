@@ -2,12 +2,19 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
+
         <item name="actionBarStyle">@style/ActionBarTheme</item>
         <item name="android:actionModeBackground">@color/material_blue_500</item>
+
+        <!-- Changes statusBarColor when app visible-->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@color/material_blue_700</item>
+
         <!-- ActionBar color on recents screen-->
         <item name="colorPrimary">@color/material_blue_500</item>
         <!-- Status bar color  -->
         <item name="colorPrimaryDark">@color/material_blue_700</item>
+
     </style>
 
     <style name="ActionBarTheme"
@@ -23,5 +30,7 @@
 
     <style name="Toolbar.Theme" parent="ThemeOverlay.AppCompat.Dark">
         <item name="android:homeAsUpIndicator">@android:color/white</item>
+
     </style>
 </resources>
+
