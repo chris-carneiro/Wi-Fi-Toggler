@@ -134,8 +134,9 @@
         Wi-Fis à proximité , nécessite la permission
         *Position*. Aussi , afin de fournir aux utilisateurs une plus grande protection
         des données , la nouvelle politique de confidentialité qui vient avec Android M rend
-        obligatoire ce genre d\'autorisations par l\'utilisateur.\n\nAller dans les préférences de
-        l\'application et autoriser la *Position* ?</string>
+        obligatoire ce genre d\'autorisations par l\'utilisateur.\n\n Accorder la permission
+        *Position*
+        ?</string>
 
     <string name="location_permission_dialog_negative_answer">Non, merci</string>
     <string name="location_permission_dialog_positive_answer">Oui</string>
