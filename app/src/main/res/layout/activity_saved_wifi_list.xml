@@ -1,8 +1,9 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout android:id="@+id/saved_wifi_list_root_layout"
+                xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context=".SavedWifiListActivity">
+                tools:context=".ui.SavedWifiListActivity">
 
     <RelativeLayout
         android:id="@+id/wifi_handler_switch_banner"
@@ -60,12 +61,9 @@
             />
 
     </RelativeLayout>
-    <include
-        layout="@layout/saved_wifi_list_layout"
-        />
 
     <include
-        layout="@layout/saved_wifi_confirmation_overlay_layout"
+        layout="@layout/saved_wifi_list_layout"
         />
 
 </RelativeLayout>

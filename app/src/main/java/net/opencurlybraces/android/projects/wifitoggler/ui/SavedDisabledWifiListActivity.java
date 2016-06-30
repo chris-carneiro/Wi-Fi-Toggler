@@ -1,24 +1,20 @@
 package net.opencurlybraces.android.projects.wifitoggler.ui;
 
-import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
+import net.opencurlybraces.android.projects.wifitoggler.util.SnackBarUndoActionDataHandler;
 
 /**
  * Created by chris on 28/09/15.
@@ -26,7 +22,7 @@ import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract {
 
     private static final String TAG = "SavedDisabledWifiList";
-    private TextView mUndoButton = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,35 +63,26 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
     }
 
     @Override
-    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
-        super.onDismiss(listView, reverseSortedPositions);
-        Log.d(TAG, "OnDismiss Position=" + reverseSortedPositions[0]);
+    protected void handleSnackBar(int reverseSortedPosition) {
+        Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem(reverseSortedPosition);
+        String ssid = cursor.getString(cursor.getColumnIndexOrThrow(SavedWifi.SSID));
 
-        Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem(reverseSortedPositions[0]);
-        showUndoSnackBar(cursor, R.string.wifi_enabled_confirmation_bottom_overlay_content);
+        String confirmationMessage = formatSnackBarMessage(ssid,R.string
+                .wifi_enabled_confirmation_bottom_overlay_content );
+
+        SnackBarUndoActionDataHandler.UndoData undoData = prepareSnackBarUndoDataObject
+                (reverseSortedPosition, false);
+        SnackBarUndoActionDataHandler snackBarUndoHelper = new SnackBarUndoActionDataHandler(this, undoData);
+
+        showUndoSnackBar(confirmationMessage,snackBarUndoHelper);
     }
 
     @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.undo_action_wifi_button:
-                ContentValues cv = new ContentValues();
-                cv.put(SavedWifi.AUTO_TOGGLE, false);
-                handleUndoAction(cv);
-                break;
-            default:
-                break;
-        }
-    }
+    public void onClick(View v) {}
 
     @Override
     protected void bindViews() {
-        mDismissConfirmationText = (TextView) findViewById(R.id.tv_confirmation_message_wifi);
-        mDismissConfirmationBanner = (RelativeLayout) findViewById(R.id
-                .saved_wifi_confirmation_banner);
         mEmptyView.setText(getString(R.string.wifi_list_info_no_disabled_known_wifi));
-        mUndoButton = (TextView) findViewById(R.id.undo_action_wifi_button);
-        mUndoButton.setOnClickListener(this);
     }
 
 

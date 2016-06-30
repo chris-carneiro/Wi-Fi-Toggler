@@ -7,15 +7,15 @@ import android.content.IntentSender;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.CursorAdapter;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +41,7 @@ import net.opencurlybraces.android.projects.wifitoggler.ui.SwipeDismissListViewT
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.SavedWifiDBUtils;
+import net.opencurlybraces.android.projects.wifitoggler.util.SnackBarUndoActionDataHandler;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
 
@@ -51,9 +52,6 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
 
     private static final String TAG = "BaseListActivity";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1002;
-    private static final String[] PROJECTION_SSID_AUTO_TOGGLE = new String[]{SavedWifi._ID,
-            SavedWifi
-                    .SSID, SavedWifi.AUTO_TOGGLE};
 
     protected static final String INSTANCE_KEY_FIRST_VISIBLE_POSITION = "firstVisiblePosition";
     protected static final String INSTANCE_KEY_OFFSET_FROM_TOP = "offsetFromTop";
@@ -61,18 +59,18 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     protected SavedWifiListAdapter mSavedWifiCursorAdapter = null;
     protected ListView mWifiTogglerWifiList = null;
     protected TextView mEmptyView = null;
-    protected RelativeLayout mDismissConfirmationBanner = null;
-    protected TextView mDismissConfirmationText = null;
-    protected Handler mAutoHideHandler = null;
 
     private int REQUEST_CHECK_SETTINGS = 1003;
     private Bundle mSavedInstanceState = null;
     private SwipeDismissListViewTouchListener mTouchListener = null;
     private GoogleApiClient mGoogleApiClient = null;
     private LocationRequest mLocationRequest = null;
-    private DataAsyncQueryHandler mDataAsyncQueryHandler = null;
+
+    DataAsyncQueryHandler mDataAsyncQueryHandler = null;
 
     protected abstract void bindViews();
+
+    protected abstract void handleSnackBar(int dismissedObjectPosition);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,14 +79,12 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         }
         super.onCreate(savedInstanceState);
 
-
         initCursorLoader();
-        mSavedWifiCursorAdapter = (SavedWifiListAdapter) initCursorAdapter();
-        mAutoHideHandler = new Handler();
-        mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(), mSavedWifiCursorAdapter);
+        initCursorAdapter();
+        initDataAsyncQueryHandler();
         handlePostLollipopRequirements();
-
     }
+
 
     @Override
     protected void onStart() {
@@ -205,6 +201,7 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Log.d(TAG, "LoadFinished");
         mSavedWifiCursorAdapter.swapCursor(data);
 
         if (mTouchListener == null) {
@@ -256,12 +253,11 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         getLoaderManager().initLoader(0, null, this);
     }
 
-    private CursorAdapter initCursorAdapter() {
+    private void initCursorAdapter() {
         Log.d(TAG, "initCursorAdapter");
         if (mSavedWifiCursorAdapter == null) {
             mSavedWifiCursorAdapter = new SavedWifiListAdapter(this, null, 0);
         }
-        return mSavedWifiCursorAdapter;
     }
 
 
@@ -277,11 +273,6 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         }
     }
 
-    protected void handleUndoAction(ContentValues cv) {
-        hideBanner();
-        updateAutoToggleValueWithId(mSavedWifiCursorAdapter.getItemIdToUndo(), cv);
-    }
-
     private void updateAutoToggleValueWithId(long itemId, ContentValues cv) {
         mDataAsyncQueryHandler.startUpdate(Config.TOKEN_UPDATE,
                 itemId,
@@ -291,7 +282,6 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
                         (itemId)});
     }
 
-
     @Override
     public boolean canDismiss(int position) {
         return true;
@@ -300,30 +290,24 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     @Override
     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
         Log.d(TAG, "onDismiss");
-        scheduleUndoBannerAutoHide();
 
         Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem(reverseSortedPositions[0]);
         ContentValues cv = SavedWifiDBUtils.getReversedItemAutoToggleValue(cursor);
-
         int itemId = (int) mSavedWifiCursorAdapter.getItemId(reverseSortedPositions[0]);
+
         updateAutoToggleValueWithId(itemId, cv);
         mSavedWifiCursorAdapter.notifyDataSetChanged();
+
+        handleSnackBar(reverseSortedPositions[0]);
+
     }
 
-    private void scheduleUndoBannerAutoHide() {
-        // Fix for issue #4
-        mAutoHideHandler.removeCallbacks(mHideBannerRunnable);
-        mAutoHideHandler.postDelayed(mHideBannerRunnable, Config.DELAY_FIVE_SECONDS);
-    }
+    protected void showUndoSnackBar(String confirmationMessage, View.OnClickListener
+            onClickListener) {
 
-    protected void showUndoSnackBar(final Cursor cursor, int
-            messageResourceId) {
-
-        String confirmation = getResources().getString(messageResourceId);
-        String ssid = cursor.getString(cursor.getColumnIndexOrThrow(SavedWifi.SSID));
-        String confirmationMessage = String.format(confirmation, ssid);
-        mDismissConfirmationText.setText(confirmationMessage);
-        mDismissConfirmationBanner.animate().alpha(1.0f).setDuration(300);
+        Snackbar.make(mWifiTogglerWifiList, confirmationMessage,
+                Snackbar.LENGTH_LONG).setAction(R.string.wifi_undo_action_text, onClickListener)
+                .setActionTextColor(ContextCompat.getColor(this, R.color.material_blue_500)).show();
     }
 
     private void buildGoogleApiClient() {
@@ -351,17 +335,6 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         return true;
     }
 
-    /**
-     * Created to fix Issue #4 as a simple {@link Handler#removeCallbacksAndMessages(Object)} or
-     * {@link Handler#removeMessages(int)} wouldn't work to cancel the delayed scheduled message.
-     */
-    private Runnable mHideBannerRunnable = new Runnable() {
-        public void run() {
-            Log.d(TAG, "Runnable run");
-            mDismissConfirmationBanner.animate().alpha(0.0f).setDuration(300);
-        }
-    };
-
     private void handlePostLollipopRequirements() {
         if (Config.RUNNING_POST_LOLLIPOP) {
             if (checkPlayServices()) {
@@ -371,9 +344,22 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         }
     }
 
-    private void hideBanner() {
-        // hides undo banner immediately
-        mAutoHideHandler.post(mHideBannerRunnable);
+    private void initDataAsyncQueryHandler() {
+        mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(),
+                mSavedWifiCursorAdapter);
     }
 
+    @NonNull
+    protected SnackBarUndoActionDataHandler.UndoData prepareSnackBarUndoDataObject(int reverseSortedPosition, boolean activateAutoToggle) {
+        int itemId = (int) mSavedWifiCursorAdapter.getItemId(reverseSortedPosition);
+        ContentValues cv = new ContentValues();
+        cv.put(SavedWifi.AUTO_TOGGLE, activateAutoToggle);
+        return new SnackBarUndoActionDataHandler.UndoData
+                (itemId, cv);
+    }
+
+    protected String formatSnackBarMessage(String ssid, int resMessage) {
+        String confirmation = getResources().getString(resMessage);
+        return String.format(confirmation, ssid);
+    }
 }

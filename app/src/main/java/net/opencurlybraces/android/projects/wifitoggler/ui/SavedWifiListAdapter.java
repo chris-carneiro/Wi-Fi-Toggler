@@ -5,7 +5,6 @@ import android.content.ContentProviderResult;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,19 +24,13 @@ import net.opencurlybraces.android.projects.wifitoggler.util.SavedWifiDBUtils;
  * Created by chris on 13/06/15.
  */
 public class SavedWifiListAdapter extends CursorAdapter implements DataAsyncQueryHandler
-.AsyncQueryListener {
+        .AsyncQueryListener {
     private static final String TAG = "SavedWifiListAdapter";
 
 
     final LayoutInflater mLayoutInflater;
-    protected long mItemIdUndo;
+    private long mItemIdUndo;
 
-    public long getItemIdToUndo() {
-        return mItemIdUndo;
-    }
-    public void setItemIdToUndo(long itemIdToUndo) {
-        this.mItemIdUndo = itemIdToUndo;
-    }
 
     public SavedWifiListAdapter(Context context, Cursor c, int flag) {
         super(context, c, flag);
@@ -85,8 +78,8 @@ public class SavedWifiListAdapter extends CursorAdapter implements DataAsyncQuer
 
     //TOOD create animation builder
     public void handleUndoItemAnimation(Cursor cursor, final RelativeLayout row) {
-        if (getItemId(cursor.getPosition()) == getItemIdToUndo()) {
-            setItemIdToUndo(-1);// prevent animation onResume
+        if (getItemId(cursor.getPosition()) == mItemIdUndo) {
+            mItemIdUndo = -1;// prevent animation onResume
             final ViewTreeObserver observer = row.getViewTreeObserver();
 
             observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -185,7 +178,7 @@ public class SavedWifiListAdapter extends CursorAdapter implements DataAsyncQuer
     @Override
     public void onUpdateComplete(int token, Object cookie, int result) {
         if (cookie != null) {
-            setItemIdToUndo((long) cookie);
+            mItemIdUndo = (long) cookie;
         }
     }
 
