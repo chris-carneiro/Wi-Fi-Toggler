@@ -9,7 +9,7 @@
         android:id="@+id/wifi_handler_switch_banner"
         android:layout_width="match_parent"
         android:layout_height="@dimen/switch_banner_height"
-        android:background="@color/background_floating_material_dark"
+        android:background="@color/material_gray_800"
         >
 
         <TextView
@@ -56,7 +56,7 @@
             android:layout_centerVertical="true"
             android:ellipsize="marquee"
             android:text="@string/system_settings_warning_message_banner"
-            android:textColor="@color/primary_material_light"
+            android:textColor="@color/material_gray_100"
             android:textSize="@dimen/message_banner_text_size"
             />
 

@@ -10,13 +10,17 @@
     <color name="material_orange_500">#FF9800</color>
 
 
+    <color name="material_gray_100">#f5f5f5</color>
     <color name="material_grey_400">#BDBDBD</color>
+    <color name="material_gray_800">#424242</color>
 
     <color name="material_blue_100">#BBDEFB</color>
     <color name="material_blue_400">#42A5F5</color>
     <color name="material_blue_500">#2196F3</color>
     <color name="material_blue_600">#1E88E5</color>
     <color name="material_blue_700">#1976D2</color>
+
+    <color name="disabled_material_light">#323232</color>
 
     <color name="black_alpha60">#99000000</color>
 
