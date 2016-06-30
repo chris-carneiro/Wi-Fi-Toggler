@@ -115,6 +115,18 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         }
     }
 
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //Fix for issue #7
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.unregisterConnectionCallbacks(this);
+            mGoogleApiClient.unregisterConnectionFailedListener(this);
+            mGoogleApiClient.disconnect();
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
