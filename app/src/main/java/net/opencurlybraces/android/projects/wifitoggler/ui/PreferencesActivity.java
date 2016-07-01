@@ -92,7 +92,7 @@ public class PreferencesActivity extends PreferenceActivity {
                 false);
         root.addView(appBarLayout, 0); // insert at top
         Toolbar bar = (Toolbar) appBarLayout.getChildAt(0);
-
+        bar.setTitle(R.string.title_activity_settings);
         bar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

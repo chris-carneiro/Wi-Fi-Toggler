@@ -11,12 +11,10 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/material_blue_500"
+        android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
         app:navigationContentDescription="@string/abc_action_bar_up_description"
         app:navigationIcon="?attr/homeAsUpIndicator"
-        app:theme="@style/Toolbar.Theme"
-        app:title="@string/action_settings"
         app:titleTextAppearance="@style/Toolbar.Title"
         />
 

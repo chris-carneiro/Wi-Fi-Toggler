@@ -9,6 +9,8 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -18,6 +20,7 @@ import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+
 
 import com.google.android.gms.common.ConnectionResult;
 
@@ -48,6 +51,9 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
         setContentView(R.layout.activity_saved_wifi_list);
         bindListView();
         bindViews();
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null)
+            actionBar.setDisplayHomeAsUpEnabled(false);
     }
 
     @Override
@@ -156,6 +162,8 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
 
     @Override
     protected void bindViews() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         mEmptyView.setText(getString(R.string.wifi_list_info_no_known_wifi));
         mWifiTogglerSwitchLabel = (TextView) findViewById(R.id.wifi_toggler_switch_label);
         mWifiTogglerActivationSwitch = (Switch) findViewById(R.id.wifi_toggler_activation_switch);

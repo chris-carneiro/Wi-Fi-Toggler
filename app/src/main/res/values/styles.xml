@@ -1,19 +1,13 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
-        <item name="actionBarStyle">@style/ActionBarTheme</item>
-        <item name="android:actionModeBackground">@color/material_blue_500</item>
+    <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- ActionBar color on recents screen-->
         <item name="colorPrimary">@color/material_blue_500</item>
         <!-- Status bar color  -->
         <item name="colorPrimaryDark">@color/material_blue_700</item>
     </style>
 
-    <style name="ActionBarTheme"
-           parent="@style/Widget.AppCompat.Light.ActionBar">
-        <item name="background">@color/material_blue_500</item>
-    </style>
 
     <style name="Toolbar.Title" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textSize">18sp</item>
@@ -24,4 +18,6 @@
     <style name="Toolbar.Theme" parent="ThemeOverlay.AppCompat.Dark">
         <item name="android:homeAsUpIndicator">@android:color/white</item>
     </style>
+
+    <style name="AppTheme" parent="AppTheme.Base"/>
 </resources>

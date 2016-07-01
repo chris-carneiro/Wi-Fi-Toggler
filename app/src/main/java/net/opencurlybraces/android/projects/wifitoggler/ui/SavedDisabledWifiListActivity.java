@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -67,21 +68,25 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
         Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem(reverseSortedPosition);
         String ssid = cursor.getString(cursor.getColumnIndexOrThrow(SavedWifi.SSID));
 
-        String confirmationMessage = formatSnackBarMessage(ssid,R.string
-                .wifi_enabled_confirmation_bottom_overlay_content );
+        String confirmationMessage = formatSnackBarMessage(ssid, R.string
+                .wifi_enabled_confirmation_bottom_overlay_content);
 
         SnackBarUndoActionDataHandler.UndoData undoData = prepareSnackBarUndoDataObject
                 (reverseSortedPosition, false);
-        SnackBarUndoActionDataHandler snackBarUndoHelper = new SnackBarUndoActionDataHandler(this, undoData);
+        SnackBarUndoActionDataHandler snackBarUndoHelper = new SnackBarUndoActionDataHandler
+                (this, undoData);
 
-        showUndoSnackBar(confirmationMessage,snackBarUndoHelper);
+        showUndoSnackBar(confirmationMessage, snackBarUndoHelper);
     }
 
     @Override
-    public void onClick(View v) {}
+    public void onClick(View v) {
+    }
 
     @Override
     protected void bindViews() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         mEmptyView.setText(getString(R.string.wifi_list_info_no_disabled_known_wifi));
     }
 

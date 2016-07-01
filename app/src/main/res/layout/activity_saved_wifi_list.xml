@@ -1,69 +1,81 @@
-<RelativeLayout android:id="@+id/saved_wifi_list_root_layout"
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:context=".ui.SavedWifiListActivity">
+<android.support.design.widget.CoordinatorLayout
+    android:id="@+id/main_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <RelativeLayout
-        android:id="@+id/wifi_handler_switch_banner"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/switch_banner_height"
-        android:background="@color/material_gray_800"
-        >
+    <LinearLayout android:id="@+id/saved_wifi_list_root_layout"
+                  xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:tools="http://schemas.android.com/tools"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:orientation="vertical"
+                  tools:context=".ui.SavedWifiListActivity">
 
-        <TextView
-            android:id="@+id/wifi_toggler_switch_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="@dimen/wifi_list_row_margin_left"
-            android:text="@string/on_wifi_toggler_switch_label_value"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/switch_banner_label_value_text_size"/>
-
-        <Switch
-            android:id="@+id/wifi_toggler_activation_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="@dimen/wifi_list_row_margin_left"
-            android:checked="true"/>
-
-    </RelativeLayout>
-
-    <View
-        android:id="@+id/toolbar_shadow"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_below="@id/wifi_handler_switch_banner"
-        android:background="@drawable/toolbar_shadow"/>
-
-    <RelativeLayout
-        android:id="@+id/wifi_toggler_message_banner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/wifi_handler_switch_banner"
-        android:background="@drawable/system_settings_warning_banner_selector"
-        android:gravity="center"
-        android:padding="@dimen/normal_padding">
-
-        <TextView
-            android:id="@+id/wifi_toggler_message_banner_content"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:ellipsize="marquee"
-            android:text="@string/system_settings_warning_message_banner"
-            android:textColor="@color/material_gray_100"
-            android:textSize="@dimen/message_banner_text_size"
+        <include
+            android:id="@+id/include_toolbar"
+            layout="@layout/settings_toolbar"
             />
 
-    </RelativeLayout>
+        <RelativeLayout
+            android:id="@+id/wifi_handler_switch_banner"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/switch_banner_height"
+            android:background="@color/material_gray_800"
+            >
 
-    <include
-        layout="@layout/saved_wifi_list_layout"
-        />
+            <TextView
+                android:id="@+id/wifi_toggler_switch_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="@dimen/wifi_list_row_margin_left"
+                android:text="@string/on_wifi_toggler_switch_label_value"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/switch_banner_label_value_text_size"/>
 
-</RelativeLayout>
+            <Switch
+                android:id="@+id/wifi_toggler_activation_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="@dimen/wifi_list_row_margin_left"
+                android:checked="true"/>
+
+        </RelativeLayout>
+
+        <View
+            android:id="@+id/toolbar_shadow"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/toolbar_shadow"/>
+
+        <RelativeLayout
+            android:id="@+id/wifi_toggler_message_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/system_settings_warning_banner_selector"
+            android:gravity="center"
+            android:padding="@dimen/normal_padding">
+
+            <TextView
+                android:id="@+id/wifi_toggler_message_banner_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:ellipsize="marquee"
+                android:text="@string/system_settings_warning_message_banner"
+                android:textColor="@color/material_gray_100"
+                android:textSize="@dimen/message_banner_text_size"
+                />
+
+        </RelativeLayout>
+
+        <include
+            android:id="@+id/include_wifi_list"
+            layout="@layout/saved_wifi_list_layout"
+            />
+
+    </LinearLayout>
+</android.support.design.widget.CoordinatorLayout>

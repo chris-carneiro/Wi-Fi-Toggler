@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<View
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/shadow_view"
+    android:layout_width="match_parent"
+    android:layout_height="3dp"
+    android:background="@drawable/toolbar_shadow"
+    android:visibility="gone"
+    tools:showIn="@layout/activity_saved_wifi_list"/>

@@ -2,30 +2,21 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
        android:layout_width="match_parent"
        android:layout_height="match_parent">
-
-    <RelativeLayout
-        android:id="@+id/list_layout"
+    <ListView
+        android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/wifi_toggler_message_banner"
-        >
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        />
 
-        <ListView
-            android:id="@android:id/list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:divider="@null"
-            android:dividerHeight="0dp"
-            />
-
-        <TextView
-            android:id="@android:id/empty"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_margin="@dimen/normal_padding"
-            android:padding="@dimen/normal_padding"
-            android:text="@string/wifi_list_info_when_wifi_toggler_off"
-            android:textAlignment="center"/>
-    </RelativeLayout>
+    <TextView
+        android:id="@android:id/empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/normal_padding"
+        android:layout_gravity="center"
+        android:padding="@dimen/normal_padding"
+        android:text="@string/wifi_list_info_when_wifi_toggler_off"
+        />
 </merge>
