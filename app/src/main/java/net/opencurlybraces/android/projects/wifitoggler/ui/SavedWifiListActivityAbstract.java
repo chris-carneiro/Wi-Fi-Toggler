@@ -319,7 +319,8 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
 
         Snackbar.make(mWifiTogglerWifiList, confirmationMessage,
                 Snackbar.LENGTH_LONG).setAction(R.string.wifi_undo_action_text, onClickListener)
-                .setActionTextColor(ContextCompat.getColor(this, R.color.material_blue_500)).show();
+                .setActionTextColor(ContextCompat.getColor(this, android.R.color.white))
+                .show();
     }
 
     private void buildGoogleApiClient() {
