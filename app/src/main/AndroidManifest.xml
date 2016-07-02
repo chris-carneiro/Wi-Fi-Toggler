@@ -66,11 +66,16 @@
         </activity>
         <activity
             android:name="net.opencurlybraces.android.projects.wifitoggler.ui.StartupSettingsCheckActivity"
-            android:label="@string/startup_check_title_activity">
+            android:label="@string/startup_check_title_activity"
+            >
         </activity>
         <activity
             android:name="net.opencurlybraces.android.projects.wifitoggler.ui.SystemSettingsCheckActivity"
-            android:label="@string/check_system_settings_title_activity">
+            android:label="@string/check_system_settings_title_activity"
+            android:parentActivityName=".ui.SavedWifiListActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.SavedWifiListActivity"/>
         </activity>
         <activity
             android:name=".ui.LocationPermissionActivityAsDialog"

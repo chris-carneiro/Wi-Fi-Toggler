@@ -77,7 +77,7 @@ public class PreferencesActivity extends PreferenceActivity {
         setUpToolbar();
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            View toolbarDropShadow = findViewById(R.id.toolbar_shadow);
+            View toolbarDropShadow = findViewById(R.id.shadow_view);
             toolbarDropShadow.setVisibility(View.VISIBLE);
         }
         setupSimplePreferencesScreen();

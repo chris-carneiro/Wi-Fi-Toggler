@@ -3,9 +3,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
+    <include android:id="@+id/actionbar" layout="@layout/settings_toolbar"/>
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/actionbar"
         android:layout_above="@+id/system_settings_check_continue_button"
         android:fillViewport="true"
         >

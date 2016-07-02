@@ -31,9 +31,6 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
         setContentView(R.layout.activity_disabled_saved_wifi_list);
         bindListView();
         bindViews();
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null)
-            actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
     @Override

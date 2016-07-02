@@ -10,8 +10,10 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -59,6 +61,7 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
     protected ImageView mLocationNextIcon;
     protected Button mContinueButton = null;
 
+    protected Toolbar mToolbar = null;
 
     protected final CheckPassiveScanHandler mCheckPassiveHandler = new CheckPassiveScanHandler
             (this, Config.WHAT_REPEAT_CHECK_SCAN_ALWAYS, Config.DELAY_CHECK_HALF_SECOND);
@@ -161,19 +164,19 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
         return true;
     }
 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+            default:
+                break;
         }
-
         return super.onOptionsItemSelected(item);
+
     }
 
     @Override
@@ -325,6 +328,8 @@ public abstract class SystemSettingsActivityAbstract extends AppCompatActivity i
     }
 
     private void bindViews() {
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
         mScanCheckLayout = (RelativeLayout) findViewById(R.id
                 .startup_check_scan_always_available_layout);
         mAirplaneCheckLayout = (RelativeLayout) findViewById(R.id

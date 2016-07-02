@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.View;
 
@@ -22,6 +23,14 @@ import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 public class StartupSettingsCheckActivity extends SystemSettingsActivityAbstract {
 
     private static final String TAG = "StartupSettingsCheck";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null)
+            actionBar.setDisplayHomeAsUpEnabled(false);
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
