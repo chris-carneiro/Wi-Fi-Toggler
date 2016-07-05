@@ -8,7 +8,7 @@
         <item name="colorPrimaryDark">@color/material_blue_700</item>
 
         <!-- navigation icon color -->
-        <!--<item name="colorControlNormal">@android:color/white</item>-->
+        <item name="colorControlNormal">@android:color/white</item>
 
     </style>
     <style name="AppTheme" parent="AppTheme.Base"/>

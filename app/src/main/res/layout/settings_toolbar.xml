@@ -17,15 +17,17 @@
         android:minHeight="?attr/actionBarSize"
         app:layout_scrollFlags="scroll|enterAlways"
         app:navigationIcon="?attr/homeAsUpIndicator"
+        app:titleTextColor="@android:color/white"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         />
 
     <!-- Toolbar shadow view pre LOLLIPOP -->
-    <View
-        android:id="@+id/toolbar_shadow"
-        android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:background="@drawable/toolbar_shadow"
-        android:visibility="gone"/>
+    <include layout="@layout/shadow_view"/>
+    <!--<View-->
+    <!--android:id="@+id/toolbar_shadow"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="3dp"-->
+    <!--android:background="@drawable/toolbar_shadow"-->
+    <!--android:visibility="gone"/>-->
 
 </android.support.design.widget.AppBarLayout>

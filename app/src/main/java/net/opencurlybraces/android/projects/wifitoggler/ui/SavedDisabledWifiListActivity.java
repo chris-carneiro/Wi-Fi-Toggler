@@ -5,7 +5,6 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,6 +14,7 @@ import com.google.android.gms.common.ConnectionResult;
 
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
+import net.opencurlybraces.android.projects.wifitoggler.ui.fragments.SavedWifiListFragment;
 import net.opencurlybraces.android.projects.wifitoggler.util.SnackBarUndoActionDataHandler;
 
 /**
@@ -23,14 +23,25 @@ import net.opencurlybraces.android.projects.wifitoggler.util.SnackBarUndoActionD
 public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract {
 
     private static final String TAG = "SavedDisabledWifiList";
+    public static final String AUTO_TOGGLE_IS_OFF = "0";
 
+    private SavedWifiListFragment mWifiListFragment = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_disabled_saved_wifi_list);
-        bindListView();
-        bindViews();
+//        bindListView();
+//        bindViews();
+//        if (savedInstanceState == null) {
+//            mWifiListFragment = new SavedWifiListFragment();
+//            Bundle b = new Bundle();
+//            b.putString(WIFI_FRAGMENT_BUNDLE_KEY,AUTO_TOGGLE_IS_OFF);
+//            mWifiListFragment.setArguments(b);
+//            getSupportFragmentManager().beginTransaction().add(R.id
+//                            .wifi_list_fragment_container,
+//                    mWifiListFragment).commit();
+//        }
     }
 
     @Override
@@ -50,15 +61,16 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
 
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String[] projection = {SavedWifi._ID, SavedWifi.SSID, SavedWifi.STATUS, SavedWifi
-                .AUTO_TOGGLE};
-        CursorLoader cursorLoader = new CursorLoader(this,
-                SavedWifi.CONTENT_URI, projection, SavedWifi.whereAutoToggle, new String[]{"0"},
-                null);
-        return cursorLoader;
-    }
+//    @Override
+//    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+//        String[] projection = {SavedWifi._ID, SavedWifi.SSID, SavedWifi.STATUS, SavedWifi
+//                .AUTO_TOGGLE};
+//        CursorLoader cursorLoader = new CursorLoader(this,
+//                SavedWifi.CONTENT_URI, projection, SavedWifi.whereAutoToggle, new
+//                String[]{AUTO_TOGGLE_IS_OFF},
+//                null);
+//        return cursorLoader;
+//    }
 
     @Override
     protected void handleSnackBar(int reverseSortedPosition) {
@@ -73,7 +85,7 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
         SnackBarUndoActionDataHandler snackBarUndoHelper = new SnackBarUndoActionDataHandler
                 (this, undoData);
 
-        showUndoSnackBar(confirmationMessage, snackBarUndoHelper);
+//        showUndoSnackBar(confirmationMessage, snackBarUndoHelper);
     }
 
     @Override
@@ -84,7 +96,7 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
     protected void bindViews() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        mEmptyView.setText(getString(R.string.wifi_list_info_no_disabled_known_wifi));
+//        mEmptyView.setText(getString(R.string.wifi_list_info_no_disabled_known_wifi));
     }
 
 

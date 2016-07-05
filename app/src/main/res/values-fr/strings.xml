@@ -43,11 +43,11 @@
 
     <string name="pref_title_signal_strength_threshold">"Auto activer"</string>
     <!--<string-array name="pref_wifi_signal_strength_list_values">-->
-        <!--<item>8</item>-->
-        <!--<item>6</item>-->
-        <!--<item>4</item>-->
-        <!--<item>2</item>-->
-        <!--<item>0</item>-->
+    <!--<item>8</item>-->
+    <!--<item>6</item>-->
+    <!--<item>4</item>-->
+    <!--<item>2</item>-->
+    <!--<item>0</item>-->
     <!--</string-array>-->
 
     <string-array name="pref_wifi_signal_strength_list_titles">
@@ -72,9 +72,9 @@
     <string name="pref_title_auto_toggle_default_value_for_new_wifi">Nouveau Wi-Fi</string>
 
     <!--<string-array name="pref_auto_toggle_default_value_for_new_wifi_list_values">-->
-        <!--<item>Active</item>-->
-        <!--<item>Disabled</item>-->
-        <!--<item>Ask</item>-->
+    <!--<item>Active</item>-->
+    <!--<item>Disabled</item>-->
+    <!--<item>Ask</item>-->
     <!--</string-array>-->
 
     <string-array name="pref_auto_toggle_default_value_for_new_wifi_list_titles">
@@ -123,6 +123,8 @@
     <string name="title_activity_disabled_wifi_list">Wi-Fis désactivés</string>
 
     <string name="action_disabled_wifis">Wi-Fis désactivés</string>
+    <string name="action_enabled_wifis">Wi-Fis Activés</string>
+
 
     <string name="wifi_list_info_no_disabled_known_wifi">"Vous n'avez désactivé aucun Wi-Fi"</string>
 

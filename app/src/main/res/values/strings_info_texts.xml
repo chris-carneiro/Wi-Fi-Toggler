@@ -3,6 +3,7 @@
     <string name="title_activity_disabled_wifi_list">Disabled Wi-Fis</string>
 
     <string name="action_disabled_wifis">Disabled Wi-Fis</string>
+    <string name="action_enabled_wifis">Enabled Wi-Fis</string>
 
     <string name="wifi_list_info_no_disabled_known_wifi">No disabled saved Wi-Fis found</string>
 </resources>

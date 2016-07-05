@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    package="net.opencurlybraces.android.projects.wifitoggler"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest package="net.opencurlybraces.android.projects.wifitoggler"
+          xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
@@ -20,10 +19,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
-
-
         <activity
-            android:name="net.opencurlybraces.android.projects.wifitoggler.ui.SavedWifiListActivity"
+            android:name=".ui.SavedWifiListActivity"
             android:label="@string/app_name"
             android:launchMode="singleTask">
             <intent-filter>
@@ -40,7 +37,7 @@
             android:label="@string/app_name">
         </service>
 
-        <receiver android:name="net.opencurlybraces.android.projects.wifitoggler.receiver.BootCompletedReceiver">
+        <receiver android:name=".receiver.BootCompletedReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
@@ -53,24 +50,22 @@
         </provider>
 
         <activity
-            android:name="net.opencurlybraces.android.projects.wifitoggler.ui.SavedDisabledWifiListActivity"
+            android:name=".ui.SavedDisabledWifiListActivity"
             android:label="@string/title_activity_disabled_wifi_list">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.SavedWifiListActivity"/>
         </activity>
-
         <activity
             android:name=".ui.PreferencesActivity"
             android:label="@string/title_activity_settings">
         </activity>
         <activity
-            android:name="net.opencurlybraces.android.projects.wifitoggler.ui.StartupSettingsCheckActivity"
-            android:label="@string/startup_check_title_activity"
-            >
+            android:name=".ui.StartupSettingsCheckActivity"
+            android:label="@string/startup_check_title_activity">
         </activity>
         <activity
-            android:name="net.opencurlybraces.android.projects.wifitoggler.ui.SystemSettingsCheckActivity"
+            android:name=".ui.SystemSettingsCheckActivity"
             android:label="@string/check_system_settings_title_activity"
             android:parentActivityName=".ui.SavedWifiListActivity">
             <meta-data
@@ -83,10 +78,11 @@
             android:theme="@android:style/Theme.Holo.Dialog.NoActionBar">
         </activity>
 
-        <!-- fix Crash at startup (only in release mode wtf?): this tag missing since play services update to 8.3.0  -->
+        <!-- fix Crash at startup (only in release mode wtf?): this tag missing since play services update to 8.3.0 -->
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version"/>
+
     </application>
 
 </manifest>

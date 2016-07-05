@@ -1,16 +1,16 @@
 <android.support.design.widget.CoordinatorLayout
-    android:id="@+id/main_content"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout android:id="@+id/saved_wifi_list_root_layout"
-                  xmlns:android="http://schemas.android.com/apk/res/android"
-                  xmlns:tools="http://schemas.android.com/tools"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:orientation="vertical"
-                  tools:context=".ui.SavedWifiListActivity">
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".ui.SavedWifiListActivity">
 
         <include
             android:id="@+id/include_toolbar"
@@ -66,10 +66,34 @@
 
         </RelativeLayout>
 
-        <include
-            android:id="@+id/include_wifi_list"
-            layout="@layout/saved_wifi_list_layout"
-            />
 
+        <!--<fragment-->
+        <!--android:id="@+id/wifi_list"-->
+        <!--android:name="net.opencurlybraces.android.projects.wifitoggler.ui.fragments.SavedWifiListFragment"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--tools:layout="@layout/saved_wifi_list_fragment"-->
+        <!--/>-->
+
+        <!--</FrameLayout>-->
+
+
+        <!--<fragment-->
+        <!--android:id="@+id/saved_wifi_list"-->
+        <!--android:name="net.opencurlybraces.android.projects.wifitoggler.ui.fragments.SavedWifiListFragment"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--tools:layout="@layout/saved_wifi_list_fragment"-->
+        <!--/>-->
+        <FrameLayout
+            android:id="@+id/wifi_list_fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <!--<FrameLayout-->
+            <!--android:id="@+id/disabled_wifi_list_fragment_container"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"/>-->
     </LinearLayout>
+
+
 </android.support.design.widget.CoordinatorLayout>

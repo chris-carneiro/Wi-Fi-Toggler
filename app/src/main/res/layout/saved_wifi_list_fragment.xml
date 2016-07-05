@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-       android:layout_width="match_parent"
-       android:layout_height="match_parent">
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
 
     <ListView
         android:id="@android:id/list"
@@ -20,4 +22,4 @@
         android:padding="@dimen/normal_padding"
         android:text="@string/wifi_list_info_when_wifi_toggler_off"
         />
-</merge>
+</FrameLayout>

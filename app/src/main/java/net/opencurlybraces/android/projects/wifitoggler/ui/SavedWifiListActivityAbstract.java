@@ -46,19 +46,21 @@ import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
 
 public abstract class SavedWifiListActivityAbstract extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks<Cursor>, DismissCallbacks, View.OnClickListener,
+        View.OnClickListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         ResultCallback<LocationSettingsResult> {
 
     private static final String TAG = "BaseListActivity";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1002;
 
+    public static final String WIFI_FRAGMENT_BUNDLE_KEY = "WIFI_AUTO_TOGGLE_STATE";
+
     protected static final String INSTANCE_KEY_FIRST_VISIBLE_POSITION = "firstVisiblePosition";
     protected static final String INSTANCE_KEY_OFFSET_FROM_TOP = "offsetFromTop";
 
     protected SavedWifiListAdapter mSavedWifiCursorAdapter = null;
-    protected ListView mWifiTogglerWifiList = null;
-    protected TextView mEmptyView = null;
+//    protected ListView mWifiTogglerWifiList = null;
+//    protected TextView mEmptyView = null;
 
     private int REQUEST_CHECK_SETTINGS = 1003;
     private Bundle mSavedInstanceState = null;
@@ -79,8 +81,8 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         }
         super.onCreate(savedInstanceState);
 
-        initCursorLoader();
-        initCursorAdapter();
+//        initCursorLoader();
+//        initCursorAdapter();
         initDataAsyncQueryHandler();
         handlePostLollipopRequirements();
     }
@@ -108,8 +110,8 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     @Override
     protected void onResume() {
         super.onResume();
-        setAdapter();
-        restoreListViewState();
+//        setAdapter();
+//        restoreListViewState();
         if (NetworkUtils.isWifiEnabled(this)) {
             WifiToggler.removeDeletedSavedWifiFromDB(this);
         }
@@ -130,8 +132,8 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mWifiTogglerWifiList.setOnTouchListener(null);
-        mWifiTogglerWifiList.setOnScrollListener(null);
+//        mWifiTogglerWifiList.setOnTouchListener(null);
+//        mWifiTogglerWifiList.setOnScrollListener(null);
     }
 
     @Override
@@ -172,13 +174,13 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        int firstVisiblePosition = mWifiTogglerWifiList.getFirstVisiblePosition();
-        View v = mWifiTogglerWifiList.getChildAt(0);
-        int top = (v == null) ? 0 : (v.getTop() - mWifiTogglerWifiList.getPaddingTop());
-
-        outState.putInt(INSTANCE_KEY_FIRST_VISIBLE_POSITION, firstVisiblePosition);
-        outState.putInt(INSTANCE_KEY_OFFSET_FROM_TOP, top);
-        mSavedInstanceState = outState; // Needed on Pause/Resume to keep selected items' state
+//        int firstVisiblePosition = mWifiTogglerWifiList.getFirstVisiblePosition();
+//        View v = mWifiTogglerWifiList.getChildAt(0);
+//        int top = (v == null) ? 0 : (v.getTop() - mWifiTogglerWifiList.getPaddingTop());
+//
+//        outState.putInt(INSTANCE_KEY_FIRST_VISIBLE_POSITION, firstVisiblePosition);
+//        outState.putInt(INSTANCE_KEY_OFFSET_FROM_TOP, top);
+//        mSavedInstanceState = outState; // Needed on Pause/Resume to keep selected items' state
     }
 
 
@@ -211,38 +213,38 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         return true;
     }
 
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        Log.d(TAG, "LoadFinished");
-        mSavedWifiCursorAdapter.swapCursor(data);
+//    @Override
+//    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+//        Log.d(TAG, "LoadFinished");
+//        mSavedWifiCursorAdapter.swapCursor(data);
+//
+//        if (mTouchListener == null) {
+//            mTouchListener =
+//                    new SwipeDismissListViewTouchListener(
+//                            mWifiTogglerWifiList,
+//                            this);
+//        }
+//        mWifiTogglerWifiList.setOnTouchListener(mTouchListener);
+//        // Setting this scroll listener is required to ensure that during ListView scrolling,
+//        // we don't look for swipes.
+//        mWifiTogglerWifiList.setOnScrollListener(mTouchListener.makeScrollListener());
+//        mTouchListener.resetDeletedViews();
+//
+////        mWifiTogglerWifiList.setEmptyView(mEmptyView);
+//
+//    }
 
-        if (mTouchListener == null) {
-            mTouchListener =
-                    new SwipeDismissListViewTouchListener(
-                            mWifiTogglerWifiList,
-                            this);
-        }
-        mWifiTogglerWifiList.setOnTouchListener(mTouchListener);
-        // Setting this scroll listener is required to ensure that during ListView scrolling,
-        // we don't look for swipes.
-        mWifiTogglerWifiList.setOnScrollListener(mTouchListener.makeScrollListener());
-        mTouchListener.resetDeletedViews();
-
-        mWifiTogglerWifiList.setEmptyView(mEmptyView);
-
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mSavedWifiCursorAdapter.swapCursor(null);
-    }
-
-    private void setAdapter() {
-        Log.d(TAG, "setAdapter");
-        if (PrefUtils.isWifiTogglerActive(this)) {
-            mWifiTogglerWifiList.setAdapter(mSavedWifiCursorAdapter);
-        }
-    }
+//    @Override
+//    public void onLoaderReset(Loader<Cursor> loader) {
+//        mSavedWifiCursorAdapter.swapCursor(null);
+//    }
+//
+//    private void setAdapter() {
+//        Log.d(TAG, "setAdapter");
+//        if (PrefUtils.isWifiTogglerActive(this)) {
+//            //            mWifiTogglerWifiList.setAdapter(mSavedWifiCursorAdapter);
+//        }
+//    }
 
     private void buildLocationRequest() {
         mLocationRequest = new LocationRequest()
@@ -252,8 +254,8 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     }
 
     protected void bindListView() {
-        mWifiTogglerWifiList = (ListView) findViewById(android.R.id.list);
-        mEmptyView = (TextView) findViewById(android.R.id.empty);
+        //        mWifiTogglerWifiList = (ListView) findViewById(android.R.id.list);
+//        mEmptyView = (TextView) findViewById(android.R.id.empty);
     }
 
     private void displaySettingsActivity() {
@@ -261,29 +263,29 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
         startActivity(preferencesIntent);
     }
 
-    private void initCursorLoader() {
-        getLoaderManager().initLoader(0, null, this);
-    }
+//    private void initCursorLoader() {
+//        getLoaderManager().initLoader(0, null, this);
+//    }
 
-    private void initCursorAdapter() {
-        Log.d(TAG, "initCursorAdapter");
-        if (mSavedWifiCursorAdapter == null) {
-            mSavedWifiCursorAdapter = new SavedWifiListAdapter(this, null, 0);
-        }
-    }
+//    private void initCursorAdapter() {
+//        Log.d(TAG, "initCursorAdapter");
+//        if (mSavedWifiCursorAdapter == null) {
+//            mSavedWifiCursorAdapter = new SavedWifiListAdapter(this, null, 0);
+//        }
+//    }
 
 
-    private void restoreListViewState() {
-        Log.d(TAG, "restoreListViewState ");
-
-        if (mSavedInstanceState != null) {
-            int firstVisiblePosition = mSavedInstanceState.getInt
-                    (INSTANCE_KEY_FIRST_VISIBLE_POSITION);
-            int offsetTop = mSavedInstanceState.getInt(INSTANCE_KEY_OFFSET_FROM_TOP);
-            // restore ListView scroll position
-            mWifiTogglerWifiList.setSelectionFromTop(firstVisiblePosition, offsetTop);
-        }
-    }
+//    private void restoreListViewState() {
+//        Log.d(TAG, "restoreListViewState ");
+//
+//        if (mSavedInstanceState != null) {
+//            int firstVisiblePosition = mSavedInstanceState.getInt
+//                    (INSTANCE_KEY_FIRST_VISIBLE_POSITION);
+//            int offsetTop = mSavedInstanceState.getInt(INSTANCE_KEY_OFFSET_FROM_TOP);
+//            // restore ListView scroll position
+//            mWifiTogglerWifiList.setSelectionFromTop(firstVisiblePosition, offsetTop);
+//        }
+//    }
 
     private void updateAutoToggleValueWithId(long itemId, ContentValues cv) {
         mDataAsyncQueryHandler.startUpdate(Config.TOKEN_UPDATE,
@@ -294,34 +296,35 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
                         (itemId)});
     }
 
-    @Override
-    public boolean canDismiss(int position) {
-        return true;
-    }
+//    @Override
+//    public boolean canDismiss(int position) {
+//        return true;
+//    }
 
-    @Override
-    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
-        Log.d(TAG, "onDismiss");
+//    @Override
+//    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+//        Log.d(TAG, "onDismiss");
+//
+//        Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem(reverseSortedPositions[0]);
+//        ContentValues cv = SavedWifiDBUtils.getReversedItemAutoToggleValue(cursor);
+//        int itemId = (int) mSavedWifiCursorAdapter.getItemId(reverseSortedPositions[0]);
+//
+//        updateAutoToggleValueWithId(itemId, cv);
+//        mSavedWifiCursorAdapter.notifyDataSetChanged();
+//
+//        handleSnackBar(reverseSortedPositions[0]);
+//
+//    }
 
-        Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem(reverseSortedPositions[0]);
-        ContentValues cv = SavedWifiDBUtils.getReversedItemAutoToggleValue(cursor);
-        int itemId = (int) mSavedWifiCursorAdapter.getItemId(reverseSortedPositions[0]);
-
-        updateAutoToggleValueWithId(itemId, cv);
-        mSavedWifiCursorAdapter.notifyDataSetChanged();
-
-        handleSnackBar(reverseSortedPositions[0]);
-
-    }
-
-    protected void showUndoSnackBar(String confirmationMessage, View.OnClickListener
-            onClickListener) {
-
-        Snackbar.make(mWifiTogglerWifiList, confirmationMessage,
-                Snackbar.LENGTH_LONG).setAction(R.string.wifi_undo_action_text, onClickListener)
-                .setActionTextColor(ContextCompat.getColor(this, android.R.color.white))
-                .show();
-    }
+//    protected void showUndoSnackBar(String confirmationMessage, View.OnClickListener
+//            onClickListener) {
+//
+//        // TODO change to root View (CoordinatorLayout)
+//        Snackbar.make(mWifiTogglerWifiList, confirmationMessage,
+//                Snackbar.LENGTH_LONG).setAction(R.string.wifi_undo_action_text, onClickListener)
+//                .setActionTextColor(ContextCompat.getColor(this, android.R.color.white))
+//                .show();
+//    }
 
     private void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
