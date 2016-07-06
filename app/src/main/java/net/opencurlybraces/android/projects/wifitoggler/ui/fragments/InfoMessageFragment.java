@@ -19,6 +19,9 @@ public class InfoMessageFragment extends Fragment {
     public static final String INFO_MESSAGE_BUNDLE_KEY = "info_message_key";
     private static final String TAG = "InfoMessageFragment";
 
+    public InfoMessageFragment() {
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle

@@ -21,6 +21,7 @@ import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 
@@ -89,7 +90,10 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
 
     @Override
     protected void onResume() {
-        Log.d(TAG, "onResume");
+        Log.d(TAG, "onResume mShowingDisabledWifi=" + mShowingDisabledWifi);
+        /** TODO restore value
+         onResume, retain instance or use fragment.isVisible() instead or maybe move this field in
+         the fragment itself **/
         super.onResume();
 
         startupCheck();
@@ -101,25 +105,34 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_saved_wifi_list, menu);
-        MenuItem disabledWifi = menu.findItem(R.id.action_disabled_wifi);
-        disabledWifi.setVisible(true);
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
         if (id == R.id.action_disabled_wifi) {
             showDisabledWifis();
-            item.setTitle(mShowingDisabledWifi ? R.string.action_enabled_wifis : R.string
-                    .action_disabled_wifis);
+
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+
+        MenuItem item = menu.findItem(R.id.action_disabled_wifi);
+        boolean whenTogglerIsActive = PrefUtils.isWifiTogglerActive(this);
+        item.setVisible(whenTogglerIsActive);
+//        item.setEnabled(whenTogglerIsActive);
+        item.setTitle(mShowingDisabledWifi ? R.string
+                .action_enabled_wifis : R.string
+                .action_disabled_wifis);
+
+//        if (!whenTogglerIsActive) {
+//            Toast.makeText(this, "To enable disabled Wi-Fis menu action,  activate Wi-Fi Toggler",
+//                    Toast.LENGTH_LONG).show();
+//        }
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -148,7 +161,6 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
                     transaction.replace(R.id.wifi_list_fragment_container, fragment)
                             .addToBackStack(null);
                     transaction.commit();
-
                 } else {
                     FragmentManager fragmentManager = getFragmentManager();
                     FragmentTransaction transaction = fragmentManager
@@ -161,8 +173,10 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
                             R.animator.card_flip_left_in,
                             R.animator.card_flip_left_out);
                     transaction.replace(R.id.wifi_list_fragment_container, fragment).commit();
-                }
 
+
+                }
+                mShowingDisabledWifi = false;
                 break;
             default:
                 break;
@@ -186,14 +200,13 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
     protected void showDisabledWifis() {
 
         if (mShowingDisabledWifi) {
-
             getFragmentManager().popBackStack();
             mShowingDisabledWifi = false;
             return;
         }
 
-        Fragment fragment = DisabledWifiListFragment.newInstance("");
 
+        Fragment fragment = DisabledWifiListFragment.newInstance("");
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.setCustomAnimations(
@@ -204,6 +217,7 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
         transaction.replace(R.id.wifi_list_fragment_container, fragment)
                 .addToBackStack(null);
         transaction.commit();
+
         mShowingDisabledWifi = true;
     }
 
