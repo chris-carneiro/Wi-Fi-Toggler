@@ -52,5 +52,4 @@ public class InfoMessageFragment extends Fragment {
         return fragment;
     }
 
-
 }

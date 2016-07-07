@@ -53,7 +53,6 @@ public abstract class SavedWifiListActivityAbstract extends AppCompatActivity im
     private static final String TAG = "BaseListActivity";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1002;
 
-    public static final String WIFI_FRAGMENT_BUNDLE_KEY = "WIFI_AUTO_TOGGLE_STATE";
 
     protected static final String INSTANCE_KEY_FIRST_VISIBLE_POSITION = "firstVisiblePosition";
     protected static final String INSTANCE_KEY_OFFSET_FROM_TOP = "offsetFromTop";

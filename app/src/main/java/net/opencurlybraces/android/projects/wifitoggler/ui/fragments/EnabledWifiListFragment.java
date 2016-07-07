@@ -21,19 +21,20 @@ import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 /**
  * Created by chris on 02/07/16.
  */
-public class DisabledWifiListFragment extends BaseListFragment implements LoaderManager
+public class EnabledWifiListFragment extends BaseListFragment implements LoaderManager
         .LoaderCallbacks<Cursor> {
 
-    public static final String TAG = "disabledWifiFragment";
-    public static final int LOADER_ID = 1;
-    private static final String DISABLED_WIFI = "0";
+    public static final String TAG = "SavedWifiFragment";
+    public static final int LOADER_ID = 0;
+    private static final String ENABLED_WIFI = "1";
 
-    public DisabledWifiListFragment() {
+    public EnabledWifiListFragment() {
     }
 
-    public static DisabledWifiListFragment newInstance() {
+    public static EnabledWifiListFragment newInstance() {
+
         Log.d(TAG, "newInstance: ");
-        DisabledWifiListFragment fragment = new DisabledWifiListFragment();
+        EnabledWifiListFragment fragment = new EnabledWifiListFragment();
         return fragment;
     }
 
@@ -49,9 +50,10 @@ public class DisabledWifiListFragment extends BaseListFragment implements Loader
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable
     Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView: ");
-        View rootView = inflater.inflate(R.layout.disabled_wifi_list_fragment, container, false);
+        View rootView = inflater.inflate(R.layout.saved_wifi_list_fragment, container, false);
         return rootView;
     }
+
 
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
@@ -60,11 +62,11 @@ public class DisabledWifiListFragment extends BaseListFragment implements Loader
                 .AUTO_TOGGLE};
         CursorLoader cursorLoader = new CursorLoader(getActivity(),
                 SavedWifi.CONTENT_URI, projection, SavedWifi.whereAutoToggle, new
-                String[]{DISABLED_WIFI},
+                String[]{ENABLED_WIFI},
                 null);
+        Log.d(TAG, "onCreateLoader: autoToggleStateSelection=" + "0");
         return cursorLoader;
     }
-
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
@@ -72,19 +74,19 @@ public class DisabledWifiListFragment extends BaseListFragment implements Loader
         boolean whenTogglerIsActive = PrefUtils.isWifiTogglerActive(getActivity());
         item.setVisible(whenTogglerIsActive);
         item.setTitle(R.string
-                .action_enabled_wifis);
+                .action_disabled_wifis);
 
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         Log.d(TAG, "onOptionsItemSelected: ");
         if (id == R.id.action_display_wifi) {
-            showFragment(EnabledWifiListFragment.newInstance(), getActivity());
+            showFragment(DisabledWifiListFragment.newInstance(), getActivity());
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 

@@ -1,7 +1,5 @@
 package net.opencurlybraces.android.projects.wifitoggler.ui;
 
-import android.content.CursorLoader;
-import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -14,7 +12,7 @@ import com.google.android.gms.common.ConnectionResult;
 
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
-import net.opencurlybraces.android.projects.wifitoggler.ui.fragments.SavedWifiListFragment;
+import net.opencurlybraces.android.projects.wifitoggler.ui.fragments.EnabledWifiListFragment;
 import net.opencurlybraces.android.projects.wifitoggler.util.SnackBarUndoActionDataHandler;
 
 /**
@@ -25,7 +23,7 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
     private static final String TAG = "SavedDisabledWifiList";
     public static final String AUTO_TOGGLE_IS_OFF = "0";
 
-    private SavedWifiListFragment mWifiListFragment = null;
+    private EnabledWifiListFragment mWifiListFragment = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +32,7 @@ public class SavedDisabledWifiListActivity extends SavedWifiListActivityAbstract
 //        bindListView();
 //        bindViews();
 //        if (savedInstanceState == null) {
-//            mWifiListFragment = new SavedWifiListFragment();
+//            mWifiListFragment = new EnabledWifiListFragment();
 //            Bundle b = new Bundle();
 //            b.putString(WIFI_FRAGMENT_BUNDLE_KEY,AUTO_TOGGLE_IS_OFF);
 //            mWifiListFragment.setArguments(b);

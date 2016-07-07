@@ -69,7 +69,7 @@
 
         <!--<fragment-->
         <!--android:id="@+id/wifi_list"-->
-        <!--android:name="net.opencurlybraces.android.projects.wifitoggler.ui.fragments.SavedWifiListFragment"-->
+        <!--android:name="net.opencurlybraces.android.projects.wifitoggler.ui.fragments.EnabledWifiListFragmentnt"-->
         <!--android:layout_width="match_parent"-->
         <!--android:layout_height="match_parent"-->
         <!--tools:layout="@layout/saved_wifi_list_fragment"-->
@@ -80,7 +80,7 @@
 
         <!--<fragment-->
         <!--android:id="@+id/saved_wifi_list"-->
-        <!--android:name="net.opencurlybraces.android.projects.wifitoggler.ui.fragments.SavedWifiListFragment"-->
+        <!--android:name="net.opencurlybraces.android.projects.wifitoggler.ui.fragments.EnabledWifiListFragmentnt"-->
         <!--android:layout_width="match_parent"-->
         <!--android:layout_height="match_parent"-->
         <!--tools:layout="@layout/saved_wifi_list_fragment"-->

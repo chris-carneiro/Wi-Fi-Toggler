@@ -1,8 +1,5 @@
 package net.opencurlybraces.android.projects.wifitoggler.ui;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,14 +11,11 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 
@@ -29,9 +23,9 @@ import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.service.WifiTogglerService;
-import net.opencurlybraces.android.projects.wifitoggler.ui.fragments.DisabledWifiListFragment;
+import net.opencurlybraces.android.projects.wifitoggler.ui.fragments.BaseListFragment;
+import net.opencurlybraces.android.projects.wifitoggler.ui.fragments.EnabledWifiListFragment;
 import net.opencurlybraces.android.projects.wifitoggler.ui.fragments.InfoMessageFragment;
-import net.opencurlybraces.android.projects.wifitoggler.ui.fragments.SavedWifiListFragment;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.SnackBarUndoActionDataHandler;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
@@ -41,19 +35,13 @@ import java.util.Observer;
 
 public class SavedWifiListActivity extends SavedWifiListActivityAbstract implements
         CompoundButton.OnCheckedChangeListener,
-        View.OnClickListener, Observer, FragmentManager.OnBackStackChangedListener {
+        View.OnClickListener, Observer {
 
     private static final String TAG = "SavedWifiList";
-    public static final String AUTO_TOGGLE_IS_OFF = "0";
-    public static final String AUTO_TOGGLE_IS_ON = "1";
-
 
     private TextView mWifiTogglerSwitchLabel = null;
     private Switch mWifiTogglerActivationSwitch = null;
     private RelativeLayout mBanner = null;
-
-    private boolean mShowingDisabledWifi = false;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,11 +50,7 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
 
         if (savedInstanceState == null) {
 
-            FragmentManager fragmentManager = getFragmentManager();
-            FragmentTransaction transaction = fragmentManager.beginTransaction();
-            SavedWifiListFragment fragment = new SavedWifiListFragment();
-            transaction.add(R.id.wifi_list_fragment_container, fragment);
-            transaction.commit();
+            BaseListFragment.showFragment(EnabledWifiListFragment.newInstance(), this);
         }
 
         bindListView();
@@ -90,7 +74,6 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
 
     @Override
     protected void onResume() {
-        Log.d(TAG, "onResume mShowingDisabledWifi=" + mShowingDisabledWifi);
         /** TODO restore value
          onResume, retain instance or use fragment.isVisible() instead or maybe move this field in
          the fragment itself **/
@@ -104,36 +87,6 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
         switchActivation();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_disabled_wifi) {
-            showDisabledWifis();
-
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-
-        MenuItem item = menu.findItem(R.id.action_disabled_wifi);
-        boolean whenTogglerIsActive = PrefUtils.isWifiTogglerActive(this);
-        item.setVisible(whenTogglerIsActive);
-//        item.setEnabled(whenTogglerIsActive);
-        item.setTitle(mShowingDisabledWifi ? R.string
-                .action_enabled_wifis : R.string
-                .action_disabled_wifis);
-
-//        if (!whenTogglerIsActive) {
-//            Toast.makeText(this, "To enable disabled Wi-Fis menu action,  activate Wi-Fi Toggler",
-//                    Toast.LENGTH_LONG).show();
-//        }
-        return super.onPrepareOptionsMenu(menu);
-    }
 
     @Override
     protected void onPause() {
@@ -150,33 +103,11 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
                 handleNotification(isChecked);
 
                 if (isChecked) {
-                    FragmentManager fragmentManager = getFragmentManager();
-                    FragmentTransaction transaction = fragmentManager.beginTransaction();
-                    Fragment fragment = SavedWifiListFragment.newInstance("");
-                    transaction.setCustomAnimations(
-                            R.animator.card_flip_right_in,
-                            R.animator.card_flip_right_out,
-                            R.animator.card_flip_left_in,
-                            R.animator.card_flip_left_out);
-                    transaction.replace(R.id.wifi_list_fragment_container, fragment)
-                            .addToBackStack(null);
-                    transaction.commit();
+                    BaseListFragment.showFragment(EnabledWifiListFragment.newInstance(), this);
                 } else {
-                    FragmentManager fragmentManager = getFragmentManager();
-                    FragmentTransaction transaction = fragmentManager
-                            .beginTransaction();
-                    Fragment fragment = InfoMessageFragment.newInstance(getString(R.string
-                            .wifi_list_info_when_wifi_toggler_off));
-                    transaction.setCustomAnimations(
-                            R.animator.card_flip_right_in,
-                            R.animator.card_flip_right_out,
-                            R.animator.card_flip_left_in,
-                            R.animator.card_flip_left_out);
-                    transaction.replace(R.id.wifi_list_fragment_container, fragment).commit();
-
-
+                    BaseListFragment.showFragment(InfoMessageFragment.newInstance(getString(R
+                            .string.wifi_list_info_when_wifi_toggler_off)), this);
                 }
-                mShowingDisabledWifi = false;
                 break;
             default:
                 break;
@@ -197,40 +128,49 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
     }
 
 
-    protected void showDisabledWifis() {
-
-        if (mShowingDisabledWifi) {
-            getFragmentManager().popBackStack();
-            mShowingDisabledWifi = false;
-            return;
-        }
-
-
-        Fragment fragment = DisabledWifiListFragment.newInstance("");
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.setCustomAnimations(
-                R.animator.card_flip_right_in,
-                R.animator.card_flip_right_out,
-                R.animator.card_flip_left_in,
-                R.animator.card_flip_left_out);
-        transaction.replace(R.id.wifi_list_fragment_container, fragment)
-                .addToBackStack(null);
-        transaction.commit();
-
-        mShowingDisabledWifi = true;
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (mShowingDisabledWifi) {
-            getFragmentManager().popBackStack();
-            mShowingDisabledWifi = false;
-
-        } else {
-            super.onBackPressed();
-        }
-    }
+    //    @Override
+    //    public void onBackPressed() {
+    //        FragmentManager fragmentManager = getFragmentManager();
+    //
+    //        int backStackCount = fragmentManager.getBackStackEntryCount();
+    //        boolean backStackNotEmpty = (fragmentManager.getBackStackEntryCount() != 0);
+    //
+    //        Log.d(TAG, "onBackPressed: backstackcount = " + backStackCount);
+    //
+    //        Fragment currentFragment = getFragmentManager().findFragmentById(R.id
+    //                .wifi_list_fragment_container);
+    //        Log.d(TAG, "onBackPressed: currentFragment=" + (currentFragment != null ?
+    // currentFragment
+    //                .getClass() : null));
+    //        if (backStackNotEmpty && (currentFragment instanceof DisabledWifiListFragment ||
+    //                currentFragment instanceof
+    //                        EnabledWifiListFragment) && PrefUtils.isWifiTogglerActive(this)) {
+    //
+    //            fragmentManager.popBackStack();
+    //            //            FragmentManager.BackStackEntry entry = fragmentManager
+    // .getBackStackEntryAt
+    //            //                    (backStackCount - 2);
+    //            //            Log.d(TAG, "onBackPressed: entry id=" + entry.getId() + " name=" +
+    //            // entry.getName());
+    //            //            Fragment lastFragment = fragmentManager.findFragmentById(entry
+    // .getId());
+    //            //            Log.d(TAG, "onBackPressed: instance=" + (lastFragment != null ?
+    //            // lastFragment.getClass()
+    //            //                    : null));
+    //            //
+    //            //            boolean wasListFragment = lastFragment instanceof
+    //            // EnabledWifiListFragment ||
+    //            //                    lastFragment instanceof DisabledWifiListFragment;
+    //            //            Log.d(TAG, "onBackPressed: wasListFragment" + wasListFragment);
+    //            //            if (wasListFragment) {
+    //            //                fragmentManager.popBackStack();
+    //            //            } else {
+    //            //                super.onBackPressed();
+    //            //            }
+    //        } else {
+    //            super.onBackPressed();
+    //        }
+    //    }
 
 
     @Override
@@ -429,10 +369,5 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-    }
-
-    @Override
-    public void onBackStackChanged() {
-        //TODO handle menu titles
     }
 }
