@@ -66,33 +66,11 @@
 
         </RelativeLayout>
 
-
-        <!--<fragment-->
-        <!--android:id="@+id/wifi_list"-->
-        <!--android:name="net.opencurlybraces.android.projects.wifitoggler.ui.fragments.EnabledWifiListFragmentnt"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--tools:layout="@layout/saved_wifi_list_fragment"-->
-        <!--/>-->
-
-        <!--</FrameLayout>-->
-
-
-        <!--<fragment-->
-        <!--android:id="@+id/saved_wifi_list"-->
-        <!--android:name="net.opencurlybraces.android.projects.wifitoggler.ui.fragments.EnabledWifiListFragmentnt"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--tools:layout="@layout/saved_wifi_list_fragment"-->
-        <!--/>-->
         <FrameLayout
             android:id="@+id/wifi_list_fragment_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
-        <!--<FrameLayout-->
-            <!--android:id="@+id/disabled_wifi_list_fragment_container"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent"/>-->
+
     </LinearLayout>
 
 

@@ -4,44 +4,66 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
+import android.content.IntentSender;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 
+import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.WifiToggler;
-import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.service.WifiTogglerService;
 import net.opencurlybraces.android.projects.wifitoggler.ui.fragments.BaseListFragment;
 import net.opencurlybraces.android.projects.wifitoggler.ui.fragments.EnabledWifiListFragment;
 import net.opencurlybraces.android.projects.wifitoggler.ui.fragments.InfoMessageFragment;
+import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
-import net.opencurlybraces.android.projects.wifitoggler.util.SnackBarUndoActionDataHandler;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;
 
 import java.util.Observable;
 import java.util.Observer;
 
-public class SavedWifiListActivity extends SavedWifiListActivityAbstract implements
+public class SavedWifiListActivity extends AppCompatActivity implements
         CompoundButton.OnCheckedChangeListener,
-        View.OnClickListener, Observer {
+        View.OnClickListener, Observer, GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        ResultCallback<LocationSettingsResult> {
 
     private static final String TAG = "SavedWifiList";
+
+    private int REQUEST_CHECK_SETTINGS = 1003;
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1002;
 
     private TextView mWifiTogglerSwitchLabel = null;
     private Switch mWifiTogglerActivationSwitch = null;
     private RelativeLayout mBanner = null;
+
+    private GoogleApiClient mGoogleApiClient = null;
+    private LocationRequest mLocationRequest = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,17 +75,32 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
             BaseListFragment.showFragment(EnabledWifiListFragment.newInstance(), this);
         }
 
-        bindListView();
         bindViews();
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null)
             actionBar.setDisplayHomeAsUpEnabled(false);
+
+        handlePostLollipopRequirements();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         WifiToggler.registerSettingObserver(this);
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.connect();
+
+            LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                    .addLocationRequest(mLocationRequest);
+
+            PendingResult<LocationSettingsResult> mLocationSettingsResult = LocationServices
+                    .SettingsApi.checkLocationSettings
+                            (mGoogleApiClient, builder
+                                    .build());
+
+            mLocationSettingsResult.setResultCallback(this);
+
+        }
     }
 
     @Override
@@ -85,6 +122,9 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
         doSystemSettingsCheck();
         registerReceivers();
         switchActivation();
+        if (NetworkUtils.isWifiEnabled(this)) {
+            WifiToggler.removeDeletedSavedWifiFromDB(this);
+        }
     }
 
 
@@ -92,6 +132,53 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
     protected void onPause() {
         super.onPause();
         unregisterReceivers();
+        //Fix for issue #7
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.unregisterConnectionCallbacks(this);
+            mGoogleApiClient.unregisterConnectionFailedListener(this);
+            mGoogleApiClient.disconnect();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_saved_wifi_list, menu);
+        return true;
+    }
+
+    @Override
+    public void onResult(LocationSettingsResult locationSettingsResult) {
+        final Status status = locationSettingsResult.getStatus();
+
+        switch (status.getStatusCode()) {
+            case LocationSettingsStatusCodes.SUCCESS:
+                Log.d(TAG, "LocationSettingsStatusCodes.SUCCESS");
+                break;
+            case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                // Location settings are not satisfied. But could be fixed by showing
+                // the user
+                // a dialog.
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    status.startResolutionForResult(
+                            SavedWifiListActivity.this,
+                            REQUEST_CHECK_SETTINGS);
+                } catch (IntentSender.SendIntentException e) {
+                    // Ignore the error.
+                }
+                break;
+            case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                // Location settings are not satisfied. However, we have no way to
+                // fix the
+                // settings so we won't show the dialog.
+                Log.d(TAG, "LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE");
+                //TODO in the future warn the user
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
@@ -127,54 +214,23 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
         }
     }
 
-
-    //    @Override
-    //    public void onBackPressed() {
-    //        FragmentManager fragmentManager = getFragmentManager();
-    //
-    //        int backStackCount = fragmentManager.getBackStackEntryCount();
-    //        boolean backStackNotEmpty = (fragmentManager.getBackStackEntryCount() != 0);
-    //
-    //        Log.d(TAG, "onBackPressed: backstackcount = " + backStackCount);
-    //
-    //        Fragment currentFragment = getFragmentManager().findFragmentById(R.id
-    //                .wifi_list_fragment_container);
-    //        Log.d(TAG, "onBackPressed: currentFragment=" + (currentFragment != null ?
-    // currentFragment
-    //                .getClass() : null));
-    //        if (backStackNotEmpty && (currentFragment instanceof DisabledWifiListFragment ||
-    //                currentFragment instanceof
-    //                        EnabledWifiListFragment) && PrefUtils.isWifiTogglerActive(this)) {
-    //
-    //            fragmentManager.popBackStack();
-    //            //            FragmentManager.BackStackEntry entry = fragmentManager
-    // .getBackStackEntryAt
-    //            //                    (backStackCount - 2);
-    //            //            Log.d(TAG, "onBackPressed: entry id=" + entry.getId() + " name=" +
-    //            // entry.getName());
-    //            //            Fragment lastFragment = fragmentManager.findFragmentById(entry
-    // .getId());
-    //            //            Log.d(TAG, "onBackPressed: instance=" + (lastFragment != null ?
-    //            // lastFragment.getClass()
-    //            //                    : null));
-    //            //
-    //            //            boolean wasListFragment = lastFragment instanceof
-    //            // EnabledWifiListFragment ||
-    //            //                    lastFragment instanceof DisabledWifiListFragment;
-    //            //            Log.d(TAG, "onBackPressed: wasListFragment" + wasListFragment);
-    //            //            if (wasListFragment) {
-    //            //                fragmentManager.popBackStack();
-    //            //            } else {
-    //            //                super.onBackPressed();
-    //            //            }
-    //        } else {
-    //            super.onBackPressed();
-    //        }
-    //    }
-
-
     @Override
-    protected void bindViews() {
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            displaySettingsActivity();
+            return true;
+        }
+
+        return false;
+    }
+
+
+    private void bindViews() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mWifiTogglerSwitchLabel = (TextView) findViewById(R.id.wifi_toggler_switch_label);
@@ -187,21 +243,6 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
         mBanner = (RelativeLayout) findViewById(R.id.wifi_toggler_message_banner);
         mBanner.setOnClickListener(this);
 
-    }
-
-    @Override
-    protected void handleSnackBar(int reverseSortedPosition) {
-        Cursor cursor = (Cursor) mSavedWifiCursorAdapter.getItem(reverseSortedPosition);
-        String ssid = cursor.getString(cursor.getColumnIndexOrThrow(SavedWifi.SSID));
-
-        String confirmationMessage = formatSnackBarMessage(ssid, R.string
-                .wifi_disabled_confirmation_bottom_overlay_content);
-        SnackBarUndoActionDataHandler.UndoData undoData = prepareSnackBarUndoDataObject
-                (reverseSortedPosition, true);
-        SnackBarUndoActionDataHandler snackBarUndoHelper = new SnackBarUndoActionDataHandler
-                (this, undoData);
-
-        //        showUndoSnackBar(confirmationMessage, snackBarUndoHelper);
     }
 
     private void startupCheck() {
@@ -359,15 +400,64 @@ public class SavedWifiListActivity extends SavedWifiListActivityAbstract impleme
         startService(checkSettings);
     }
 
+    private void handlePostLollipopRequirements() {
+        if (Config.RUNNING_POST_LOLLIPOP) {
+            if (checkPlayServices()) {
+                buildGoogleApiClient();
+                buildLocationRequest();
+            }
+        }
+    }
+
+    private void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API).build();
+    }
+
+    private boolean checkPlayServices() {
+        int resultCode = GooglePlayServicesUtil
+                .isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
+                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            } else {
+                Toast.makeText(getApplicationContext(),
+                        "This device is not supported.", Toast.LENGTH_LONG)
+                        .show();
+                finish();
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private void buildLocationRequest() {
+        mLocationRequest = new LocationRequest()
+                .setInterval(Config.DELAY_FIVE_SECONDS)
+                .setFastestInterval(1000)
+                .setPriority(LocationRequest.PRIORITY_LOW_POWER);
+    }
+
+    private void displaySettingsActivity() {
+        Intent preferencesIntent = new Intent(this, PreferencesActivity.class);
+        startActivity(preferencesIntent);
+    }
+
     @Override
     public void onConnected(Bundle bundle) {
+
     }
 
     @Override
     public void onConnectionSuspended(int i) {
+
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
+
     }
 }
