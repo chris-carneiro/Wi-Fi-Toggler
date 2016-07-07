@@ -10,8 +10,12 @@ import android.content.ContentValues;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.View;
 import android.widget.ListView;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
@@ -21,6 +25,7 @@ import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.ui.SavedWifiListAdapter;
 import net.opencurlybraces.android.projects.wifitoggler.ui.SwipeDismissListViewTouchListener;
 import net.opencurlybraces.android.projects.wifitoggler.util.SavedWifiDBUtils;
+import net.opencurlybraces.android.projects.wifitoggler.util.SnackBarUndoActionDataHandler;
 
 /**
  * Created by chris on 07/07/16.
@@ -33,13 +38,13 @@ public abstract class BaseListFragment extends ListFragment implements LoaderMan
     private SwipeDismissListViewTouchListener mTouchListener = null;
     private DataAsyncQueryHandler mDataAsyncQueryHandler;
 
+    protected abstract void handleSnackBar(int dismissedObjectPosition);
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         Log.d(TAG, "onCreate: ");
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        mDataAsyncQueryHandler = new DataAsyncQueryHandler(getActivity().getContentResolver(),
-                mSavedWifiListAdapter);
     }
 
     @Override
@@ -48,6 +53,8 @@ public abstract class BaseListFragment extends ListFragment implements LoaderMan
         super.onActivityCreated(savedInstanceState);
         mSavedWifiListAdapter = new SavedWifiListAdapter(getActivity(), null, 0);
         setListAdapter(mSavedWifiListAdapter);
+        mDataAsyncQueryHandler = new DataAsyncQueryHandler(getActivity().getContentResolver(),
+                mSavedWifiListAdapter);
     }
 
     @Override
@@ -87,6 +94,8 @@ public abstract class BaseListFragment extends ListFragment implements LoaderMan
         int itemId = (int) mSavedWifiListAdapter.getItemId(reverseSortedPositions[0]);
         updateAutoToggleValueWithId(itemId, cv);
 
+        mSavedWifiListAdapter.notifyDataSetChanged();
+        handleSnackBar(reverseSortedPositions[0]);
     }
 
     public static void showFragment(Fragment fragmentToShow, final Activity host) {
@@ -109,6 +118,29 @@ public abstract class BaseListFragment extends ListFragment implements LoaderMan
                 cv,
                 SavedWifi.whereID, new String[]{String.valueOf
                         (itemId)});
+    }
+
+    protected void showUndoSnackBar(String confirmationMessage, View.OnClickListener
+            onClickListener) {
+
+        Snackbar.make(getListView(), confirmationMessage,
+                Snackbar.LENGTH_LONG).setAction(R.string.wifi_undo_action_text, onClickListener)
+                .setActionTextColor(ContextCompat.getColor(getActivity(), android.R.color.white))
+                .show();
+    }
+
+    @NonNull
+    protected SnackBarUndoActionDataHandler.UndoData prepareSnackBarUndoDataObject(int reverseSortedPosition, boolean activateAutoToggle) {
+        int itemId = (int) mSavedWifiListAdapter.getItemId(reverseSortedPosition);
+        ContentValues cv = new ContentValues();
+        cv.put(SavedWifi.AUTO_TOGGLE, activateAutoToggle);
+        return new SnackBarUndoActionDataHandler.UndoData
+                (itemId, cv);
+    }
+
+    protected String formatSnackBarMessage(String ssid, int resMessage) {
+        String confirmation = getResources().getString(resMessage);
+        return String.format(confirmation, ssid);
     }
 
     @Override

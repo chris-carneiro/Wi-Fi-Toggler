@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
+import net.opencurlybraces.android.projects.wifitoggler.util.SnackBarUndoActionDataHandler;
 
 /**
  * Created by chris on 02/07/16.
@@ -36,6 +37,7 @@ public class DisabledWifiListFragment extends BaseListFragment implements Loader
         DisabledWifiListFragment fragment = new DisabledWifiListFragment();
         return fragment;
     }
+
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -88,5 +90,20 @@ public class DisabledWifiListFragment extends BaseListFragment implements Loader
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void handleSnackBar(int dismissedObjectPosition) {
+        Cursor cursor = (Cursor) mSavedWifiListAdapter.getItem(dismissedObjectPosition);
+        String ssid = cursor.getString(cursor.getColumnIndexOrThrow(SavedWifi.SSID));
+
+        String confirmationMessage = formatSnackBarMessage(ssid, R.string
+                .wifi_enabled_confirmation_bottom_overlay_content);
+        SnackBarUndoActionDataHandler.UndoData undoData = prepareSnackBarUndoDataObject
+                (dismissedObjectPosition, false);
+        SnackBarUndoActionDataHandler snackBarUndoHelper = new SnackBarUndoActionDataHandler
+                (getActivity(),
+                        undoData);
+
+        showUndoSnackBar(confirmationMessage, snackBarUndoHelper);
+    }
 
 }
