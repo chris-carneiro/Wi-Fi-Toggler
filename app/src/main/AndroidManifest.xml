@@ -48,10 +48,7 @@
             android:authorities="net.opencurlybraces.android.projects.wifitoggler.data.provider"
             android:exported="false">
         </provider>
-        <activity
-            android:name=".ui.PreferencesActivity"
-            android:label="@string/title_activity_settings">
-        </activity>
+
         <activity
             android:name=".ui.StartupSettingsCheckActivity"
             android:label="@string/startup_check_title_activity">
@@ -68,6 +65,14 @@
             android:name=".ui.LocationPermissionActivityAsDialog"
             android:label="Permission"
             android:theme="@android:style/Theme.Holo.Dialog.NoActionBar">
+        </activity>
+        <activity
+            android:name=".ui.PreferencesActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".ui.SavedWifiListActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.SavedWifiListActivity"/>
         </activity>
 
         <!-- fix Crash at startup (only in release mode wtf?): this tag missing since play services update to 8.3.0 -->

@@ -222,7 +222,7 @@ public class SavedWifiListActivity extends AppCompatActivity implements
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            displaySettingsActivity();
+            displayAppPreferencesActivity();
             return true;
         }
 
@@ -441,9 +441,10 @@ public class SavedWifiListActivity extends AppCompatActivity implements
                 .setPriority(LocationRequest.PRIORITY_LOW_POWER);
     }
 
-    private void displaySettingsActivity() {
-        Intent preferencesIntent = new Intent(this, PreferencesActivity.class);
-        startActivity(preferencesIntent);
+    private void displayAppPreferencesActivity() {
+        Intent intent = new Intent();
+        intent.setClass(this, PreferencesActivity.class);
+        startActivity(intent);
     }
 
     @Override
