@@ -1,4 +1,4 @@
-package net.opencurlybraces.android.projects.wifitoggler.util;
+package net.opencurlybraces.android.projects.wifitoggler.ui.util;
 
 import android.content.ContentValues;
 import android.content.Context;

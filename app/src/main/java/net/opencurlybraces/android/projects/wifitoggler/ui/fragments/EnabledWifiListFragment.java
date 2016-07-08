@@ -17,7 +17,7 @@ import android.view.ViewGroup;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
-import net.opencurlybraces.android.projects.wifitoggler.util.SnackBarUndoActionDataHandler;
+import net.opencurlybraces.android.projects.wifitoggler.ui.util.SnackBarUndoActionDataHandler;
 
 /**
  * Created by chris on 02/07/16.

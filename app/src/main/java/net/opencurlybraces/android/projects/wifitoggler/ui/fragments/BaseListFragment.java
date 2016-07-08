@@ -25,7 +25,7 @@ import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.ui.SavedWifiListAdapter;
 import net.opencurlybraces.android.projects.wifitoggler.ui.SwipeDismissListViewTouchListener;
 import net.opencurlybraces.android.projects.wifitoggler.util.SavedWifiDBUtils;
-import net.opencurlybraces.android.projects.wifitoggler.util.SnackBarUndoActionDataHandler;
+import net.opencurlybraces.android.projects.wifitoggler.ui.util.SnackBarUndoActionDataHandler;
 
 /**
  * Created by chris on 07/07/16.
