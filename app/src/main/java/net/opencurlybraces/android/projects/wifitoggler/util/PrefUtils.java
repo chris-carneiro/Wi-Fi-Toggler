@@ -3,10 +3,15 @@ package net.opencurlybraces.android.projects.wifitoggler.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
+import android.support.v4.util.ArrayMap;
 import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
+import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.ui.PreferencesActivity;
+
+import java.util.Map;
 
 /**
  * Created by chris on 12/06/15.
@@ -85,8 +90,21 @@ public class PrefUtils {
                 .DEFAULT_SIGNAL_STRENGTH_THRESHOLD));
     }
 
+    public static String getWifiSignalStrengthThresholdStringValue(final Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        String value = sp.getString(PREF_SIGNAL_STRENGTH_THRESHOLD, Config
+                .DEFAULT_SIGNAL_STRENGTH_THRESHOLD);
+        String[] keys = context.getResources().getStringArray(R.array
+                .pref_wifi_signal_strength_list_values);
+        String[] stringValues = context.getResources().getStringArray(R.array
+                .pref_wifi_signal_strength_list_titles);
+
+        ArrayMap<String, String> map = map(keys, stringValues);
+        return map != null ? map.get(value) : null;
+    }
+
     /**
-     * Gets delay value for wifi deactivation the user defined in app settings ²
+     * Gets delay value for wifi deactivation the user defined in app settings
      *
      * @param context
      * @return int
@@ -95,6 +113,37 @@ public class PrefUtils {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return Integer.parseInt(sp.getString(PREF_WIFI_DEACTIVATION_DELAY, Config
                 .DEFAULT_DEACTIVATION_DELAY));
+    }
+
+    /**
+     * Gets String entry value for wifi deactivation the user defined in app settings
+     *
+     * @param context
+     * @return int
+     */
+    public static String getWifiDeactivationDelayStringValue(final Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        String value = sp.getString(PREF_WIFI_DEACTIVATION_DELAY, Config
+                .DEFAULT_DEACTIVATION_DELAY);
+        String[] keys = context.getResources().getStringArray(R.array
+                .pref_timer_for_deactivation_list_values);
+        String[] stringValues = context.getResources().getStringArray(R.array
+                .pref_timer_for_deactivation_list_titles);
+
+        ArrayMap<String, String> map = map(keys, stringValues);
+        return map != null ? map.get(value) : null;
+    }
+
+    @Nullable
+    private static ArrayMap<String, String> map(String[] keys, String[] values) {
+        ArrayMap<String, String> map = null;
+        if (keys.length == values.length) {
+            map = new ArrayMap<>(keys.length);
+            for (int index = 0; index < keys.length; index++) {
+                map.put(keys[index], values[index]);
+            }
+        }
+        return map;
     }
 
     /**
@@ -108,6 +157,20 @@ public class PrefUtils {
 
         return sp.getString(PREF_AUTO_TOGGLE_DEFAULT_VALUE_FOR_NEW_WIFI, Config
                 .DEFAULT_AUTO_TOGGLE_VALUE);
+    }
+
+    public static String getAutoToggleModeOnNewWifiStringValue(final Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        String value = sp.getString(PREF_AUTO_TOGGLE_DEFAULT_VALUE_FOR_NEW_WIFI, Config
+                .DEFAULT_AUTO_TOGGLE_VALUE);
+
+        String[] keys = context.getResources().getStringArray(R.array
+                .pref_auto_toggle_default_value_for_new_wifi_list_values);
+        String[] stringValues = context.getResources().getStringArray(R.array
+                .pref_auto_toggle_default_value_for_new_wifi_list_titles);
+
+        ArrayMap<String, String> map = map(keys, stringValues);
+        return map != null ? map.get(value) : null;
     }
 
     public static void setSavedWifiInsertComplete(final Context context, boolean completed) {
