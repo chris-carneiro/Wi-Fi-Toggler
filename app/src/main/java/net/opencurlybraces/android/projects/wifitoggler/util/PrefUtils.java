@@ -78,18 +78,6 @@ public class PrefUtils {
         return sp.getBoolean(PREF_ALL_SETTINGS_CORRECT_AT_FIRST_LAUNCH, false);
     }
 
-    /**
-     * Gets wifi signal strength threshold the user defined in app settings ²
-     *
-     * @param context
-     * @return int
-     */
-    public static int getWifiSignalStrengthThreshold(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return Integer.parseInt(sp.getString(PREF_SIGNAL_STRENGTH_THRESHOLD, Config
-                .DEFAULT_SIGNAL_STRENGTH_THRESHOLD));
-    }
-
     public static String getWifiSignalStrengthThresholdStringValue(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String value = sp.getString(PREF_SIGNAL_STRENGTH_THRESHOLD, Config
@@ -199,4 +187,15 @@ public class PrefUtils {
         return sp.getBoolean(PREF_DISABLE_WIFI_SCHEDULED, false);
     }
 
+    /**
+     * Gets wifi signal strength threshold the user defined in app settings ²
+     *
+     * @param context
+     * @return int
+     */
+    public static int getWifiSignalStrengthThreshold(final Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return Integer.parseInt(sp.getString(PREF_SIGNAL_STRENGTH_THRESHOLD, Config
+                .DEFAULT_SIGNAL_STRENGTH_THRESHOLD));
+    }
 }

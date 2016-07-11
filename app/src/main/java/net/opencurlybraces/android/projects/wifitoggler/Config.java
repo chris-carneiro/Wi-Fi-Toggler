@@ -3,6 +3,7 @@ package net.opencurlybraces.android.projects.wifitoggler;
 import android.app.AlarmManager;
 import android.os.Build;
 
+import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.ui.PreferencesActivity;
 
 /**
@@ -71,4 +72,8 @@ public class Config {
      * Android M Permission Requests codes
      */
     public static final int M_LOCATION_REQUEST_CODE = 101;
+
+
+    public static final String[] WIFI = new String[]{SavedWifi._ID, SavedWifi.SSID, SavedWifi
+            .AUTO_TOGGLE};
 }

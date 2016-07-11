@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifitoggler.util.DeletedSavedWifiSweepingTask;
 import net.opencurlybraces.android.projects.wifitoggler.util.ObservableMap;
 import net.opencurlybraces.android.projects.wifitoggler.util.StartupUtils;

@@ -13,12 +13,10 @@ import android.widget.CursorAdapter;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.R;
 import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandler;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
-import net.opencurlybraces.android.projects.wifitoggler.util.SavedWifiDBUtils;
 
 /**
  * Created by chris on 13/06/15.
@@ -196,9 +194,6 @@ public class SavedWifiListAdapter extends CursorAdapter implements DataAsyncQuer
 
     @Override
     public void onQueryComplete(int token, Object cookie, Cursor cursor) {
-        if (Config.DEBUG_MODE) {
-            SavedWifiDBUtils.logCursorData(cursor);
-        }
     }
 
 }

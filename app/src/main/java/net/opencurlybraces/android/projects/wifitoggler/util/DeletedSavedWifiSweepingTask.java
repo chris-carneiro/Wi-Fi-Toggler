@@ -5,21 +5,21 @@ import android.net.wifi.WifiConfiguration;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import net.opencurlybraces.android.projects.wifitoggler.Config;
 import net.opencurlybraces.android.projects.wifitoggler.data.model.Wifi;
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created to delete the saved wifis(from DB) that the user deliberately removed from the saved
- * networks
- * Created by chris on 02/09/15.
+ * networks Created by chris on 02/09/15.
  */
 public class DeletedSavedWifiSweepingTask extends AsyncTask<Object, Object, Object> {
 
     private static final String TAG = "DeletedSavedWifiTask";
-    private static final String[] PROJECTION = new String[]{SavedWifi._ID, SavedWifi.SSID, SavedWifi
-            .AUTO_TOGGLE};
+
 
     private final Context mContext;
 
@@ -27,11 +27,22 @@ public class DeletedSavedWifiSweepingTask extends AsyncTask<Object, Object, Obje
         mContext = context;
     }
 
+    public static List<String> extractSSIDListFromUserWifi(List<WifiConfiguration> savedWifis) {
+        if (savedWifis == null || savedWifis.size() == 0) return null;
+
+        List<String> ssids = new ArrayList<>(savedWifis.size());
+        for (WifiConfiguration wifi : savedWifis) {
+            ssids.add(wifi.SSID.replace("\"", ""));
+        }
+
+        return ssids;
+    }
+
     @Override
     protected Object doInBackground(Object... params) {
-        List<Wifi> wifisFromDB = getSavedWifisFromDB();
+        List<Wifi> wifisFromDB = Wifi.getUserWifiFromDB(mContext, Config.WIFI);
 
-        removeUserUnwantedSavedWifi(wifisFromDB);
+        removeWifiDeletedByUserFromLocalDB(wifisFromDB);
         return null;
     }
 
@@ -40,9 +51,6 @@ public class DeletedSavedWifiSweepingTask extends AsyncTask<Object, Object, Obje
         super.onPostExecute(o);
     }
 
-    protected List<Wifi> getSavedWifisFromDB() {
-        return SavedWifiDBUtils.getSavedWifisFromDB(mContext, PROJECTION);
-    }
 
     /**
      * Compare the list of saved wifi from db with the system user's saved wifis and remove from db
@@ -50,19 +58,26 @@ public class DeletedSavedWifiSweepingTask extends AsyncTask<Object, Object, Obje
      *
      * @param wifisFromDB
      */
-    private void removeUserUnwantedSavedWifi(List<Wifi> wifisFromDB) {
-        Log.d(TAG, "removeUserUnwantedSavedWifi");
-        List<WifiConfiguration> savedWifis = NetworkUtils.getSavedWifiSync(mContext);
-        Log.d(TAG, "System Saved Wifi=" + (savedWifis != null ? savedWifis.size() : null));
-        if (savedWifis == null) {
+    private void removeWifiDeletedByUserFromLocalDB(List<Wifi> wifisFromDB) {
+        Log.d(TAG, "removeWifiDeletedByUserFromLocalDB");
+        List<WifiConfiguration> userWifis = NetworkUtils.getUserWifiFromSystemSync(mContext);
+        Log.d(TAG, "System Saved Wifi=" + (userWifis != null ? userWifis.size() : null));
+        if (userWifis == null) {
             return;
         }
-        List<String> savedSSIDs = SavedWifiDBUtils.extractSSIDListFromSavedWifi(savedWifis);
+        List<String> ssids = extractSSIDListFromUserWifi(userWifis);
 
         for (Wifi wifiDb : wifisFromDB) {
-            if (!savedSSIDs.contains(wifiDb.getSsid())) {
-                SavedWifiDBUtils.deleteSSIDFromDb(mContext, wifiDb.getSsid());
+            boolean userDeletedNetworkFromSystem = !ssids.contains(wifiDb.getSsid());
+            if (userDeletedNetworkFromSystem) {
+                deleteSSIDFromDb(mContext, wifiDb.getSsid());
             }
         }
+    }
+
+    private void deleteSSIDFromDb(final Context context, String ssid) {
+        int deletedWifis = context.getContentResolver().delete(SavedWifi.CONTENT_URI, SavedWifi
+                .SSID + "=?", new String[]{ssid});
+        Log.d(TAG, "deletedWifis=" + deletedWifis);
     }
 }

@@ -6,6 +6,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -13,6 +14,7 @@ import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -100,8 +102,8 @@ public class NetworkUtils {
         wifiManager.setWifiEnabled(true);
     }
 
-    public static List<WifiConfiguration> getSavedWifiSync(final Context context) {
-        Log.d(TAG, "getSavedWifiSync");
+    public static List<WifiConfiguration> getUserWifiFromSystemSync(final Context context) {
+        Log.d(TAG, "getUserWifiFromSystemSync");
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         return wifiManager.getConfiguredNetworks();
     }
@@ -157,6 +159,31 @@ public class NetworkUtils {
                         Config.WHAT_SCHEDULE_DISABLE_ADAPTER),
                 delay);
         PrefUtils.setDisableWifiScheduled(context, true);
+    }
+
+    /**
+     * Created by chris on 22/10/15.
+     */
+    private static class WifiDeactivationHandler extends Handler {
+        private static final String TAG = "WifiDeactivationHandler";
+        private final WeakReference<Context> mHost;
+
+        public WifiDeactivationHandler(Context host) {
+            mHost = new WeakReference<>(host);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            Context host = mHost.get();
+            if (host != null) {
+                if (PrefUtils.isWifiDisableWifiScheduled(host)) {
+                    Log.d(TAG, "Wifi scheduled deactivation in progress...");
+                    disableWifiAdapter(host);
+                } else {
+                    Log.d(TAG, "Wifi scheduled Deactivation has likely been aborted");
+                }
+            }
+        }
     }
 }
 

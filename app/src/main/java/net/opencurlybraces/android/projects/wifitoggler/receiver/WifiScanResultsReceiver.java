@@ -4,22 +4,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.wifi.ScanResult;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 
 import net.opencurlybraces.android.projects.wifitoggler.Config;
-import net.opencurlybraces.android.projects.wifitoggler.data.model.Wifi;
-import net.opencurlybraces.android.projects.wifitoggler.util.DeletedSavedWifiSweepingTask;
 import net.opencurlybraces.android.projects.wifitoggler.util.NetworkUtils;
 import net.opencurlybraces.android.projects.wifitoggler.util.PrefUtils;
-import net.opencurlybraces.android.projects.wifitoggler.util.SavedWifiDBUtils;
-
-import java.util.List;
+import net.opencurlybraces.android.projects.wifitoggler.receiver.util.WifiAdapterActivationHandler;
 
 /**
- * {@link BroadcastReceiver} filtered on {@link android.net.wifi
- * .WifiManager#SCAN_RESULTS_AVAILABLE_ACTION}
+ * {@link BroadcastReceiver} filtered on {@link android.net.wifi .WifiManager#SCAN_RESULTS_AVAILABLE_ACTION}
  * system action.
  *
  * @author Chris Carneiro
@@ -30,74 +23,30 @@ public class WifiScanResultsReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+
         boolean locationPermissionGranted = !Config.RUNNING_POST_LOLLIPOP || (ContextCompat
                 .checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED);
 
-        if (!NetworkUtils.isWifiConnected(context) && locationPermissionGranted) {
 
-            new ScanResultAsyncHandler(context).execute();
+        boolean notConnected = !NetworkUtils.isWifiConnected(context) && locationPermissionGranted;
+
+        if (notConnected) {
+            whenMatchFoundEnableWifiAdapter(context);
         } else {
 
-            int signalStrength = NetworkUtils.getSignalStrength(context);
-            Log.d(TAG, "Already connected");
-            if (signalStrength < PrefUtils.getWifiSignalStrengthThreshold
-                    (context)) {
-                Log.d(TAG, "Signal Strength below threshold, disabling adapter");
+            boolean signalStrengthBelowThreshold = NetworkUtils.getSignalStrength(context) <
+                    PrefUtils.getWifiSignalStrengthThreshold(context);
+
+            if (signalStrengthBelowThreshold) {
                 NetworkUtils.disableWifiAdapter(context);
             }
         }
 
     }
 
-
-    private static class ScanResultAsyncHandler extends DeletedSavedWifiSweepingTask {
-
-        private static final String TAG = "ScanResultAsyncHandler";
-        private final Context mContext;
-
-        public ScanResultAsyncHandler(Context context) {
-            super(context);
-            mContext = context;
-        }
-
-        @Override
-        protected Object doInBackground(Object... params) {
-            //            android.os.Debug.waitForDebugger(); THIS IS EVIL
-            List<Wifi> wifisFromDB = getSavedWifisFromDB();
-            List<ScanResult> availableWifis = NetworkUtils.getNearbyWifi(mContext);
-
-            Log.d(TAG, "available Wifis count=" + (availableWifis != null ? availableWifis.size()
-                    : 0));
-            if (availableWifis == null) {
-                return false;
-            }
-            boolean enableWifiAdapter = SavedWifiDBUtils.areThereAutoToggleSavedWifiInRange
-                    (mContext, availableWifis, wifisFromDB);
-
-            handleWifiActivation(enableWifiAdapter);
-            return enableWifiAdapter;
-        }
-
-        @Override
-        protected void onPostExecute(Object enableWifi) {
-            Log.d(TAG, "onPostExecute enableWifi=" + enableWifi);
-            super.onPostExecute(enableWifi);
-            // Fix issue https://github.com/chris-carneiro/Wi-Fi-Toggler/issues/2
-            if (!(Boolean) enableWifi) {
-                if (NetworkUtils.isWifiEnabled(mContext) && !PrefUtils.isWifiDisableWifiScheduled
-                        (mContext)) {
-                    int delay = PrefUtils.getWifiDeactivationDelay(mContext);
-                    NetworkUtils.scheduleDisableWifi(mContext, delay);
-                }
-            }
-        }
-
-        private void handleWifiActivation(Boolean enableWifi) {
-            Log.d(TAG, "handleWifiActivation");
-            if (enableWifi) {
-                NetworkUtils.enableWifiAdapter(mContext);
-            }
-        }
+    private void whenMatchFoundEnableWifiAdapter(Context context) {
+        new WifiAdapterActivationHandler(context).execute();
     }
+
 }

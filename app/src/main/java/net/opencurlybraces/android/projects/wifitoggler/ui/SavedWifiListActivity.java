@@ -132,6 +132,11 @@ public class SavedWifiListActivity extends AppCompatActivity implements
     protected void onPause() {
         super.onPause();
         unregisterReceivers();
+
+        unRegisterPostLollipopRequiredListeners();
+    }
+
+    private void unRegisterPostLollipopRequiredListeners() {
         //Fix for issue #7
         if (mGoogleApiClient != null) {
             mGoogleApiClient.unregisterConnectionCallbacks(this);

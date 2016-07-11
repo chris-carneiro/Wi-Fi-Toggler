@@ -24,7 +24,6 @@ import net.opencurlybraces.android.projects.wifitoggler.data.DataAsyncQueryHandl
 import net.opencurlybraces.android.projects.wifitoggler.data.table.SavedWifi;
 import net.opencurlybraces.android.projects.wifitoggler.ui.SavedWifiListAdapter;
 import net.opencurlybraces.android.projects.wifitoggler.ui.SwipeDismissListViewTouchListener;
-import net.opencurlybraces.android.projects.wifitoggler.util.SavedWifiDBUtils;
 import net.opencurlybraces.android.projects.wifitoggler.ui.util.SnackBarUndoActionDataHandler;
 
 /**
@@ -89,7 +88,7 @@ public abstract class BaseListFragment extends ListFragment implements LoaderMan
     @Override
     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
         Cursor cursor = (Cursor) mSavedWifiListAdapter.getItem(reverseSortedPositions[0]);
-        ContentValues cv = SavedWifiDBUtils.getReversedItemAutoToggleValue(cursor);
+        ContentValues cv = reverseItemAutoToggleValue(cursor);
 
         int itemId = (int) mSavedWifiListAdapter.getItemId(reverseSortedPositions[0]);
         updateAutoToggleValueWithId(itemId, cv);
@@ -148,5 +147,15 @@ public abstract class BaseListFragment extends ListFragment implements LoaderMan
         super.onDestroyView();
         getListView().setOnTouchListener(null);
         getListView().setOnScrollListener(null);
+    }
+
+    @NonNull
+    private ContentValues reverseItemAutoToggleValue(final Cursor cursor) {
+        boolean isAutoToggle = (cursor.getInt(cursor
+                .getColumnIndexOrThrow
+                        (SavedWifi.AUTO_TOGGLE)) > 0);
+        ContentValues cv = new ContentValues();
+        cv.put(SavedWifi.AUTO_TOGGLE, !isAutoToggle);
+        return cv;
     }
 }

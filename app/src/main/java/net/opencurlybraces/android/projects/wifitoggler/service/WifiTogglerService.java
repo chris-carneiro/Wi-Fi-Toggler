@@ -114,6 +114,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
         if (Config.DEBUG_MODE)
             Toast.makeText(this, "service created", Toast.LENGTH_LONG).show();
         initFields();
+        initReceivers();
         registerReceivers();
         schedulePassiveScanCheck();
     }
@@ -128,6 +129,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
                 activateWifiToggler();
                 Notification notification = NotifUtils.buildWifiTogglerRunningNotification(this);
                 startForeground(NotifUtils.NOTIFICATION_ID_WIFI_HANDLER_STATE, notification);
+
                 sendLocalBroadcastAction
                         (ACTION_HANDLE_NOTIFICATION_ACTION_ACTIVATE);
                 break;
@@ -268,7 +270,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
 
         mDataAsyncQueryHandler = new DataAsyncQueryHandler(getContentResolver(), this);
 
-        initReceivers();
+
     }
 
     private void initReceivers() {
@@ -357,7 +359,7 @@ public class WifiTogglerService extends Service implements DataAsyncQueryHandler
 
     private void handleSavedWifiInsert() {
         Log.d(TAG, "handleSavedWifiInsert");
-        List<WifiConfiguration> savedWifis = NetworkUtils.getSavedWifiSync(this);
+        List<WifiConfiguration> savedWifis = NetworkUtils.getUserWifiFromSystemSync(this);
         try {
             List<ContentProviderOperation> batch = SavedWifi.buildBatchInsert(savedWifis);
 
